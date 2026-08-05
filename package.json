@@ -17,12 +17,14 @@
     "git:pre-commit-hook": "npm run format:check && npm run lint",
     "postinstall": "npm run setup:husky",
     "setup:husky": "node -e \"try { (await import('husky')).default() } catch (e) { if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e }\" --input-type module",
-    "report:publish": "./bin/publish-tests.sh"
+    "report:publish": "./bin/publish-tests.sh",
+    "generate:report": "allure generate allure-results --clean -o allure-report && allure open allure-report"
   },
-  "dependencies": {},
   "devDependencies": {
     "@playwright/test": "1.62.0",
     "@types/node": "26.1.2",
+    "allure-commandline": "2.43.0",
+    "allure-playwright": "3.10.2",
     "husky": "9.1.7",
     "prettier": "3.9.6",
     "typescript": "7.0.2"
