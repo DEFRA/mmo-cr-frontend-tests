@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DIRECTORY="$PWD/playwright-report"
+DIRECTORY="$PWD/allure-report"
 
 echo "Publishing test results to S3"
 
