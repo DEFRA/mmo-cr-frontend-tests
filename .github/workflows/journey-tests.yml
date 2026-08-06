@@ -8,9 +8,20 @@ on:
   workflow_dispatch:
   workflow_call:
 jobs:
-  build:
-    name: Run Journey Tests
+  ui-tests:
+    name: Run UI Journey Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./run-journey-tests
+        with:
+          project: ui
+
+  api-tests:
+    name: Run API Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./run-journey-tests
+        with:
+          project: api

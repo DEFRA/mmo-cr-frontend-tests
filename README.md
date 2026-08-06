@@ -54,8 +54,8 @@ npx playwright test --debug
 
 Alongside the browser journey tests, this suite supports pure API tests using Playwright's `request` fixture.
 
-- Name API-only spec files `*.api.spec.ts` (e.g. `tests/health-check.api.spec.ts`). These run once, against a dedicated
-  `api` project, instead of once per browser project.
+- Browser (UI) specs live under `tests/ui/` and API specs live under `tests/api/`. The `api` project only runs
+  `tests/api/`, and the `chromium`/`Mobile Safari` projects only run `tests/ui/`, so each spec runs once.
 - Add API clients under `services/` (mirroring the `pages/` pattern), extending `BaseApi`, and expose them via a fixture in
   [fixtures/commonfixture.ts](fixtures/commonfixture.ts).
 - Configure the target with `CATCH_RECORDING_API_BASE_URL` (falls back to `CATCH_RECORDING_BASE_URL`/`CATCH_RECORDING_ENV`

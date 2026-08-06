@@ -1,4 +1,4 @@
-import { expect, test } from '../fixtures/commonfixture';
+import { expect, test } from '../../fixtures/commonfixture';
 
 const email = process.env.CATCH_RECORDING_EMAIL;
 const password = process.env.CATCH_RECORDING_PASSWORD;
