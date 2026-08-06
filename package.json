@@ -10,6 +10,7 @@
   "license": "OGL-UK-3.0",
   "scripts": {
     "test": "playwright test",
+    "test:api": "playwright test --project=api",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "tsc --noEmit",

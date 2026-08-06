@@ -14,14 +14,19 @@ const environmentUrls = {
 
 const environmentName = process.env.CATCH_RECORDING_ENV ?? 'uat';
 const baseURL =
-  process.env.CATCH_RECORDING_BASE_URL ??
-  environmentUrls[environmentName as keyof typeof environmentUrls];
+  process.env.CATCH_RECORDING_BASE_URL ?? environmentUrls[environmentName as keyof typeof environmentUrls];
 
 if (!baseURL) {
   throw new Error(
     `Unknown CATCH_RECORDING_ENV "${environmentName}". Add its URL to environmentUrls or set CATCH_RECORDING_BASE_URL.`,
   );
 }
+
+/* Falls back to the frontend baseURL when the API is served from the same host. */
+const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL ?? baseURL;
+const apiToken = process.env.CATCH_RECORDING_API_TOKEN;
+/* API-only specs (*.api.spec.ts) run once against the API project, not against every browser project. */
+const apiSpecPattern = /.*\.api\.spec\.ts/;
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -50,11 +55,21 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
+      testIgnore: apiSpecPattern,
       use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'Mobile Safari',
+      testIgnore: apiSpecPattern,
       use: { ...devices['iPhone 17'] },
+    },
+    {
+      name: 'api',
+      testMatch: apiSpecPattern,
+      use: {
+        baseURL: apiBaseURL,
+        extraHTTPHeaders: apiToken ? { Authorization: `Bearer ${apiToken}` } : undefined,
+      },
     },
   ],
 });
