@@ -1,4 +1,5 @@
 name: Run Journey Tests on GitHub
+description: Starts the docker compose environment and runs the Playwright journey tests against it
 
 inputs:
   example-node-backend:
@@ -7,13 +8,16 @@ inputs:
   example-node-frontend:
     required: false
     type: string
+  project:
+    description: 'Which Playwright projects to run: all, ui or api'
+    required: false
+    type: string
+    default: all
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - uses: actions/checkout@v4
-      with:
-        repository: DEFRA/cdp-node-journey-test-suite-template
 
     - name: Docker Login
       uses: DEFRA/cdp-build-action/docker-login@main
@@ -28,29 +32,37 @@ runs:
     - name: Start docker compose
       shell: bash
       run: |
-          CDP_EXAMPLE_NODE_FRONTEND=${{inputs.example-node-frontend}} \
-          CDP_EXAMPLE_NODE_BACKEND=${{inputs.example-node-backend}} \
-          docker compose up --wait-timeout 300 -d --quiet-pull
+        CDP_EXAMPLE_NODE_FRONTEND=${{inputs.example-node-frontend}} \
+        CDP_EXAMPLE_NODE_BACKEND=${{inputs.example-node-backend}} \
+        docker compose up --wait-timeout 300 -d --quiet-pull
     - name: Run the tests
       shell: bash
       run: |
-        npm run test:github
-        npm run report
+        case "${{ inputs.project }}" in
+          ui) npm run test:ui ;;
+          api) npm run test:api ;;
+          *) npm test ;;
+        esac
+    - name: Generate Allure report
+      if: always()
+      shell: bash
+      run: |
+        npm run generate:report || true
     - name: debug
       if: always()
       run: |
         docker compose logs > logs.txt
         docker ps
       shell: bash
-    - name: Upload allure report
+    - name: Upload Allure report
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: allure-report
+        name: allure-report-${{ inputs.project }}
         path: ./allure-report
     - name: Upload docker compose logs
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: docker-compose-logs
+        name: docker-compose-logs-${{ inputs.project }}
         path: ./logs.txt

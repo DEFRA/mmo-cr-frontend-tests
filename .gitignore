@@ -8,6 +8,12 @@ npm-debug.log
 coverage
 .cache
 .png
-allure-report/
-allure-results/
 FAILED
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+playwright/.auth/
+allure-results/
+allure-report/
+.env
