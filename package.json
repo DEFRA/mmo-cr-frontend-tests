@@ -10,7 +10,7 @@
   "license": "OGL-UK-3.0",
   "scripts": {
     "test": "playwright test",
-    "test:ui": "playwright test --project=chromium --project=\"Mobile Safari\"",
+    "test:ui": "playwright test --project=Chrome --project=Edge --project=Firefox --project=Safari --project=\"Mobile iOS\" --project=\"Mobile Android\"",
     "test:api": "playwright test --project=api",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

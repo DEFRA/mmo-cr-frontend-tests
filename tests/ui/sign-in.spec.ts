@@ -11,7 +11,7 @@ test.describe('Sign in', () => {
     await expect(signInPage.passwordInput()).toBeVisible();
     await expect(signInPage.signInButton()).toBeVisible();
     await expect(signInPage.troubleHeading()).toBeVisible();
-    await expect(signInPage.forgotPasswordLink()).toHaveAttribute('href', '/forgot-password');
+    await expect(signInPage.forgotPasswordLink()).toHaveAttribute('href', '/not-implemented?return=/sign-in');
     await expect(signInPage.registerLink()).toBeVisible();
   });
 
@@ -25,6 +25,6 @@ test.describe('Sign in', () => {
     await signInPage.login(email, password);
 
     await expect(page).not.toHaveURL(/\/sign-in(?:\?.*)?$/);
-    await expect(page.getByRole('link', { name: 'Sign out' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible();
   });
 });

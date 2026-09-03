@@ -7,13 +7,13 @@ export class SigninPage extends BasePage {
   public readonly signInButton = (): Locator => this.page.getByRole('button', { name: 'Sign in' });
   public readonly errorMessage = (): Locator => this.page.locator('#errorIsland');
 
-  public readonly signInHeading = (): Locator => this.page.getByRole('heading', { name: 'Sign in', level: 2 });
+  public readonly signInHeading = (): Locator => this.page.getByTestId('app-heading-title');
   public readonly troubleHeading = (): Locator =>
     this.page.getByRole('heading', { name: 'Having trouble signing in?' });
 
   public readonly backLink = (): Locator => this.page.getByRole('link', { name: 'Back' });
   public readonly forgotPasswordLink = (): Locator => this.page.getByRole('link', { name: 'Forgotten your password?' });
-  public readonly registerLink = (): Locator => this.page.getByText("Don't have an account yet?");
+  public readonly registerLink = (): Locator => this.page.getByRole('link', { name: 'Create an account' });
 
   public readonly englishLabel = (): Locator => this.page.getByText('English', { exact: true });
   public readonly cymraegLink = (): Locator => this.page.getByRole('link', { name: 'Cymraeg' });

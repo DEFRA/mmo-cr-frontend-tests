@@ -10,9 +10,10 @@ if (existsSync(envFile)) {
 
 const environmentUrls = {
   uat: 'https://uat.catchrecording.cefasext.co.uk',
+  local: 'http://localhost:3000',
 } as const;
 
-const environmentName = process.env.CATCH_RECORDING_ENV ?? 'uat';
+const environmentName = process.env.CATCH_RECORDING_ENV;
 const baseURL =
   process.env.CATCH_RECORDING_BASE_URL ?? environmentUrls[environmentName as keyof typeof environmentUrls];
 
@@ -49,17 +50,37 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
 
-  /* Configure projects for major browsers */
+  /* Configure projects for the supported desktop and touchscreen browsers. */
   projects: [
     {
-      name: 'chromium',
+      name: 'Chrome',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     },
     {
-      name: 'Mobile Safari',
+      name: 'Edge',
+      testDir: './tests/ui',
+      use: { ...devices['Desktop Chrome'], channel: 'msedge' },
+    },
+    {
+      name: 'Firefox',
+      testDir: './tests/ui',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'Safari',
+      testDir: './tests/ui',
+      use: { ...devices['Desktop Safari'] },
+    },
+    {
+      name: 'Mobile iOS',
       testDir: './tests/ui',
       use: { ...devices['iPhone 17'] },
+    },
+    {
+      name: 'Mobile Android',
+      testDir: './tests/ui',
+      use: { ...devices['Pixel 7'] },
     },
     {
       name: 'api',
