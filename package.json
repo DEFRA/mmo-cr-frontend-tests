@@ -1,14 +1,19 @@
 {
   "name": "mmo-cr-frontend-tests",
   "version": "0.0.0",
+<<<<<<< Updated upstream
   "type": "commonjs",
   "description": "",
+=======
+  "description": "Playwright BDD E2E test suite for MMO-CR external frontend",
+>>>>>>> Stashed changes
   "engines": {
     "node": ">=22.13.1"
   },
   "author": "Defra DDTS",
   "license": "OGL-UK-3.0",
   "scripts": {
+<<<<<<< Updated upstream
     "test": "playwright test",
     "test:ui": "playwright test --project=Chrome --project=Edge --project=Firefox --project=Safari --project=\"Mobile iOS\" --project=\"Mobile Android\"",
     "test:api": "playwright test --project=api",
@@ -30,5 +35,47 @@
     "husky": "9.1.7",
     "prettier": "3.9.6",
     "typescript": "7.0.2"
+=======
+    "clean": "rm -rf allure-results allure-report test-results .features-gen",
+    "bddgen": "bddgen",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run clean && npm run bddgen && playwright test",
+    "test:smoke": "npm run clean && npm run bddgen && playwright test --grep @smoke",
+    "test:regression": "npm run clean && npm run bddgen && playwright test --grep @regression",
+    "test:local": "npm run clean && npm run bddgen && playwright test --headed",
+    "test:local:debug": "npm run clean && npm run bddgen && PWDEBUG=1 playwright test",
+    "test:trace": "playwright show-trace test-results/**/trace.zip",
+    "format": "prettier --write '**/*.{ts,json,yml,md}'",
+    "format:check": "prettier --check '**/*.{ts,json,yml,md}'",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "git:pre-commit-hook": "npm run format:check && npm run lint && npm run typecheck",
+    "postinstall": "npm run setup:husky",
+    "setup:husky": "node -e \"try { require('husky')() } catch(e) { if (e.code !== 'MODULE_NOT_FOUND') throw e }\"",
+    "report": "allure generate allure-results --single-file --clean",
+    "report:publish": "npm run report && ./bin/publish-tests.sh"
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@cucumber/cucumber": "^11.0.0",
+    "@playwright/test": "^1.52.0",
+    "allure-playwright": "^3.0.0",
+    "allure-commandline": "^2.32.0",
+    "dotenv": "^16.4.0",
+    "playwright-bdd": "^8.0.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-playwright": "^2.0.0",
+    "eslint-plugin-prettier": "^5.1.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.4.2",
+    "typescript": "^5.8.0"
+>>>>>>> Stashed changes
   }
 }
