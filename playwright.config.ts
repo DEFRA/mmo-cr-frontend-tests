@@ -8,23 +8,13 @@ if (existsSync(envFile)) {
   process.loadEnvFile(envFile);
 }
 
-const environmentUrls = {
-  uat: 'https://uat.catchrecording.cefasext.co.uk',
-  local: 'http://localhost:3000',
-  test: 'https://mmo-cr-copilot-dashboard.test.cdp-int.defra.cloud/',
-  'ext-test': 'https://mmo-cr-copilot-dashboard.ext-test.cdp-int.defra.cloud/',
-} as const;
-
-const environmentName = process.env.ENVIRONMENT ?? process.env.CATCH_RECORDING_ENV;
 const baseURL =
-  process.env.BASE_URL ??
-  process.env.CATCH_RECORDING_BASE_URL ??
-  (environmentName && environmentUrls[environmentName as keyof typeof environmentUrls]) ??
-  (environmentName ? `https://mmo-cr-copilot-dashboard.${environmentName}.cdp-int.defra.cloud/` : undefined) ??
-  'https://mmo-cr-copilot-dashboard.ext-test.cdp-int.defra.cloud/';
+  process.env.BASE_URL ||
+  process.env.CATCH_RECORDING_BASE_URL ||
+  'https://mmo-cr-copilot-dashboard.ext-test.cdp.defra.gov.uk/';
 
 /* Falls back to the frontend baseURL when the API is served from the same host. */
-const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL ?? baseURL;
+const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL || baseURL;
 const apiToken = process.env.CATCH_RECORDING_API_TOKEN;
 
 /**
