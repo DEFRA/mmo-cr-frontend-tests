@@ -11,7 +11,7 @@ if (existsSync(envFile)) {
 const environmentUrls = {
   uat: 'https://uat.catchrecording.cefasext.co.uk',
   local: 'http://localhost:3000',
-  test: 'https://mmo-cr-copilot-dashboard.test.cdp.defra.gov.uk/',
+  test: 'https://mmo-cr-copilot-dashboard.ext-test.cdp.defra.gov.uk/',
   'ext-test': 'https://mmo-cr-copilot-dashboard.ext-test.cdp.defra.gov.uk/',
 } as const;
 
@@ -20,7 +20,7 @@ const baseURL =
   process.env.BASE_URL ??
   process.env.CATCH_RECORDING_BASE_URL ??
   environmentUrls[environmentName as keyof typeof environmentUrls] ??
-  (environmentName ? `https://mmo-cr-copilot-dashboard.${environmentName}.cdp.defra.gov.uk/` : undefined);
+  'https://mmo-cr-copilot-dashboard.ext-test.cdp.defra.gov.uk/';
 
 if (!baseURL) {
   throw new Error(
