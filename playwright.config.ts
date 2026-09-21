@@ -15,18 +15,11 @@ const environmentUrls = {
   'ext-test': 'https://mmo-cr-copilot-dashboard.ext-test.cdp.defra.gov.uk/',
 } as const;
 
-const environmentName = process.env.ENVIRONMENT ?? process.env.CATCH_RECORDING_ENV;
+const environmentName = process.env.CATCH_RECORDING_ENV ?? process.env.ENVIRONMENT;
 const baseURL =
-  process.env.BASE_URL ??
   process.env.CATCH_RECORDING_BASE_URL ??
   environmentUrls[environmentName as keyof typeof environmentUrls] ??
   'https://mmo-cr-copilot-dashboard.ext-test.cdp.defra.gov.uk/';
-
-if (!baseURL) {
-  throw new Error(
-    `Unknown CATCH_RECORDING_ENV "${environmentName}". Add its URL to environmentUrls or set CATCH_RECORDING_BASE_URL.`,
-  );
-}
 
 /* Falls back to the frontend baseURL when the API is served from the same host. */
 const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL ?? baseURL;

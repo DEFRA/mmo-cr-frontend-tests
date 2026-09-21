@@ -3,6 +3,6 @@ import { BaseApi } from './baseApi';
 
 export class HealthApi extends BaseApi {
   checkHealth(): Promise<APIResponse> {
-    return this.get('/health');
+    return this.get('health');
   }
 }
