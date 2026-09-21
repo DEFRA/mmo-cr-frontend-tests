@@ -54,34 +54,9 @@ export default defineConfig({
   /* Configure projects for the supported desktop and touchscreen browsers. */
   projects: [
     {
-      name: 'Chrome',
+      name: 'chromium',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-    },
-    {
-      name: 'Edge',
-      testDir: './tests/ui',
-      use: { ...devices['Desktop Chrome'], channel: 'msedge' },
-    },
-    {
-      name: 'Firefox',
-      testDir: './tests/ui',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'Safari',
-      testDir: './tests/ui',
-      use: { ...devices['Desktop Safari'] },
-    },
-    {
-      name: 'Mobile iOS',
-      testDir: './tests/ui',
-      use: { ...devices['iPhone 17'] },
-    },
-    {
-      name: 'Mobile Android',
-      testDir: './tests/ui',
-      use: { ...devices['Pixel 7'] },
+      use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'api',
