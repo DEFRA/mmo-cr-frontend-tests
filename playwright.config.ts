@@ -9,7 +9,6 @@ if (existsSync(envFile)) {
 }
 
 const baseURL =
-  process.env.BASE_URL ||
   process.env.CATCH_RECORDING_BASE_URL ||
   'https://mmo-cr-copilot-dashboard.ext-test.cdp.defra.gov.uk/';
 
