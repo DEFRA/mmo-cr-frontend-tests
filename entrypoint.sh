@@ -4,6 +4,9 @@ echo "run_id: $RUN_ID"
 npm test
 test_exit_code=$?
 
+# Generate the HTML Allure report from raw test results
+npx allure generate allure-results --clean -o allure-report
+
 npm run report:publish
 publish_exit_code=$?
 
