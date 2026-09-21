@@ -27,16 +27,6 @@ const baseURL =
 const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL ?? baseURL;
 const apiToken = process.env.CATCH_RECORDING_API_TOKEN;
 
-// Proxy configuration if running behind CDP Squid Proxy
-const proxyServer = process.env.CDP_HTTP_PROXY ?? process.env.HTTP_PROXY;
-const proxyConfig = proxyServer
-  ? {
-      server: proxyServer,
-      username: process.env.SQUID_USERNAME,
-      password: process.env.SQUID_PASSWORD,
-    }
-  : undefined;
-
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -59,7 +49,6 @@ export default defineConfig({
   use: {
     baseURL,
     ignoreHTTPSErrors: true,
-    ...(proxyConfig ? { proxy: proxyConfig } : {}),
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
