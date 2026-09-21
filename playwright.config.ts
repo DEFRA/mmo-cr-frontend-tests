@@ -11,6 +11,7 @@ if (existsSync(envFile)) {
 const environmentUrls = {
   uat: 'https://uat.catchrecording.cefasext.co.uk',
   local: 'http://localhost:3000',
+  'ext-test': 'https://mmo-cr-copilot-dashboard.ext-test.cdp.defra.gov.uk/',
 } as const;
 
 const environmentName = process.env.CATCH_RECORDING_ENV;
