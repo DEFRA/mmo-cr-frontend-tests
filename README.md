@@ -2,6 +2,12 @@ mmo-cr-frontend-tests
 
 A Playwright test suite that runs journey tests against the MMO Catch Recording frontend.
 
+The UI journey suite runs against Chrome, Microsoft Edge, Firefox, desktop Safari, mobile iOS Safari, and mobile Android
+Chrome. The mobile projects provide touchscreen coverage alongside the responsive desktop browser projects.
+
+Internet Explorer 11 is not supported by Playwright and is therefore subject to separate technical confirmation. It is
+not included in the automated browser matrix until an IE11-compatible test approach is agreed.
+
 - [Local](#local)
   - [Requirements](#requirements)
     - [Node.js](#nodejs)
@@ -34,6 +40,12 @@ Install application dependencies:
 
 ```bash
 npm install
+```
+
+Install the browsers used by the UI projects when running locally for the first time:
+
+```bash
+npx playwright install chromium firefox webkit chrome msedge
 ```
 
 ### Running local tests

@@ -8,7 +8,8 @@ RUN apt-get update -qq \
     && apt-get install -qqy \
     curl \
     zip \
-    unzip
+    unzip \
+    default-jre-headless
 
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
     && unzip awscliv2.zip \
@@ -18,7 +19,7 @@ WORKDIR /app
 
 COPY . .
 RUN npm install
-RUN npx playwright install --with-deps chromium
+RUN npx playwright install --with-deps chromium firefox webkit chrome msedge
 
 ENTRYPOINT [ "./entrypoint.sh" ]
 

@@ -14,13 +14,9 @@ const environmentUrls = {
 
 const environmentName = process.env.CATCH_RECORDING_ENV ?? 'uat';
 const baseURL =
-  process.env.CATCH_RECORDING_BASE_URL ?? environmentUrls[environmentName as keyof typeof environmentUrls];
-
-if (!baseURL) {
-  throw new Error(
-    `Unknown CATCH_RECORDING_ENV "${environmentName}". Add its URL to environmentUrls or set CATCH_RECORDING_BASE_URL.`,
-  );
-}
+  process.env.CATCH_RECORDING_BASE_URL ?? 
+  environmentUrls[environmentName as keyof typeof environmentUrls] ?? 
+  'https://mmo-cr-copilot-dashboard.ext-test.cdp.defra.gov.uk/';
 
 /* Falls back to the frontend baseURL when the API is served from the same host. */
 const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL ?? baseURL;
@@ -40,26 +36,50 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   ...(process.env.CI ? { workers: 1 } : {}),
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'allure-playwright',
+  reporter: [
+    ['allure-playwright'],
+    ['html', { outputFolder: 'allure-report', open: 'never' }],
+  ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
+    ignoreHTTPSErrors: true,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
 
-  /* Configure projects for major browsers */
+  /* Configure projects for the supported desktop and touchscreen browsers. */
   projects: [
     {
-      name: 'chromium',
+      name: 'Chrome',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     },
     {
-      name: 'Mobile Safari',
+      name: 'Edge',
       testDir: './tests/ui',
-      use: { ...devices['iPhone 17'] },
+      use: { ...devices['Desktop Edge'], channel: 'msedge' },
+    },
+    {
+      name: 'Firefox',
+      testDir: './tests/ui',
+      use: { ...devices['Desktop Firefox'] },
+    },
+    {
+      name: 'Safari',
+      testDir: './tests/ui',
+      use: { ...devices['Desktop Safari'] },
+    },
+    {
+      name: 'Mobile iOS',
+      testDir: './tests/ui',
+      use: { ...devices['iPhone 12'] },
+    },
+    {
+      name: 'Mobile Android',
+      testDir: './tests/ui',
+      use: { ...devices['Pixel 5'] },
     },
     {
       name: 'api',
