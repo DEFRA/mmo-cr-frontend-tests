@@ -9,14 +9,13 @@ if (existsSync(envFile)) {
 }
 
 const environmentUrls = {
-  uat: 'https://uat.catchrecording.cefasext.co.uk',
+  dev: 'https://mmo-cr-external-frontend.dev.cdp-int.defra.cloud',
+  test: 'https://mmo-cr-external-frontend.test.cdp-int.defra.cloud',
+  prod: 'https://mmo-cr-external-frontend.prod.cdp-int.defra.cloud',
 } as const;
 
 const environmentName = process.env.CATCH_RECORDING_ENV ?? 'uat';
-const baseURL =
-  process.env.CATCH_RECORDING_BASE_URL ?? 
-  environmentUrls[environmentName as keyof typeof environmentUrls] ?? 
-  'https://mmo-cr-copilot-dashboard.ext-test.cdp.defra.gov.uk/';
+const baseURL = environmentUrls[environmentName as keyof typeof environmentUrls];
 
 /* Falls back to the frontend baseURL when the API is served from the same host. */
 const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL ?? baseURL;
@@ -36,10 +35,7 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   ...(process.env.CI ? { workers: 1 } : {}),
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [
-    ['allure-playwright'],
-    ['html', { outputFolder: 'allure-report', open: 'never' }],
-  ],
+  reporter: [['allure-playwright'], ['html', { outputFolder: 'allure-report', open: 'never' }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
