@@ -11,6 +11,16 @@ export abstract class BasePage {
     govukHeader: (): Locator => this.page.locator('.govuk-header.app-header'),
     serviceNavigation: (): Locator => this.page.getByRole('region', { name: 'Service information' }),
   };
+
+  public readonly common = {
+    backLink: (): Locator => this.page.getByTestId('app-page-navigation-back-link'),
+    saveAndContinueButton: (): Locator => this.page.getByRole('button', { name: 'Save and continue' }),
+    phaseBanner: (): Locator => this.page.locator('.govuk-phase-banner'),
+    workflowPageCaption: (): Locator => this.page.locator('.govuk-caption-l').filter({ hasText: 'New catch record' }),
+    languageEnglish: (): Locator => this.page.getByTestId('app-page-navigation-language-current'),
+    languageCymraeg: (): Locator => this.page.getByTestId('app-page-navigation-language-link'),
+  };
+
   public readonly footer = {
     footerMeta: (): Locator => this.page.locator('.govuk-footer__meta'),
     licenceLink: (): Locator => this.page.getByRole('link', { name: 'Open Government Licence v3.0' }),
@@ -28,6 +38,10 @@ export abstract class BasePage {
     try {
       await acceptButton.click({ timeout: 3000 });
     } catch {}
+  }
+
+  async clickSaveAndContinue() {
+    await this.common.saveAndContinueButton().click();
   }
 
   async expectTitle(title: string) {
