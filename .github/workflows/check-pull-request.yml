@@ -30,19 +30,19 @@ jobs:
 
   # Uncomment this to run the tests in your test suite
   ui-tests:
-    name: Run UI Journey Tests
+    name: Catch Record UI Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./run-journey-tests
+      - uses: ./catch-record-tests
         with:
           project: ui
 
   api-tests:
-    name: Run API Tests
+    name: Catch Record API Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./run-journey-tests
+      - uses: ./catch-record-tests
         with:
           project: api
