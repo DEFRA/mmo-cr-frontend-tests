@@ -4,16 +4,6 @@ import { BasePage } from './basePage';
 export class HomePage extends BasePage {
   public readonly startNowButton = (): Locator => this.page.getByRole('button', { name: 'Start now' });
   public readonly privacyPolicyLink = (): Locator => this.page.getByRole('link', { name: 'Privacy policy' });
-  public readonly privacyNoticeLink = (): Locator => this.page.getByRole('link', { name: 'Privacy notice' });
-  public readonly pageTitle = (): Locator => this.page.getByTestId('app-heading-title');
-  public readonly pageCaption = (): Locator => this.page.getByTestId('app-heading-caption');
-  public readonly warningText = (): Locator => this.page.locator('.govuk-warning-text');
-  public readonly phaseBanner = (): Locator => this.page.locator('.govuk-phase-banner');
-  public readonly languageSwitcher = {
-    container: (): Locator => this.page.getByTestId('app-page-navigation-language'),
-    english: (): Locator => this.page.getByTestId('app-page-navigation-language-current'),
-    welsh: (): Locator => this.page.getByTestId('app-page-navigation-language-link'),
-  };
 
   public readonly guidanceContents = {
     whatWeNeedFromYouLink: (): Locator =>
