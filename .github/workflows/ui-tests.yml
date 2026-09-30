@@ -57,3 +57,5 @@ jobs:
           project: ui
           env: ${{ inputs.env }}
           browser: ${{ inputs.browser }}
+          email: ${{ secrets.CATCH_RECORDING_EMAIL }}
+          password: ${{ secrets.CATCH_RECORDING_PASSWORD }}
