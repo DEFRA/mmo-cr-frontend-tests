@@ -1,6 +1,7 @@
 name: Catch Record API Tests on GitHub
 
 permissions:
+  id-token: write
   checks: write
   pull-requests: write
 
