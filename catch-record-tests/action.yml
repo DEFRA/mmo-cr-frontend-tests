@@ -1,4 +1,4 @@
-name: Run Journey Tests on GitHub
+name: Catch Record Tests on GitHub
 description: Starts the docker compose environment and runs the Playwright journey tests against it
 
 inputs:
@@ -13,6 +13,28 @@ inputs:
     required: false
     type: string
     default: all
+  env:
+    description: 'Environment to run tests against'
+    required: false
+    type: string
+    default: test
+  browser:
+    description: 'Browser to run UI tests on'
+    required: false
+    type: string
+    default: all
+  email:
+    description: 'Email for sign-in tests'
+    required: false
+    type: string
+  password:
+    description: 'Password for sign-in tests'
+    required: false
+    type: string
+  api-token:
+    description: 'API token for API tests'
+    required: false
+    type: string
 
 runs:
   using: 'composite'
@@ -37,12 +59,27 @@ runs:
         docker compose up --wait-timeout 300 -d --quiet-pull
     - name: Run the tests
       shell: bash
+      env:
+        CATCH_RECORDING_ENV: ${{ inputs.env }}
+        CATCH_RECORDING_EMAIL: ${{ inputs.email }}
+        CATCH_RECORDING_PASSWORD: ${{ inputs.password }}
+        CATCH_RECORDING_API_TOKEN: ${{ inputs.api-token }}
       run: |
-        case "${{ inputs.project }}" in
-          ui) npm run test:ui ;;
-          api) npm run test:api ;;
-          *) npm test ;;
-        esac
+        if [ "${{ inputs.project }}" = "ui" ]; then
+          if [ "${{ inputs.browser }}" = "all" ] || [ -z "${{ inputs.browser }}" ]; then
+            npm run test:ui
+          else
+            npx playwright test --project="${{ inputs.browser }}"
+          fi
+        elif [ "${{ inputs.project }}" = "api" ]; then
+          npm run test:api
+        else
+          if [ "${{ inputs.browser }}" != "all" ] && [ -n "${{ inputs.browser }}" ]; then
+            npx playwright test --project="${{ inputs.browser }}"
+          else
+            npm test
+          fi
+        fi
     - name: Generate Allure report
       if: always()
       shell: bash
