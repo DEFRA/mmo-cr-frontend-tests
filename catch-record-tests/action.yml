@@ -22,7 +22,7 @@ inputs:
     description: 'Browser to run UI tests on'
     required: false
     type: string
-    default: all
+    default: Chromium
   email:
     description: 'Email for sign-in tests'
     required: false
@@ -66,7 +66,9 @@ runs:
         CATCH_RECORDING_API_TOKEN: ${{ inputs.api-token }}
       run: |
         if [ "${{ inputs.project }}" = "ui" ]; then
-          if [ "${{ inputs.browser }}" = "all" ] || [ -z "${{ inputs.browser }}" ]; then
+          if [ "${{ inputs.browser }}" = "all" ]; then
+            npm run test:ui:all
+          elif [ -z "${{ inputs.browser }}" ]; then
             npm run test:ui
           else
             npx playwright test --project="${{ inputs.browser }}"

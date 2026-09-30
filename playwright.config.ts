@@ -14,7 +14,7 @@ const environmentUrls = {
   prod: 'https://mmo-cr-external-frontend.prod.cdp-int.defra.cloud',
 } as const;
 
-const environmentName = process.env.CATCH_RECORDING_ENV ?? 'uat';
+const environmentName = process.env.CATCH_RECORDING_ENV ?? 'test';
 const baseURL = environmentUrls[environmentName as keyof typeof environmentUrls];
 
 /* Falls back to the frontend baseURL when the API is served from the same host. */
@@ -47,6 +47,11 @@ export default defineConfig({
 
   /* Configure projects for the supported desktop and touchscreen browsers. */
   projects: [
+    {
+      name: 'Chromium',
+      testDir: './tests/ui',
+      use: { ...devices['Desktop Chrome'] },
+    },
     {
       name: 'Chrome',
       testDir: './tests/ui',

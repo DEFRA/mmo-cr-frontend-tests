@@ -24,9 +24,10 @@ on:
       browser:
         description: 'Browser to run UI tests on'
         required: true
-        default: 'all'
+        default: 'Chromium'
         type: choice
         options:
+          - Chromium
           - all
           - Chrome
           - Edge
@@ -45,7 +46,7 @@ on:
         description: 'Browser to run UI tests on'
         required: false
         type: string
-        default: 'all'
+        default: 'Chromium'
 jobs:
   ui-tests:
     name: Catch Record UI Tests
