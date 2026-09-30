@@ -1,0 +1,40 @@
+name: Catch Record API Tests on GitHub
+
+permissions:
+  id-token: write
+  checks: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+    inputs:
+      env:
+        description: 'Environment to run tests against'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
+  workflow_call:
+    inputs:
+      env:
+        description: 'Environment to run tests against'
+        required: false
+        type: string
+        default: 'test'
+jobs:
+  api-tests:
+    name: Catch Record API Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./catch-record-tests
+        with:
+          project: api
+          env: ${{ inputs.env }}
