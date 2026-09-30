@@ -11,14 +11,6 @@ on:
       - synchronize
       - ready_for_review
 
-permissions:
-  id-token: write
-  contents: read
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   cdp-workflows:
     name: Run Pull Request Checks
@@ -36,21 +28,21 @@ jobs:
       - run: npm run format:check
       - run: npm run lint
 
-  # Uncomment this to run the tests in your test suite
-  # ui-tests:
-  #   name: Catch Record UI Tests
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: ./catch-record-tests
-  #       with:
-  #         project: ui
-
-  # api-tests:
-  #   name: Catch Record API Tests
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: ./catch-record-tests
-  #       with:
-  #         project: api
+# Uncomment this to run the tests in your test suite
+#  ui-tests:
+#    name: Run UI Journey Tests
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: ./run-journey-tests
+#        with:
+#          project: ui
+#
+#  api-tests:
+#    name: Run API Tests
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: ./run-journey-tests
+#        with:
+#          project: api
