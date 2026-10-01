@@ -30,7 +30,7 @@ export abstract class BasePage {
     accessibilityStatementLink: (): Locator => this.page.getByRole('link', { name: 'Accessibility Statement' }),
   };
   async goto(SpecificUrl: string) {
-    await this.page.goto(SpecificUrl);
+    await this.page.goto(SpecificUrl, { waitUntil: 'load' });
   }
 
   async acceptCookies() {
