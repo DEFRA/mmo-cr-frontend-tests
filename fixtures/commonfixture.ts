@@ -19,6 +19,7 @@ import { StatisticalAreaOtherPage } from '../pages/statisticalAreaOtherPage';
 import { SpeciesSelectionPage } from '../pages/speciesSelectionPage';
 import { AddSpeciesPage } from '../pages/addSpeciesPage';
 import { CatchNotLandedPage } from '../pages/catchNotLandedPage';
+import { RemoveSpeciesPage } from '../pages/removeSpeciesPage';
 import { CheckAnswersPage } from '../pages/checkAnswersPage';
 import { SubmittedRecordPage } from '../pages/submittedRecordPage';
 
@@ -43,6 +44,7 @@ type CommonFixtures = {
   speciesSelectionPage: SpeciesSelectionPage;
   addSpeciesPage: AddSpeciesPage;
   catchNotLandedPage: CatchNotLandedPage;
+  removeSpeciesPage: RemoveSpeciesPage;
   checkAnswersPage: CheckAnswersPage;
   submittedRecordPage: SubmittedRecordPage;
 };
@@ -110,6 +112,9 @@ export const test = base.extend<CommonFixtures>({
   },
   catchNotLandedPage: async ({ page }: { page: Page }, use) => {
     await use(new CatchNotLandedPage(page));
+  },
+  removeSpeciesPage: async ({ page }: { page: Page }, use) => {
+    await use(new RemoveSpeciesPage(page));
   },
   checkAnswersPage: async ({ page }: { page: Page }, use) => {
     await use(new CheckAnswersPage(page));
