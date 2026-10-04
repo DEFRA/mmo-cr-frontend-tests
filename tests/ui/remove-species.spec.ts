@@ -8,7 +8,7 @@ test.describe('Remove Species', () => {
   test.describe('Species Removal', () => {
     test('removing a species removes its associated catch-weight information', async ({
       speciesSelectionPage,
-      removeSpeciesPage,
+      removeSpeciesPage
     }) => {
       await speciesSelectionPage.selectSpecies('Cod (COD)');
       await speciesSelectionPage.enterSpeciesWeights('COD', '100');
@@ -29,7 +29,7 @@ test.describe('Remove Species', () => {
 
     test('removing a species clears below-minimum and discarded weights too', async ({
       speciesSelectionPage,
-      removeSpeciesPage,
+      removeSpeciesPage
     }) => {
       await speciesSelectionPage.selectSpecies('Cod (COD)');
       await speciesSelectionPage.enterSpeciesWeights('COD', '100', '10', '5');
@@ -52,7 +52,7 @@ test.describe('Remove Species', () => {
   test.describe('Species Persistence', () => {
     test('remaining species are still displayed after removing another species', async ({
       speciesSelectionPage,
-      removeSpeciesPage,
+      removeSpeciesPage
     }) => {
       await speciesSelectionPage.selectSpecies('Cod (COD)');
       await speciesSelectionPage.enterSpeciesWeights('COD', '100');
@@ -76,7 +76,7 @@ test.describe('Remove Species', () => {
 
     test('weight data for remaining species is preserved after a removal', async ({
       speciesSelectionPage,
-      removeSpeciesPage,
+      removeSpeciesPage
     }) => {
       await speciesSelectionPage.selectSpecies('Cod (COD)');
       await speciesSelectionPage.enterSpeciesWeights('COD', '100');
@@ -99,7 +99,7 @@ test.describe('Remove Species', () => {
     test('removing all species redirects to the Add Species page', async ({
       speciesSelectionPage,
       removeSpeciesPage,
-      addSpeciesPage,
+      addSpeciesPage
     }) => {
       await speciesSelectionPage.clickRemoveSpecies();
       await removeSpeciesPage.selectSpeciesToRemove('Cod (COD)');
@@ -117,7 +117,7 @@ test.describe('Remove Species', () => {
     test('after removing all species, adding a new species allows continuation', async ({
       speciesSelectionPage,
       removeSpeciesPage,
-      addSpeciesPage,
+      addSpeciesPage
     }) => {
       await speciesSelectionPage.clickRemoveSpecies();
       await removeSpeciesPage.selectSpeciesToRemove('Cod (COD)');
@@ -153,7 +153,7 @@ test.describe('Remove Species', () => {
     test('removing species down to zero prevents continuation from species selection', async ({
       speciesSelectionPage,
       removeSpeciesPage,
-      addSpeciesPage,
+      addSpeciesPage
     }) => {
       await speciesSelectionPage.clickRemoveSpecies();
       await removeSpeciesPage.selectSpeciesToRemove('Cod (COD)');

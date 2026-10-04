@@ -9,7 +9,7 @@ export abstract class BasePage {
 
   public readonly header = {
     govukHeader: (): Locator => this.page.locator('.govuk-header.app-header'),
-    serviceNavigation: (): Locator => this.page.getByRole('region', { name: 'Service information' }),
+    serviceNavigation: (): Locator => this.page.getByRole('region', { name: 'Service information' })
   };
 
   public readonly common = {
@@ -18,7 +18,7 @@ export abstract class BasePage {
     phaseBanner: (): Locator => this.page.locator('.govuk-phase-banner'),
     workflowPageCaption: (): Locator => this.page.locator('.govuk-caption-l').filter({ hasText: 'New catch record' }),
     languageEnglish: (): Locator => this.page.getByTestId('app-page-navigation-language-current'),
-    languageCymraeg: (): Locator => this.page.getByTestId('app-page-navigation-language-link'),
+    languageCymraeg: (): Locator => this.page.getByTestId('app-page-navigation-language-link')
   };
 
   public readonly footer = {
@@ -27,7 +27,7 @@ export abstract class BasePage {
     copyrightLink: (): Locator => this.page.getByRole('link', { name: 'Crown copyright' }),
     feedbackLink: (): Locator => this.page.getByRole('link', { name: 'Feedback' }),
     privacyPolicyLink: (): Locator => this.page.getByRole('link', { name: 'Privacy policy' }),
-    accessibilityStatementLink: (): Locator => this.page.getByRole('link', { name: 'Accessibility Statement' }),
+    accessibilityStatementLink: (): Locator => this.page.getByRole('link', { name: 'Accessibility Statement' })
   };
   async goto(SpecificUrl: string) {
     await this.page.goto(SpecificUrl, { waitUntil: 'load' });

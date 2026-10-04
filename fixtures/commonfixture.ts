@@ -22,6 +22,8 @@ import { CatchNotLandedPage } from '../pages/catchNotLandedPage';
 import { RemoveSpeciesPage } from '../pages/removeSpeciesPage';
 import { CheckAnswersPage } from '../pages/checkAnswersPage';
 import { SubmittedRecordPage } from '../pages/submittedRecordPage';
+import { AccountPage } from '../pages/accountPage';
+import { RemoveGearPage } from '../pages/removeGearPage';
 
 type CommonFixtures = {
   signInPage: SigninPage;
@@ -47,6 +49,8 @@ type CommonFixtures = {
   removeSpeciesPage: RemoveSpeciesPage;
   checkAnswersPage: CheckAnswersPage;
   submittedRecordPage: SubmittedRecordPage;
+  accountPage: AccountPage;
+  removeGearPage: RemoveGearPage;
 };
 
 export const test = base.extend<CommonFixtures>({
@@ -122,9 +126,15 @@ export const test = base.extend<CommonFixtures>({
   submittedRecordPage: async ({ page }: { page: Page }, use) => {
     await use(new SubmittedRecordPage(page));
   },
+  accountPage: async ({ page }: { page: Page }, use) => {
+    await use(new AccountPage(page));
+  },
+  removeGearPage: async ({ page }: { page: Page }, use) => {
+    await use(new RemoveGearPage(page));
+  },
   healthApi: async ({ request }: { request: APIRequestContext }, use) => {
     await use(new HealthApi(request));
-  },
+  }
 });
 
 export { expect };

@@ -11,7 +11,7 @@ if (existsSync(envFile)) {
 const environmentUrls = {
   dev: 'https://mmo-cr-external-frontend.dev.cdp-int.defra.cloud',
   test: 'https://mmo-cr-external-frontend.test.cdp-int.defra.cloud',
-  prod: 'https://mmo-cr-external-frontend.prod.cdp-int.defra.cloud',
+  prod: 'https://mmo-cr-external-frontend.prod.cdp-int.defra.cloud'
 } as const;
 
 const environmentName = process.env.CATCH_RECORDING_ENV ?? 'test';
@@ -43,7 +43,7 @@ export default defineConfig({
     ignoreHTTPSErrors: true,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    trace: 'on-first-retry'
   },
 
   /* Configure projects for the supported desktop and touchscreen browsers. */
@@ -51,45 +51,45 @@ export default defineConfig({
     {
       name: 'Chromium',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'] }
     },
     {
       name: 'Chrome',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+      use: { ...devices['Desktop Chrome'], channel: 'chrome' }
     },
     {
       name: 'Edge',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Edge'], channel: 'msedge' },
+      use: { ...devices['Desktop Edge'], channel: 'msedge' }
     },
     {
       name: 'Firefox',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Firefox'] },
+      use: { ...devices['Desktop Firefox'] }
     },
     {
       name: 'Safari',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Safari'] },
+      use: { ...devices['Desktop Safari'] }
     },
     {
       name: 'Mobile iOS',
       testDir: './tests/ui',
-      use: { ...devices['iPhone 12'] },
+      use: { ...devices['iPhone 12'] }
     },
     {
       name: 'Mobile Android',
       testDir: './tests/ui',
-      use: { ...devices['Pixel 5'] },
+      use: { ...devices['Pixel 5'] }
     },
     {
       name: 'api',
       testDir: './tests/api',
       use: {
         baseURL: apiBaseURL,
-        extraHTTPHeaders: apiToken ? { Authorization: `Bearer ${apiToken}` } : undefined,
-      },
-    },
-  ],
+        extraHTTPHeaders: apiToken ? { Authorization: `Bearer ${apiToken}` } : undefined
+      }
+    }
+  ]
 });

@@ -12,7 +12,7 @@ export class HomePage extends BasePage {
   public readonly languageSwitcher = {
     container: (): Locator => this.page.getByTestId('app-page-navigation-language'),
     english: (): Locator => this.page.getByTestId('app-page-navigation-language-current'),
-    welsh: (): Locator => this.page.getByTestId('app-page-navigation-language-link'),
+    welsh: (): Locator => this.page.getByTestId('app-page-navigation-language-link')
   };
 
   public readonly guidanceContents = {
@@ -24,7 +24,7 @@ export class HomePage extends BasePage {
       this.page.getByTestId('app-guidance-contents-link').filter({ hasText: 'Special cases' }),
     howToCreateARecordLink: (): Locator =>
       this.page.getByTestId('app-guidance-contents-link').filter({ hasText: 'How to create a record' }),
-    getHelpLink: (): Locator => this.page.getByTestId('app-guidance-contents-link').filter({ hasText: 'Get help' }),
+    getHelpLink: (): Locator => this.page.getByTestId('app-guidance-contents-link').filter({ hasText: 'Get help' })
   };
 
   public readonly guidanceHeadings = {
@@ -32,6 +32,6 @@ export class HomePage extends BasePage {
     whenToCreateYourRecordHeading: (): Locator => this.page.locator('#when-to-create-your-record'),
     specialCasesHeading: (): Locator => this.page.locator('#special-cases-ices-areas'),
     howToCreateARecordHeading: (): Locator => this.page.locator('#how-to-create-a-record'),
-    getHelpWithYourRecordHeading: (): Locator => this.page.locator('#get-help-with-your-record'),
+    getHelpWithYourRecordHeading: (): Locator => this.page.locator('#get-help-with-your-record')
   };
 }
