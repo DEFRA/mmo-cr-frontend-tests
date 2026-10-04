@@ -29,8 +29,8 @@ export abstract class BasePage {
     privacyPolicyLink: (): Locator => this.page.getByRole('link', { name: 'Privacy policy' }),
     accessibilityStatementLink: (): Locator => this.page.getByRole('link', { name: 'Accessibility Statement' })
   };
-  async goto(SpecificUrl: string) {
-    await this.page.goto(SpecificUrl, { waitUntil: 'load' });
+  async goto(url: string) {
+    await this.page.goto(url, { waitUntil: 'load' });
   }
 
   async acceptCookies() {
@@ -51,5 +51,30 @@ export abstract class BasePage {
 
   async expectUrl(url: string) {
     await expect(this.page).toHaveURL(url);
+  }
+}
+
+export abstract class DateInputPage extends BasePage {
+  public readonly dayInput = (): Locator => this.page.getByLabel('Day');
+  public readonly monthInput = (): Locator => this.page.getByLabel('Month');
+  public readonly yearInput = (): Locator => this.page.getByLabel('Year');
+
+  async enterDate(day: string, month: string, year: string) {
+    await this.dayInput().fill(day);
+    await this.monthInput().fill(month);
+    await this.yearInput().fill(year);
+  }
+}
+
+export abstract class PortSelectionPage extends BasePage {
+  public readonly portRadio = (portName: string): Locator => this.page.getByLabel(portName);
+  public readonly addPortButton = (): Locator => this.page.getByRole('button', { name: 'Add port' });
+
+  async selectPort(portName: string) {
+    await this.portRadio(portName).click();
+  }
+
+  async clickAddPort() {
+    await this.addPortButton().click();
   }
 }

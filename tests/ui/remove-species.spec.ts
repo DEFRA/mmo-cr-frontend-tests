@@ -104,7 +104,6 @@ test.describe('Remove Species', () => {
       await speciesSelectionPage.clickRemoveSpecies();
       await removeSpeciesPage.selectSpeciesToRemove('Cod (COD)');
       await removeSpeciesPage.clickSaveAndContinue();
-      await addSpeciesPage.page.waitForTimeout(1000);
       await expect(addSpeciesPage.pageHeading()).toBeVisible();
     });
 

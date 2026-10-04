@@ -15,8 +15,4 @@ export class RemoveSpeciesPage extends BasePage {
   async selectSpeciesToRemove(speciesName: string) {
     await this.speciesCheckbox(speciesName).check();
   }
-
-  async getVisibleSpeciesCount(): Promise<number> {
-    return await this.speciesCheckboxes().count();
-  }
 }

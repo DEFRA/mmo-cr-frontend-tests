@@ -9,17 +9,23 @@ RUN apt-get update -qq \
     curl \
     zip \
     unzip \
-    default-jre-headless
+    default-jre-headless \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
-    && unzip awscliv2.zip \
-    && ./aws/install
+    && unzip -q awscliv2.zip \
+    && ./aws/install \
+    && rm -rf awscliv2.zip aws
 
 WORKDIR /app
 
+# Copy manifests first so dependency layers are cached across source changes
+COPY package*.json ./
+RUN npm install \
+    && npx playwright install --with-deps chromium firefox webkit chrome msedge \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY . .
-RUN npm install
-RUN npx playwright install --with-deps chromium firefox webkit chrome msedge
 
 ENTRYPOINT [ "./entrypoint.sh" ]
 

@@ -1,17 +1,7 @@
 import { type Locator } from '@playwright/test';
-import { BasePage } from './basePage';
+import { DateInputPage } from './basePage';
 
-export class TripReturnDatePage extends BasePage {
+export class TripReturnDatePage extends DateInputPage {
   public readonly pageHeading = (): Locator =>
     this.page.getByRole('heading', { name: 'Which date did you return from your trip?' });
-
-  public readonly dayInput = (): Locator => this.page.getByLabel('Day');
-  public readonly monthInput = (): Locator => this.page.getByLabel('Month');
-  public readonly yearInput = (): Locator => this.page.getByLabel('Year');
-
-  async enterDate(day: string, month: string, year: string) {
-    await this.dayInput().fill(day);
-    await this.monthInput().fill(month);
-    await this.yearInput().fill(year);
-  }
 }

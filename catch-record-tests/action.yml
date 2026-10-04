@@ -46,11 +46,23 @@ runs:
 
     - uses: actions/setup-node@v4
       with:
-        node-version: 20
+        node-version-file: .nvmrc
         cache: npm
     - name: Setup the tests
-      run: npm i
+      run: npm ci
       shell: bash
+    - name: Install Playwright browsers
+      if: inputs.project != 'api'
+      shell: bash
+      run: |
+        case "${{ inputs.browser }}" in
+          Chrome) npx playwright install --with-deps chrome ;;
+          Edge) npx playwright install --with-deps msedge ;;
+          Firefox) npx playwright install --with-deps firefox ;;
+          Safari|"Mobile iOS") npx playwright install --with-deps webkit ;;
+          all) npx playwright install --with-deps chromium chrome msedge firefox webkit ;;
+          *) npx playwright install --with-deps chromium ;;
+        esac
     - name: Start docker compose
       shell: bash
       run: |
@@ -86,7 +98,7 @@ runs:
       if: always()
       shell: bash
       run: |
-        npm run generate:report || true
+        npm run report || true
     - name: debug
       if: always()
       run: |
