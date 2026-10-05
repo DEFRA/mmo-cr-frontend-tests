@@ -4,31 +4,32 @@ import { BasePage } from './basePage';
 export class GearSelectionPage extends BasePage {
   public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: 'What gear did you use?' });
 
-  public readonly gearCheckbox = (gearName: string): Locator => this.page.getByLabel(gearName);
+  public readonly gearCheckbox = (gearName: string): Locator =>
+    this.page.getByRole('checkbox', { name: gearName, exact: true });
 
   public readonly gearInputs = {
     bottomOtterTrawl: {
       numberOfTrawlNets: (): Locator => this.page.locator('#bottom-otter-trawl-numberOfTrawlNets'),
-      meshSize: (): Locator => this.page.locator('#bottom-otter-trawl-meshSize'),
+      meshSize: (): Locator => this.page.locator('#bottom-otter-trawl-meshSize')
     },
     dredge: {
       numberOfDredges: (): Locator => this.page.locator('#dredge-numberOfDredges'),
-      numberOfTimesShot: (): Locator => this.page.locator('#dredge-numberOfTimesShot'),
+      numberOfTimesShot: (): Locator => this.page.locator('#dredge-numberOfTimesShot')
     },
     handlines: {
-      rodsAndLines: (): Locator => this.page.locator('#handlines-pole-lines-rodsAndLines'),
+      rodsAndLines: (): Locator => this.page.locator('#handlines-pole-lines-rodsAndLines')
     },
     pots: {
       hauled: (): Locator => this.page.locator('#potsHauled'),
-      inWater: (): Locator => this.page.locator('#potsInWater'),
+      inWater: (): Locator => this.page.locator('#potsInWater')
     },
     seineNets: {
-      meshSize: (): Locator => this.page.locator('#seine-nets-meshSize'),
+      meshSize: (): Locator => this.page.locator('#seine-nets-meshSize')
     },
     traps: {
       hauled: (): Locator => this.page.locator('#traps-totalHauled'),
-      inWater: (): Locator => this.page.locator('#traps-totalInWater'),
-    },
+      inWater: (): Locator => this.page.locator('#traps-totalInWater')
+    }
   };
 
   public readonly addGearLink = (): Locator => this.page.getByRole('link', { name: 'Add gear' });

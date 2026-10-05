@@ -4,7 +4,7 @@ import { BasePage } from './basePage';
 export class AddSpeciesPage extends BasePage {
   // Uses a regex because the vessel name is dynamically inserted into the heading
   public readonly pageHeading = (): Locator =>
-    this.page.getByRole('heading', { name: /Add species to your vessel .*/ });
+    this.page.getByRole('heading', { name: /What species did you catch using .*\?/ });
 
   public readonly speciesInput = (): Locator => this.page.locator('#species');
 

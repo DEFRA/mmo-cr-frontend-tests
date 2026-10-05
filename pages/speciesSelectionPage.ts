@@ -9,19 +9,34 @@ export class SpeciesSelectionPage extends BasePage {
   public readonly speciesCheckbox = (speciesName: string): Locator => this.page.getByLabel(speciesName);
 
   public readonly weightAboveMinimumInput = (speciesCode: string): Locator =>
-    this.page.locator(`#weightAboveMinimum-${speciesCode}`);
+    this.page.locator(`#weightAboveMinimum-${speciesCode.toLowerCase()}`);
 
   public readonly weightBelowMinimumInput = (speciesCode: string): Locator =>
-    this.page.locator(`#weightBelowMinimum-${speciesCode}`);
+    this.page.locator(`#weightBelowMinimum-${speciesCode.toLowerCase()}`);
 
   public readonly weightDiscardedInput = (speciesCode: string): Locator =>
-    this.page.locator(`#weightDiscarded-${speciesCode}`);
+    this.page.locator(`#weightDiscarded-${speciesCode.toLowerCase()}`);
 
   public readonly addWeightBelowMinimumLink = (speciesCode: string): Locator =>
-    this.page.locator(`.js-weight-toggle[data-target="weightBelowMinimum-${speciesCode}-group"]`);
+    this.page.locator(`.js-weight-toggle[data-target="weightBelowMinimum-${speciesCode.toLowerCase()}-group"]`);
 
   public readonly addWeightDiscardedLink = (speciesCode: string): Locator =>
-    this.page.locator(`.js-weight-toggle[data-target="weightDiscarded-${speciesCode}-group"]`);
+    this.page.locator(`.js-weight-toggle[data-target="weightDiscarded-${speciesCode.toLowerCase()}-group"]`);
+
+  public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
+
+  public readonly errorSummaryLinks = (): Locator => this.page.locator('.govuk-error-summary__list a');
+
+  public readonly speciesErrorMessage = (): Locator => this.page.locator('#speciesIds-error');
+
+  public readonly weightAboveMinimumError = (speciesCode: string): Locator =>
+    this.page.locator(`#weightAboveMinimum-${speciesCode.toLowerCase()}-error`);
+
+  public readonly weightBelowMinimumError = (speciesCode: string): Locator =>
+    this.page.locator(`#weightBelowMinimum-${speciesCode.toLowerCase()}-error`);
+
+  public readonly weightDiscardedError = (speciesCode: string): Locator =>
+    this.page.locator(`#weightDiscarded-${speciesCode.toLowerCase()}-error`);
 
   public readonly addSpeciesLink = (): Locator => this.page.getByRole('link', { name: 'Add species' });
 
@@ -45,6 +60,13 @@ export class SpeciesSelectionPage extends BasePage {
       await this.addWeightDiscardedLink(speciesCode).click();
       await this.weightDiscardedInput(speciesCode).fill(discarded);
     }
+  }
+
+  // Unsaved selections are lost when leaving the page, so persist them before removing species
+  async saveAndReturn() {
+    await this.clickSaveAndContinue();
+    await this.page.waitForURL(/catch-not-landed/);
+    await this.goto('/species-selection');
   }
 
   async clickAddSpecies() {

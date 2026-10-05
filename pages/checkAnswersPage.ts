@@ -7,7 +7,7 @@ export class CheckAnswersPage extends BasePage {
 
   public readonly summaryRow = (key: string): Locator =>
     this.page.locator('.govuk-summary-list__row').filter({
-      has: this.page.locator('.govuk-summary-list__key', { hasText: key }),
+      has: this.page.locator('.govuk-summary-list__key', { hasText: key })
     });
 
   public readonly summaryValue = (key: string): Locator => this.summaryRow(key).locator('.govuk-summary-list__value');

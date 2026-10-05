@@ -18,5 +18,12 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["playwright.config.ts", "fixtures/**/*.ts", "pages/**/*.ts", "services/**/*.ts", "tests/**/*.ts"]
+  "include": [
+    "allure-setup.ts",
+    "playwright.config.ts",
+    "fixtures/**/*.ts",
+    "pages/**/*.ts",
+    "services/**/*.ts",
+    "tests/**/*.ts"
+  ]
 }

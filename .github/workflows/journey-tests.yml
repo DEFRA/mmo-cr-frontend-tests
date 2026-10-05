@@ -1,4 +1,4 @@
-name: Catch Record UI Tests on GitHub
+name: Run Journey Tests on GitHub
 
 permissions:
   id-token: write
@@ -33,8 +33,6 @@ on:
           - Edge
           - Firefox
           - Safari
-          - Mobile iOS
-          - Mobile Android
   workflow_call:
     inputs:
       env:
@@ -47,14 +45,35 @@ on:
         required: false
         type: string
         default: 'Chromium'
+    secrets:
+      CATCH_RECORDING_EMAIL:
+        required: false
+      CATCH_RECORDING_PASSWORD:
+        required: false
+      CATCH_RECORDING_API_TOKEN:
+        required: false
 jobs:
   ui-tests:
-    name: Catch Record UI Tests
+    name: Run UI Journey Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./catch-record-tests
+      - uses: ./run-journey-tests
         with:
           project: ui
           env: ${{ inputs.env }}
           browser: ${{ inputs.browser }}
+          email: ${{ secrets.CATCH_RECORDING_EMAIL }}
+          password: ${{ secrets.CATCH_RECORDING_PASSWORD }}
+
+  api-tests:
+    name: Run API Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./run-journey-tests
+        with:
+          project: api
+          env: ${{ inputs.env }}
+          api-token: ${{ secrets.CATCH_RECORDING_API_TOKEN }}
+          api-base-url: ${{ vars.CATCH_RECORDING_API_BASE_URL }}
