@@ -1,4 +1,4 @@
-import { type Locator } from '@playwright/test';
+import { expect, type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
 export class AddGearPage extends BasePage {
@@ -8,14 +8,16 @@ export class AddGearPage extends BasePage {
 
   public readonly gearInput = (): Locator => this.page.getByLabel('What gear did you use?');
 
-  public readonly gearResultsList = (): Locator => this.page.locator('ul.app-autocomplete__menu'); // Assuming typical govuk autocomplete structure, but we'll provide a robust selection method
+  public readonly gearResultsList = (): Locator => this.page.locator('#gear-options');
 
-  // Selects a gear from the autocomplete dropdown
-  async searchAndSelectGear(gearName: string) {
+  public readonly hooksHauledInput = (): Locator => this.page.getByLabel('Total hooks hauled');
+
+  public readonly hooksInWaterInput = (): Locator => this.page.getByLabel('Total hooks left in water');
+
+  public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
+
+  async searchAndSelectGear(gearName: string): Promise<void> {
+    await expect(this.gearResultsList().locator(`option[value="${gearName}"]`)).toHaveCount(1);
     await this.gearInput().fill(gearName);
-
-    // Sometimes autocomplete needs a moment, and we can just hit Enter if it's a datalist/combobox
-    // or we can select from the dropdown. We'll try hitting Enter first which usually works for both datalists and standard govuk autocompletes.
-    await this.page.keyboard.press('Enter');
   }
 }
