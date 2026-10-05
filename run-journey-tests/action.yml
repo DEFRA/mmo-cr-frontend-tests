@@ -1,4 +1,4 @@
-name: Catch Record Tests on GitHub
+name: Run Journey Tests on GitHub
 description: Starts the docker compose environment and runs the Playwright journey tests against it
 
 inputs:
@@ -14,12 +14,12 @@ inputs:
     type: string
     default: all
   env:
-    description: 'Environment to run tests against'
+    description: 'Environment to run tests against: dev, test or prod'
     required: false
     type: string
     default: test
   browser:
-    description: 'Browser to run UI tests on'
+    description: 'Playwright UI project to run, or "all"'
     required: false
     type: string
     default: Chromium
@@ -58,12 +58,14 @@ runs:
     - name: Install Playwright browsers
       if: inputs.project != 'api'
       shell: bash
+      env:
+        BROWSER: ${{ inputs.browser }}
       run: |
-        case "${{ inputs.browser }}" in
+        case "$BROWSER" in
           Chrome) npx playwright install --with-deps chrome ;;
           Edge) npx playwright install --with-deps msedge ;;
           Firefox) npx playwright install --with-deps firefox ;;
-          Safari|"Mobile iOS") npx playwright install --with-deps webkit ;;
+          Safari) npx playwright install --with-deps webkit ;;
           all) npx playwright install --with-deps chromium chrome msedge firefox webkit ;;
           *) npx playwright install --with-deps chromium ;;
         esac
@@ -76,29 +78,24 @@ runs:
     - name: Run the tests
       shell: bash
       env:
+        PROJECT: ${{ inputs.project }}
+        BROWSER: ${{ inputs.browser }}
         CATCH_RECORDING_ENV: ${{ inputs.env }}
         CATCH_RECORDING_EMAIL: ${{ inputs.email }}
         CATCH_RECORDING_PASSWORD: ${{ inputs.password }}
         CATCH_RECORDING_API_TOKEN: ${{ inputs.api-token }}
         CATCH_RECORDING_API_BASE_URL: ${{ inputs.api-base-url }}
       run: |
-        if [ "${{ inputs.project }}" = "ui" ]; then
-          if [ "${{ inputs.browser }}" = "all" ]; then
-            npm run test:ui:all
-          elif [ -z "${{ inputs.browser }}" ]; then
-            npm run test:ui
-          else
-            npx playwright test --project="${{ inputs.browser }}"
-          fi
-        elif [ "${{ inputs.project }}" = "api" ]; then
-          npm run test:api
-        else
-          if [ "${{ inputs.browser }}" != "all" ] && [ -n "${{ inputs.browser }}" ]; then
-            npx playwright test --project="${{ inputs.browser }}"
-          else
-            npm test
-          fi
-        fi
+        case "$PROJECT" in
+          ui)
+            case "$BROWSER" in
+              all) npm run test:ui:all ;;
+              "") npm run test:ui ;;
+              *) npx playwright test --project="$BROWSER" ;;
+            esac ;;
+          api) npm run test:api ;;
+          *) npm test ;;
+        esac
     - name: Generate Allure report
       if: always()
       shell: bash

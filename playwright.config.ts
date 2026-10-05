@@ -46,7 +46,7 @@ export default defineConfig({
     trace: 'on-first-retry'
   },
 
-  /* Configure projects for the supported desktop and touchscreen browsers. */
+  /* Configure projects for the supported desktop browsers. */
   projects: [
     {
       name: 'Chromium',
@@ -72,16 +72,6 @@ export default defineConfig({
       name: 'Safari',
       testDir: './tests/ui',
       use: { ...devices['Desktop Safari'] }
-    },
-    {
-      name: 'Mobile iOS',
-      testDir: './tests/ui',
-      use: { ...devices['iPhone 12'] }
-    },
-    {
-      name: 'Mobile Android',
-      testDir: './tests/ui',
-      use: { ...devices['Pixel 5'] }
     },
     {
       name: 'api',

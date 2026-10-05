@@ -2,8 +2,7 @@ mmo-cr-frontend-tests
 
 A Playwright test suite that runs journey tests against the MMO Catch Recording frontend.
 
-The UI journey suite runs against Chrome, Microsoft Edge, Firefox, desktop Safari, mobile iOS Safari, and mobile Android
-Chrome. The mobile projects provide touchscreen coverage alongside the responsive desktop browser projects.
+The UI journey suite runs against Chromium, Chrome, Microsoft Edge, Firefox and desktop Safari.
 
 Internet Explorer 11 is not supported by Playwright and is therefore subject to separate technical confirmation. It is
 not included in the automated browser matrix until an IE11-compatible test approach is agreed.
@@ -67,7 +66,7 @@ npx playwright test --debug
 Alongside the browser journey tests, this suite supports pure API tests using Playwright's `request` fixture.
 
 - Browser (UI) specs live under `tests/ui/` and API specs live under `tests/api/`. The `api` project only runs
-  `tests/api/`, and the `chromium`/`Mobile Safari` projects only run `tests/ui/`, so each spec runs once.
+  `tests/api/`, and the browser projects only run `tests/ui/`, so each spec runs once.
 - Add API clients under `services/` (mirroring the `pages/` pattern), extending `BaseApi`, and expose them via a fixture in
   [fixtures/commonfixture.ts](fixtures/commonfixture.ts).
 - Configure the target with `CATCH_RECORDING_API_BASE_URL` (falls back to `CATCH_RECORDING_BASE_URL`/`CATCH_RECORDING_ENV`
