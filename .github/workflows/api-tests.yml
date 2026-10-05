@@ -39,3 +39,4 @@ jobs:
           project: api
           env: ${{ inputs.env }}
           api-token: ${{ secrets.CATCH_RECORDING_API_TOKEN }}
+          api-base-url: ${{ vars.CATCH_RECORDING_API_BASE_URL }}

@@ -35,6 +35,10 @@ inputs:
     description: 'API token for API tests'
     required: false
     type: string
+  api-base-url:
+    description: 'Base URL for API tests (defaults to the frontend URL)'
+    required: false
+    type: string
 
 runs:
   using: 'composite'
@@ -76,6 +80,7 @@ runs:
         CATCH_RECORDING_EMAIL: ${{ inputs.email }}
         CATCH_RECORDING_PASSWORD: ${{ inputs.password }}
         CATCH_RECORDING_API_TOKEN: ${{ inputs.api-token }}
+        CATCH_RECORDING_API_BASE_URL: ${{ inputs.api-base-url }}
       run: |
         if [ "${{ inputs.project }}" = "ui" ]; then
           if [ "${{ inputs.browser }}" = "all" ]; then

@@ -18,7 +18,7 @@ const environmentName = process.env.CATCH_RECORDING_ENV ?? 'test';
 const baseURL = environmentUrls[environmentName as keyof typeof environmentUrls];
 
 /* Falls back to the frontend baseURL when the API is served from the same host. */
-const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL ?? baseURL;
+const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL || baseURL;
 const apiToken = process.env.CATCH_RECORDING_API_TOKEN;
 
 /**
