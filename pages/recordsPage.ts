@@ -11,7 +11,7 @@ export class RecordsPage extends BasePage {
   public readonly topMenu = {
     home: (): Locator => this.page.getByRole('link', { name: 'Home' }),
     yourAccount: (): Locator => this.page.getByRole('link', { name: 'Your account' }),
-    signOutButton: (): Locator => this.page.getByRole('button', { name: 'Sign out' }),
+    signOutButton: (): Locator => this.page.getByRole('button', { name: 'Sign out' })
   };
 
   public readonly recordsTable = (): Locator => this.page.getByTestId('app-records-table');

@@ -13,7 +13,7 @@ test.describe('Home page', () => {
     await expect(homePage.phaseBanner()).toBeVisible();
     await expect(homePage.warningText()).toBeVisible();
     await expect(homePage.warningText()).toContainText(
-      'You need to create a catch record within 24 hours of landing your catch.',
+      'You need to create a catch record within 24 hours of landing your catch.'
     );
 
     // Verify language switcher options
@@ -50,28 +50,28 @@ test.describe('Home page', () => {
       {
         link: homePage.guidanceContents.whatWeNeedFromYouLink(),
         heading: homePage.guidanceHeadings.whatWeNeedFromYouHeading(),
-        hash: '#what-we-need-from-you',
+        hash: '#what-we-need-from-you'
       },
       {
         link: homePage.guidanceContents.whenToCreateYourRecordLink(),
         heading: homePage.guidanceHeadings.whenToCreateYourRecordHeading(),
-        hash: '#when-to-create-your-record',
+        hash: '#when-to-create-your-record'
       },
       {
         link: homePage.guidanceContents.specialCasesLink(),
         heading: homePage.guidanceHeadings.specialCasesHeading(),
-        hash: '#special-cases-ices-areas',
+        hash: '#special-cases-ices-areas'
       },
       {
         link: homePage.guidanceContents.howToCreateARecordLink(),
         heading: homePage.guidanceHeadings.howToCreateARecordHeading(),
-        hash: '#how-to-create-a-record',
+        hash: '#how-to-create-a-record'
       },
       {
         link: homePage.guidanceContents.getHelpLink(),
         heading: homePage.guidanceHeadings.getHelpWithYourRecordHeading(),
-        hash: '#get-help-with-your-record',
-      },
+        hash: '#get-help-with-your-record'
+      }
     ];
 
     for (const testCase of testCases) {

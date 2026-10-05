@@ -4,7 +4,7 @@ import { BasePage } from './basePage';
 export class ConfirmSamePortPage extends BasePage {
   public readonly pageHeading = (): Locator =>
     this.page.getByRole('heading', {
-      name: /Was .* the port or the closest port you set off from and returned to\?/,
+      name: /Was .* the port or the closest port you set off from and returned to\?/
     });
 
   public readonly yesRadio = (): Locator => this.page.getByLabel('Yes');
