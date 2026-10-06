@@ -83,7 +83,7 @@ test.describe('Add favourite gear', () => {
   test('saves gear with measurements and makes it available for the next catch record', async ({
     page,
     addGearPage,
-    gearSelectionPage,
+    gearSelectionPage
   }) => {
     await openAddGear(page);
     await saveLongLine(addGearPage);
@@ -169,7 +169,7 @@ test.describe('Add favourite gear', () => {
     page,
     recordsPage,
     addGearPage,
-    gearSelectionPage,
+    gearSelectionPage
   }) => {
     await openAddGear(page);
     await saveLongLine(addGearPage);
