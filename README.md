@@ -61,6 +61,16 @@ npm test
 npx playwright test --debug
 ```
 
+### Add favourite gear UI tests
+
+Set `CATCH_RECORDING_EMAIL` and `CATCH_RECORDING_PASSWORD` for a test account (for example in the local `.env` file), then run:
+
+```bash
+npx playwright test tests/ui/addgear.spec.ts --project=Chromium
+```
+
+These tests cover catalogue search and selection, required and invalid hook measurements (including zero), saving one or more gears, keyboard-only entry, and availability when starting a new catch record in the same login session. They create favourites in the test environment; use a dedicated test account. The zero-measurement test currently fails because the test environment accepts zero. Native datalist suggestion popups cannot be inspected reliably by Playwright; the search test checks the available matching option and the invalid-gear submission error instead. Offline synchronisation, audit records, mobile-app behavior, and performance targets require separate integration/device checks and are not asserted by this web UI spec.
+
 ### API tests
 
 Alongside the browser journey tests, this suite supports pure API tests using Playwright's `request` fixture.
