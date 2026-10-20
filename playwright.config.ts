@@ -16,7 +16,9 @@ const environmentUrls = {
 
 const environmentName = process.env.CATCH_RECORDING_ENV ?? 'test';
 if (!(environmentName in environmentUrls) && !process.env.CATCH_RECORDING_BASE_URL) {
-  throw new Error(`Unknown CATCH_RECORDING_ENV "${environmentName}". Use one of: ${Object.keys(environmentUrls).join(', ')}`);
+  throw new Error(
+    `Unknown CATCH_RECORDING_ENV "${environmentName}". Use one of: ${Object.keys(environmentUrls).join(', ')}`
+  );
 }
 const baseURL =
   process.env.CATCH_RECORDING_BASE_URL || environmentUrls[environmentName as keyof typeof environmentUrls];
