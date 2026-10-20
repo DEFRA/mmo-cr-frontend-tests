@@ -15,7 +15,13 @@ const environmentUrls = {
 } as const;
 
 const environmentName = process.env.CATCH_RECORDING_ENV ?? 'test';
-const baseURL = environmentUrls[environmentName as keyof typeof environmentUrls];
+if (!(environmentName in environmentUrls) && !process.env.CATCH_RECORDING_BASE_URL) {
+  throw new Error(
+    `Unknown CATCH_RECORDING_ENV "${environmentName}". Use one of: ${Object.keys(environmentUrls).join(', ')}`
+  );
+}
+const baseURL =
+  process.env.CATCH_RECORDING_BASE_URL || environmentUrls[environmentName as keyof typeof environmentUrls];
 
 /* Falls back to the frontend baseURL when the API is served from the same host. */
 const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL || baseURL;

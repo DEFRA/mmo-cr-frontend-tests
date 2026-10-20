@@ -14,10 +14,17 @@ export class AddGearPage extends BasePage {
 
   public readonly hooksInWaterInput = (): Locator => this.page.getByLabel('Total hooks left in water');
 
+  public readonly gearDimensionInput = (): Locator => this.page.getByLabel(/Gear dimension by number/);
+
   public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
 
+  public readonly gearOption = (gearName: string): Locator =>
+    this.page.getByRole('option', { name: gearName, exact: true });
+
   async searchAndSelectGear(gearName: string): Promise<void> {
-    await expect(this.gearResultsList().locator(`option[value="${gearName}"]`)).toHaveCount(1);
-    await this.gearInput().fill(gearName);
+    await this.gearInput().fill('');
+    await this.gearInput().pressSequentially(gearName);
+    await this.gearOption(gearName).click();
+    await expect(this.gearInput()).toHaveValue(gearName);
   }
 }
