@@ -1,41 +1,11 @@
-/*
- * Run CAR-300 tests (defaults to test env; set CATCH_RECORDING_ENV=dev|test|prod to switch):
- *   npx playwright test tests/ui/addgear.spec.ts --project=Chromium --grep "CAR-300"
- *   CATCH_RECORDING_ENV=dev npx playwright test tests/ui/addgear.spec.ts --project=Chromium --grep "CAR-300"
- *   npx playwright test tests/ui/addgear.spec.ts --project=Chromium --grep "CAR-300" --headed
- *   npx playwright test tests/ui/addgear.spec.ts --grep "CAR-300" --ui
- *   npx playwright test tests/ui/addgear.spec.ts --project=Chromium --grep "CAR-300" --trace=on && npx playwright show-report
- * Run the whole spec:
- *   npx playwright test tests/ui/addgear.spec.ts --project=Chromium
- */
 import { type Page } from '@playwright/test';
 import { expect, test } from '../../fixtures/commonfixture';
-import { type SigninPage } from '../../pages/sign-in.page';
 import { type AddGearPage } from '../../pages/addGearPage';
 import { type AccountPage } from '../../pages/accountPage';
 import { type RemoveGearPage } from '../../pages/removeGearPage';
+import { NavigationFlow } from './helpers/navigationFlow';
 
 const accountPath = '/account';
-
-async function signIn(signInPage: SigninPage): Promise<void> {
-  // Sign-in is currently mocked, so blank credentials are accepted
-  const email = process.env.CATCH_RECORDING_EMAIL ?? '';
-  const password = process.env.CATCH_RECORDING_PASSWORD ?? '';
-
-  await signInPage.goto('/sign-in');
-  await signInPage.login(email, password);
-  await expect(signInPage.page).toHaveURL(/\/records$/);
-}
-
-async function openAddGear(page: Page): Promise<void> {
-  await page.goto(accountPath);
-  await page.getByRole('link', { name: 'Add gear gear' }).click();
-  await expect(page).toHaveURL(/\/add-gear\?return=/);
-}
-
-function accountGear(page: Page) {
-  return page.getByText('Gear onboard', { exact: true }).locator('..').locator('.govuk-summary-list__value');
-}
 
 async function findGear(
   addGearPage: AddGearPage,
@@ -47,32 +17,28 @@ async function findGear(
   return gearName;
 }
 
-function measurementInputs(page: Page) {
-  return page.locator('main input:visible');
-}
-
 async function selectLineGear(addGearPage: AddGearPage): Promise<string> {
   const gearName = await findGear(addGearPage, 'lo', (name) => /line/i.test(name));
   await addGearPage.searchAndSelectGear(gearName);
   await addGearPage.clickSaveAndContinue();
-  await expect(addGearPage.page.getByRole('heading', { name: /Enter the measurements for/i })).toBeVisible();
+  await expect(addGearPage.measurementsHeading()).toBeVisible();
   return gearName;
 }
 
 async function saveLineGear(addGearPage: AddGearPage): Promise<string> {
   const gearName = await selectLineGear(addGearPage);
-  for (const input of await measurementInputs(addGearPage.page).all()) {
+  for (const input of await addGearPage.measurementInputs().all()) {
     await input.fill('1');
   }
   await addGearPage.clickSaveAndContinue();
-  await expect(addGearPage.page).toHaveURL(/\/account$/);
+  await addGearPage.expectUrl(/\/account$/);
   return gearName;
 }
 
 async function selectLongLine(addGearPage: AddGearPage): Promise<void> {
   await addGearPage.searchAndSelectGear('Long line');
   await addGearPage.clickSaveAndContinue();
-  await expect(addGearPage.page.getByRole('heading', { name: 'Enter the measurements for long line' })).toBeVisible();
+  await expect(addGearPage.measurementsHeading('long line')).toBeVisible();
 }
 
 async function saveLongLine(addGearPage: AddGearPage, hooksHauled = '12', hooksInWater = '3'): Promise<void> {
@@ -80,16 +46,16 @@ async function saveLongLine(addGearPage: AddGearPage, hooksHauled = '12', hooksI
   await addGearPage.hooksHauledInput().fill(hooksHauled);
   await addGearPage.hooksInWaterInput().fill(hooksInWater);
   await addGearPage.clickSaveAndContinue();
-  await expect(addGearPage.page).toHaveURL(/\/account$/);
+  await addGearPage.expectUrl(/\/account$/);
 }
 
 async function savePots(addGearPage: AddGearPage, gearDimension: string): Promise<void> {
   await addGearPage.searchAndSelectGear('Pots');
   await addGearPage.clickSaveAndContinue();
-  await expect(addGearPage.page.getByRole('heading', { name: 'Enter the measurements for pots' })).toBeVisible();
+  await expect(addGearPage.measurementsHeading('pots')).toBeVisible();
   await addGearPage.gearDimensionInput().fill(gearDimension);
   await addGearPage.clickSaveAndContinue();
-  await expect(addGearPage.page).toHaveURL(/\/account$/);
+  await addGearPage.expectUrl(/\/account$/);
 }
 
 async function removeSavedGear(
@@ -106,7 +72,7 @@ async function removeSavedGear(
   await accountPage.clickRemoveGear();
   await removeGearPage.selectGearToRemove(...present);
   await removeGearPage.clickContinue();
-  await expect(page).toHaveURL(/\/account$/);
+  await accountPage.expectUrl(/\/account$/);
 }
 
 function occurrences(text: string, value: string): number {
@@ -118,24 +84,28 @@ test.describe('Add favourite gear', () => {
   test.describe.configure({ mode: 'serial' });
 
   test.beforeEach(async ({ page, signInPage, accountPage, removeGearPage }) => {
-    await signIn(signInPage);
+    await NavigationFlow.signIn(signInPage);
     await removeSavedGear(page, accountPage, removeGearPage, ['Long line', 'Set net', 'Pots']);
   });
 
-  test('shows a matching gear option and the required fields after selection', async ({ page, addGearPage }) => {
-    await openAddGear(page);
+  test('shows a matching gear option and the required fields after selection', async ({ addGearPage, accountPage }) => {
+    await NavigationFlow.openAddGear(accountPage);
     const gearName = await findGear(addGearPage, 'lo', (name) => /line/i.test(name));
 
     await addGearPage.searchAndSelectGear(gearName);
     await expect(addGearPage.gearInput()).toHaveValue(gearName);
     await addGearPage.clickSaveAndContinue();
 
-    await expect(page.getByRole('heading', { name: /Enter the measurements for/i })).toBeVisible();
-    await expect(measurementInputs(page).first()).toBeVisible();
+    await expect(addGearPage.measurementsHeading()).toBeVisible();
+    await expect(addGearPage.measurementInputs().first()).toBeVisible();
   });
 
-  test('searches approved gear and rejects a value outside the catalogue', async ({ page, addGearPage }) => {
-    await openAddGear(page);
+  test('searches approved gear and rejects a value outside the catalogue', async ({
+    page,
+    addGearPage,
+    accountPage
+  }) => {
+    await NavigationFlow.openAddGear(accountPage);
     await expect(addGearPage.pageHeading()).toBeVisible();
     const [firstGear] = await addGearPage.searchGearOptions('po');
     expect(firstGear).toBeTruthy();
@@ -148,8 +118,8 @@ test.describe('Add favourite gear', () => {
     await expect(page).toHaveURL(/\/add-gear/);
   });
 
-  test('requires a gear type before continuing', async ({ page, addGearPage }) => {
-    await openAddGear(page);
+  test('requires a gear type before continuing', async ({ page, addGearPage, accountPage }) => {
+    await NavigationFlow.openAddGear(accountPage);
     await addGearPage.clickSaveAndContinue();
 
     await expect(addGearPage.errorSummary()).toContainText('Select the gear you want to add');
@@ -159,66 +129,63 @@ test.describe('Add favourite gear', () => {
   test('saves gear with measurements and makes it available for the next catch record', async ({
     page,
     addGearPage,
+    accountPage,
     gearSelectionPage
   }) => {
-    await openAddGear(page);
+    await NavigationFlow.openAddGear(accountPage);
     const gearName = await saveLineGear(addGearPage);
 
-    await expect(accountGear(page)).toContainText(gearName);
+    await expect(accountPage.gearOnboardValue()).toContainText(gearName);
     await page.goto('/gear-selection');
     await expect(gearSelectionPage.gearCheckbox(gearName)).toBeVisible();
   });
 
-  test('CAR-300 shows saved pots measurement under the favourite gear on the account page', async ({
-    page,
+  test('shows saved pots measurement under the favourite gear on the account page', async ({
     addGearPage,
     accountPage
   }) => {
-    await openAddGear(page);
+    await NavigationFlow.openAddGear(accountPage);
     await savePots(addGearPage, '45');
 
     await expect(accountPage.gearOnboardValue()).toContainText('Pots');
     await expect(accountPage.gearOnboardValue()).toContainText(/Gear dimension by number.*: 45/);
   });
 
-  test('CAR-300 does not offer a gear that is already a favourite in the search list', async ({
-    page,
-    addGearPage
-  }) => {
-    await openAddGear(page);
+  test('does not offer a gear that is already a favourite in the search list', async ({ addGearPage, accountPage }) => {
+    await NavigationFlow.openAddGear(accountPage);
     await savePots(addGearPage, '45');
 
-    await openAddGear(page);
+    await NavigationFlow.openAddGear(accountPage);
     await addGearPage.gearInput().pressSequentially('Pot');
     await expect(addGearPage.gearOption('Pots')).toHaveCount(0);
   });
 
-  test('CAR-300 blocks adding a gear that is already a favourite', async ({ page, addGearPage, accountPage }) => {
-    await openAddGear(page);
+  test('blocks adding a gear that is already a favourite', async ({ page, addGearPage, accountPage }) => {
+    await NavigationFlow.openAddGear(accountPage);
     await savePots(addGearPage, '45');
 
-    await openAddGear(page);
+    await NavigationFlow.openAddGear(accountPage);
     await addGearPage.gearInput().fill('Pots');
     await addGearPage.clickSaveAndContinue();
 
     await expect(page).toHaveURL(/\/add-gear/);
     await expect(addGearPage.errorSummary()).toContainText('Pots has already been added to your gear');
-    await expect(page.locator('.govuk-error-message')).toContainText('Pots has already been added to your gear');
+    await expect(addGearPage.errorMessage()).toContainText('Pots has already been added to your gear');
 
     await page.goto(accountPath);
     expect(occurrences(await accountPage.getGearOnboardText(), 'Pots')).toBe(1);
     await expect(accountPage.gearOnboardValue()).toContainText(/: 45/);
   });
 
-  test('CAR-300 lists a duplicate-attempted gear only once on the remove gear page', async ({
+  test('lists a duplicate-attempted gear only once on the remove gear page', async ({
     page,
     addGearPage,
     accountPage,
     removeGearPage
   }) => {
-    await openAddGear(page);
+    await NavigationFlow.openAddGear(accountPage);
     await savePots(addGearPage, '45');
-    await openAddGear(page);
+    await NavigationFlow.openAddGear(accountPage);
     await addGearPage.gearInput().fill('Pots');
     await addGearPage.clickSaveAndContinue();
 
@@ -227,29 +194,29 @@ test.describe('Add favourite gear', () => {
     await expect(removeGearPage.gearCheckbox('Pots')).toHaveCount(1);
   });
 
-  test('keeps multiple different favourite gears', async ({ page, addGearPage }) => {
-    await openAddGear(page);
+  test('keeps multiple different favourite gears', async ({ addGearPage, accountPage }) => {
+    await NavigationFlow.openAddGear(accountPage);
     const lineGear = await saveLineGear(addGearPage);
 
-    await openAddGear(page);
+    await NavigationFlow.openAddGear(accountPage);
     const secondGear = await findGear(addGearPage, 'po', (name) => name !== lineGear);
     await addGearPage.searchAndSelectGear(secondGear);
     await addGearPage.clickSaveAndContinue();
-    const measurementsHeading = page.getByRole('heading', { name: /Enter the measurements for/i });
+    const measurementsHeading = addGearPage.measurementsHeading();
     if (await measurementsHeading.isVisible()) {
-      for (const input of await measurementInputs(page).all()) {
+      for (const input of await addGearPage.measurementInputs().all()) {
         await input.fill('1');
       }
       await addGearPage.clickSaveAndContinue();
     }
 
-    await expect(page).toHaveURL(/\/account$/);
-    await expect(accountGear(page)).toContainText(lineGear);
-    await expect(accountGear(page)).toContainText(secondGear);
+    await accountPage.expectUrl(/\/account$/);
+    await expect(accountPage.gearOnboardValue()).toContainText(lineGear);
+    await expect(accountPage.gearOnboardValue()).toContainText(secondGear);
   });
 
-  test('does not save gear when required measurements are missing', async ({ page, addGearPage }) => {
-    await openAddGear(page);
+  test('does not save gear when required measurements are missing', async ({ page, addGearPage, accountPage }) => {
+    await NavigationFlow.openAddGear(accountPage);
     await selectLineGear(addGearPage);
     await addGearPage.clickSaveAndContinue();
 
@@ -257,10 +224,10 @@ test.describe('Add favourite gear', () => {
     await expect(page).toHaveURL(/\/add-gear/);
   });
 
-  test('rejects fractional and negative measurements', async ({ page, addGearPage }) => {
-    await openAddGear(page);
+  test('rejects fractional and negative measurements', async ({ page, addGearPage, accountPage }) => {
+    await NavigationFlow.openAddGear(accountPage);
     await selectLineGear(addGearPage);
-    const input = measurementInputs(page).first();
+    const input = addGearPage.measurementInputs().first();
     await input.fill('1.5');
     await addGearPage.clickSaveAndContinue();
 
@@ -273,10 +240,10 @@ test.describe('Add favourite gear', () => {
     await expect(page).toHaveURL(/\/add-gear/);
   });
 
-  test('rejects zero measurements', async ({ page, addGearPage }) => {
-    await openAddGear(page);
+  test('rejects zero measurements', async ({ page, addGearPage, accountPage }) => {
+    await NavigationFlow.openAddGear(accountPage);
     await selectLineGear(addGearPage);
-    await measurementInputs(page).first().fill('0');
+    await addGearPage.measurementInputs().first().fill('0');
     await addGearPage.clickSaveAndContinue();
 
     await expect(page).toHaveURL(/\/add-gear/);
@@ -287,17 +254,18 @@ test.describe('Add favourite gear', () => {
     page,
     recordsPage,
     addGearPage,
+    accountPage,
     gearSelectionPage,
     selectVesselPage
   }) => {
-    await openAddGear(page);
+    await NavigationFlow.openAddGear(accountPage);
     const gearName = await saveLineGear(addGearPage);
 
-    await expect(accountGear(page)).toContainText(gearName);
+    await expect(accountPage.gearOnboardValue()).toContainText(gearName);
     await page.goto('/records');
     await recordsPage.createNewRecordButton().click();
     await expect(selectVesselPage.pageHeading()).toBeVisible();
-    await selectVesselPage.page.getByRole('radio').first().check();
+    await selectVesselPage.firstVesselRadio().check();
     await selectVesselPage.clickSaveAndContinue();
     await expect(page).toHaveURL(/\/trip-date$/);
     await page.goto('/gear-selection');
@@ -305,8 +273,8 @@ test.describe('Add favourite gear', () => {
     await expect(gearSelectionPage.gearCheckbox(gearName)).toBeVisible();
   });
 
-  test('can save selected gear using the keyboard', async ({ page, addGearPage }) => {
-    await openAddGear(page);
+  test('can save selected gear using the keyboard', async ({ page, addGearPage, accountPage }) => {
+    await NavigationFlow.openAddGear(accountPage);
     const gearName = await findGear(addGearPage, 'lo', (name) => /line/i.test(name));
     await addGearPage.searchAndSelectGear(gearName);
 
@@ -321,8 +289,8 @@ test.describe('Add favourite gear', () => {
     await expect(saveAndContinueButton).toBeFocused();
     await page.keyboard.press('Enter');
 
-    await expect(page.getByRole('heading', { name: /Enter the measurements for/i })).toBeVisible();
-    for (const input of await measurementInputs(page).all()) {
+    await expect(addGearPage.measurementsHeading()).toBeVisible();
+    for (const input of await addGearPage.measurementInputs().all()) {
       for (let tab = 0; tab < 20 && !(await input.evaluate((element) => element === document.activeElement)); tab++) {
         await page.keyboard.press('Tab');
       }
@@ -333,7 +301,7 @@ test.describe('Add favourite gear', () => {
     await expect(saveAndContinueButton).toBeFocused();
     await page.keyboard.press('Enter');
 
-    await expect(page).toHaveURL(/\/account$/);
-    await expect(accountGear(page)).toContainText(gearName);
+    await accountPage.expectUrl(/\/account$/);
+    await expect(accountPage.gearOnboardValue()).toContainText(gearName);
   });
 });

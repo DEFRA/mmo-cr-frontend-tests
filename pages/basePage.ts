@@ -30,7 +30,16 @@ export abstract class BasePage {
     accessibilityStatementLink: (): Locator => this.page.getByRole('link', { name: 'Accessibility Statement' })
   };
   async goto(url: string) {
-    await this.page.goto(url, { waitUntil: 'load' });
+    try {
+      await this.page.goto(url, { waitUntil: 'load' });
+    } catch (error) {
+      if (!(error instanceof Error) || !error.message.includes('ERR_NAME_NOT_RESOLVED')) {
+        throw error;
+      }
+
+      await this.page.waitForTimeout(10_000);
+      await this.page.goto(url, { waitUntil: 'load' });
+    }
   }
 
   async acceptCookies() {
@@ -49,7 +58,7 @@ export abstract class BasePage {
     await expect(this.page).toHaveTitle(title);
   }
 
-  async expectUrl(url: string) {
+  async expectUrl(url: string | RegExp) {
     await expect(this.page).toHaveURL(url);
   }
 }

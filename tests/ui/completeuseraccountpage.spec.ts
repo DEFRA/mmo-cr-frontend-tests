@@ -1,31 +1,5 @@
 import { expect, test } from '../../fixtures/commonfixture';
-import { SigninPage } from '../../pages/sign-in.page';
-
-async function signIn(signInPage: SigninPage): Promise<void> {
-  const email = process.env.CATCH_RECORDING_EMAIL;
-  const password = process.env.CATCH_RECORDING_PASSWORD;
-
-  if (!email || !password) {
-    throw new Error('CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for account page UI tests');
-  }
-
-  await signInPage.goto('/sign-in');
-  await signInPage.login(email, password);
-  await expect(signInPage.page).toHaveURL(/\/records$/);
-}
-
-async function openAccount(page: import('@playwright/test').Page): Promise<void> {
-  await page.goto('/account');
-  await expect(page).toHaveURL(/\/account$/);
-  await expect(page.getByRole('heading', { name: 'Your account' })).toBeVisible();
-}
-
-function accountSummaryValue(page: import('@playwright/test').Page, rowName: string) {
-  return page
-    .locator('.govuk-summary-list__row')
-    .filter({ has: page.locator('.govuk-summary-list__key', { hasText: rowName }) })
-    .locator('.govuk-summary-list__value');
-}
+import { NavigationFlow } from './helpers/navigationFlow';
 
 async function ensureGearAdded(
   accountPage: import('../../pages/accountPage').AccountPage,
@@ -38,7 +12,7 @@ async function ensureGearAdded(
   await accountPage.clickAddGear();
   await saveGearFromAddPage(addGearPage, gearName);
 
-  await expect(accountPage.page).toHaveURL(/\/account$/);
+  await accountPage.expectUrl(/\/account$/);
   await expect(accountPage.gearOnboardValue()).toContainText(gearName);
 }
 
@@ -62,8 +36,8 @@ async function saveGearFromAddPage(
   await addGearPage.searchAndSelectGear(gearName);
   await addGearPage.clickSaveAndContinue();
 
-  if (await addGearPage.page.getByRole('heading', { name: /Enter the measurements for/i }).isVisible()) {
-    for (const input of await addGearPage.page.locator('main input:visible').all()) {
+  if (await addGearPage.measurementsHeading().isVisible()) {
+    for (const input of await addGearPage.measurementInputs().all()) {
       await input.fill('1');
     }
     await addGearPage.clickSaveAndContinue();
@@ -84,7 +58,7 @@ async function selectGearWithMeasurements(addGearPage: import('../../pages/addGe
   const gearName = await findGear(addGearPage, 'lo', (name) => /line/i.test(name));
   await addGearPage.searchAndSelectGear(gearName);
   await addGearPage.clickSaveAndContinue();
-  await expect(addGearPage.page.getByRole('heading', { name: /Enter the measurements for/i })).toBeVisible();
+  await expect(addGearPage.measurementsHeading()).toBeVisible();
   return gearName;
 }
 
@@ -98,36 +72,34 @@ async function ensureSpeciesAdded(
 
   await accountPage.addSpeciesLink().click();
   await expect(accountPage.page).toHaveURL(/\/add-species\?return=\/account$/);
-  await addSpeciesPage.speciesInput().fill(speciesName);
-  await accountPage.page.keyboard.press('Enter');
-  await expect(accountPage.page).toHaveURL(/\/account$/);
+  await addSpeciesPage.searchAndSelectSpecies(speciesName);
+  await accountPage.expectUrl(/\/account$/);
 }
 
 async function addPortFromAccount(
   page: import('@playwright/test').Page,
   accountPage: import('../../pages/accountPage').AccountPage,
+  addPortPage: import('../../pages/addPortPage').AddPortPage,
   portName: string
 ): Promise<string> {
   await accountPage.addPortLink().click();
   await expect(page).toHaveURL(/\/add-port/);
-
-  await page.getByLabel('Enter the port or closest port you set off from').fill(portName);
-  const portOption = page.locator('#port-results li').filter({ hasText: portName }).getByRole('option');
-  await expect(portOption).toBeVisible();
-  await portOption.click();
-  await page.getByRole('button', { name: 'Save and continue' }).click();
-  await expect(page).toHaveURL(/\/account$/);
+  await addPortPage.searchAndSelectPort(portName);
+  await addPortPage.clickSaveAndContinue();
+  await accountPage.expectUrl(/\/account$/);
   return portName;
 }
 
 test.describe('Complete user account page', () => {
-  test.beforeEach(async ({ signInPage, page }) => {
-    await signIn(signInPage);
-    await openAccount(page);
+  test.beforeEach(async ({ signInPage, accountPage }) => {
+    await NavigationFlow.signInAndOpenAccount(signInPage, accountPage, {
+      requiredCredentialsMessage:
+        'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for account page UI tests'
+    });
   });
 
-  test('TS01 - Verify Account Page Loads Successfully', async ({ page, accountPage }) => {
-    await expect(page.getByRole('heading', { name: 'Your account' })).toBeVisible();
+  test('Verify Account Page Loads Successfully', async ({ accountPage }) => {
+    await expect(accountPage.pageHeading()).toBeVisible();
     await expect(accountPage.personalDetailsHeading()).toBeVisible();
     await expect(accountPage.vesselDetailsHeading()).toBeVisible();
     await expect(accountPage.summaryRow('Ports used')).toBeVisible();
@@ -135,50 +107,50 @@ test.describe('Complete user account page', () => {
     await expect(accountPage.summaryRow('Species caught')).toBeVisible();
   });
 
-  test('TS02 - Verify Personal Details are Displayed', async ({ page, accountPage }) => {
+  test('Verify Personal Details are Displayed', async ({ accountPage }) => {
     await expect(accountPage.personalDetailsHeading()).toBeVisible();
-    await expect(page.locator('.govuk-summary-list__key', { hasText: 'Email address' })).toBeVisible();
-    await expect(page.locator('.govuk-summary-list__key', { hasText: 'Password' })).toBeVisible();
-    await expect(page.getByText('Address', { exact: true })).toBeVisible();
+    await expect(accountPage.summaryRow('Email address')).toBeVisible();
+    await expect(accountPage.summaryRow('Password')).toBeVisible();
+    await expect(accountPage.summaryRow('Address')).toBeVisible();
   });
 
-  test('TS03 - Verify Vessel Details are Displayed', async ({ accountPage }) => {
+  test('Verify Vessel Details are Displayed', async ({ accountPage }) => {
     await expect(accountPage.vesselDetailsHeading()).toBeVisible();
     await expect(accountPage.vesselNameHeading()).toBeVisible();
   });
 
-  test('TS04 - Verify "Ports Used" Section Presence', async ({ accountPage }) => {
+  test('Verify "Ports Used" Section Presence', async ({ accountPage }) => {
     await expect(accountPage.summaryRow('Ports used')).toBeVisible();
     await expect(accountPage.addPortLink()).toBeVisible();
     await expect(accountPage.removePortLink()).toBeVisible();
   });
 
-  test('TS05 - Verify "Gear Onboard" Section Presence', async ({ accountPage }) => {
+  test('Verify "Gear Onboard" Section Presence', async ({ accountPage }) => {
     await expect(accountPage.summaryRow('Gear onboard')).toBeVisible();
     await expect(accountPage.addGearLink()).toBeVisible();
     await expect(accountPage.removeGearLink()).toBeVisible();
   });
 
-  test('TS06 - Verify "Species Caught" Section Presence', async ({ accountPage }) => {
+  test('Verify "Species Caught" Section Presence', async ({ accountPage }) => {
     await expect(accountPage.summaryRow('Species caught')).toBeVisible();
     await expect(accountPage.addSpeciesLink()).toBeVisible();
     await expect(accountPage.removeSpeciesLink()).toBeVisible();
   });
 
-  test('TS07 - Verify Navigation to Add Gear Screen', async ({ accountPage, addGearPage }) => {
+  test('Verify Navigation to Add Gear Screen', async ({ accountPage, addGearPage }) => {
     await accountPage.clickAddGear();
     await expect(addGearPage.pageHeading()).toBeVisible();
     await expect(addGearPage.gearInput()).toBeVisible();
   });
 
-  test('TS08 - Verify Adding a Single Gear Item', async ({ page, accountPage, addGearPage }) => {
+  test('Verify Adding a Single Gear Item', async ({ accountPage, addGearPage }) => {
     const gearName = 'Pots';
     await ensureGearAdded(accountPage, addGearPage, gearName);
-    await expect(page.getByRole('heading', { name: 'Your account' })).toBeVisible();
+    await expect(accountPage.pageHeading()).toBeVisible();
     await expect(accountPage.gearOnboardValue()).toContainText(gearName);
   });
 
-  test('TS09 - Verify Multiple Gear Items Can Be Added', async ({ accountPage, addGearPage }) => {
+  test('Verify Multiple Gear Items Can Be Added', async ({ accountPage, addGearPage }) => {
     const firstGear = 'Pots';
     await ensureGearAdded(accountPage, addGearPage, firstGear);
     await accountPage.clickAddGear();
@@ -188,21 +160,21 @@ test.describe('Complete user account page', () => {
     await expect(accountPage.gearOnboardValue()).toContainText(secondGear);
   });
 
-  test('TS10 - Verify Recently Added Gear Appears Without Manual Refresh', async ({ accountPage, addGearPage }) => {
+  test('Verify Recently Added Gear Appears Without Manual Refresh', async ({ accountPage, addGearPage }) => {
     const gearName = 'Pots';
     await ensureGearAdded(accountPage, addGearPage, gearName);
     await expect(accountPage.gearOnboardValue()).toContainText(gearName);
   });
 
-  test('TS11 - Verify Cancel Action in Add Gear Flow', async ({ page, accountPage, addGearPage }) => {
+  test('Verify Cancel Action in Add Gear Flow', async ({ accountPage, addGearPage }) => {
     await accountPage.clickAddGear();
     await expect(addGearPage.pageHeading()).toBeVisible();
     await accountPage.page.goBack();
-    await expect(page).toHaveURL(/\/account$/);
+    await accountPage.expectUrl(/\/account$/);
     await expect(accountPage.pageHeading()).toBeVisible();
   });
 
-  test('TS12 - Verify Duplicate Gear Handling', async ({ accountPage, addGearPage }) => {
+  test('Verify Duplicate Gear Handling', async ({ accountPage, addGearPage }) => {
     const gearName = 'Pots';
     await ensureGearAdded(accountPage, addGearPage, gearName);
     await accountPage.clickAddGear();
@@ -213,12 +185,12 @@ test.describe('Complete user account page', () => {
     await expect(accountPage.page).toHaveURL(/\/add-gear\?return=/);
   });
 
-  test('TS13 - Verify Navigation to Remove Gear Screen', async ({ accountPage, removeGearPage }) => {
+  test('Verify Navigation to Remove Gear Screen', async ({ accountPage, removeGearPage }) => {
     await accountPage.clickRemoveGear();
     await expect(removeGearPage.pageHeading()).toBeVisible();
   });
 
-  test('TS15 - Verify Removal of Gear Item', async ({ page, accountPage, addGearPage, removeGearPage }) => {
+  test('Verify Removal of Gear Item', async ({ accountPage, addGearPage, removeGearPage }) => {
     const gearName = 'Pots';
     await ensureGearAdded(accountPage, addGearPage, gearName);
 
@@ -226,53 +198,53 @@ test.describe('Complete user account page', () => {
     await removeGearPage.selectGearToRemove(gearName);
     await removeGearPage.clickContinue();
 
-    await expect(page).toHaveURL(/\/account$/);
+    await accountPage.expectUrl(/\/account$/);
     await expect(accountPage.gearOnboardValue()).not.toContainText(gearName);
   });
 
-  test('TS19 - Verify Navigation to Add Port Screen', async ({ page, accountPage }) => {
+  test('Verify Navigation to Add Port Screen', async ({ page, accountPage }) => {
     await accountPage.addPortLink().click();
     await expect(page).toHaveURL(/\/add-port/);
   });
 
-  test('TS20 - Verify Adding a Port', async ({ page, accountPage }) => {
-    const portName = await addPortFromAccount(page, accountPage, 'Plymouth');
+  test('Verify Adding a Port', async ({ page, accountPage, addPortPage }) => {
+    const portName = await addPortFromAccount(page, accountPage, addPortPage, 'Plymouth');
     await expect(accountPage.portsUsedValue()).toContainText(portName);
   });
 
-  test('TS21 - Verify Multiple Ports Can Be Added', async ({ page, accountPage }) => {
-    const first = await addPortFromAccount(page, accountPage, 'Plymouth');
-    const second = await addPortFromAccount(page, accountPage, 'Lowestoft');
+  test('Verify Multiple Ports Can Be Added', async ({ page, accountPage, addPortPage }) => {
+    const first = await addPortFromAccount(page, accountPage, addPortPage, 'Plymouth');
+    const second = await addPortFromAccount(page, accountPage, addPortPage, 'Lowestoft');
     await expect(accountPage.portsUsedValue()).toContainText(first);
     await expect(accountPage.portsUsedValue()).toContainText(second);
   });
 
-  test('TS23 - Verify Cancel During Add Port Flow', async ({ page, accountPage }) => {
+  test('Verify Cancel During Add Port Flow', async ({ page, accountPage }) => {
     await accountPage.addPortLink().click();
     await expect(page).toHaveURL(/\/add-port/);
     await page.goBack();
-    await expect(page).toHaveURL(/\/account$/);
+    await accountPage.expectUrl(/\/account$/);
   });
 
-  test('TS24 - Verify Port Removal Screen Opens', async ({ page, accountPage }) => {
+  test('Verify Port Removal Screen Opens', async ({ page, accountPage }) => {
     await accountPage.removePortLink().click();
     await expect(page).toHaveURL(/\/remove-port/);
   });
 
-  test('TS28 - Verify Navigation to Add Species Screen', async ({ page, accountPage, addSpeciesPage }) => {
+  test('Verify Navigation to Add Species Screen', async ({ page, accountPage, addSpeciesPage }) => {
     await accountPage.addSpeciesLink().click();
     await expect(page).toHaveURL(/\/add-species\?return=\/account$/);
     await expect(addSpeciesPage.speciesInput()).toBeVisible();
   });
 
-  test('TS29 - Verify Adding a Species', async ({ page, accountPage, addSpeciesPage }) => {
+  test('Verify Adding a Species', async ({ accountPage, addSpeciesPage }) => {
     const speciesName = 'Atlantic cod (COD)';
     await ensureSpeciesAdded(accountPage, addSpeciesPage, speciesName);
-    await expect(page).toHaveURL(/\/account$/);
+    await accountPage.expectUrl(/\/account$/);
     await expect(accountPage.speciesCaughtValue()).toContainText(speciesName);
   });
 
-  test('TS30 - Verify Multiple Species Addition', async ({ accountPage, addSpeciesPage }) => {
+  test('Verify Multiple Species Addition', async ({ accountPage, addSpeciesPage }) => {
     const speciesNames = ['Atlantic cod (COD)', 'Atlantic mackerel (MAC)'];
     for (const species of speciesNames) {
       await ensureSpeciesAdded(accountPage, addSpeciesPage, species);
@@ -282,85 +254,85 @@ test.describe('Complete user account page', () => {
     }
   });
 
-  test('TS32 - Verify Cancel During Add Species Flow', async ({ page, accountPage, addSpeciesPage }) => {
+  test('Verify Cancel During Add Species Flow', async ({ page, accountPage, addSpeciesPage }) => {
     await accountPage.addSpeciesLink().click();
     await expect(page).toHaveURL(/\/add-species\?return=\/account$/);
     await expect(addSpeciesPage.speciesInput()).toBeVisible();
     await page.goBack();
-    await expect(page).toHaveURL(/\/account$/);
+    await accountPage.expectUrl(/\/account$/);
   });
 
-  test('TS33 - Verify Navigation to Remove Species Screen', async ({ page, accountPage, removeSpeciesPage }) => {
+  test('Verify Navigation to Remove Species Screen', async ({ page, accountPage, removeSpeciesPage }) => {
     await accountPage.removeSpeciesLink().click();
     await expect(page).toHaveURL(/\/remove-species\?return=\/account$/);
     await expect(removeSpeciesPage.pageHeading()).toBeVisible();
   });
 
-  test('TS34 - Verify Removing Species', async ({ page, accountPage, addSpeciesPage, removeSpeciesPage }) => {
+  test('Verify Removing Species', async ({ accountPage, addSpeciesPage, removeSpeciesPage }) => {
     const speciesName = 'Atlantic cod (COD)';
     await ensureSpeciesAdded(accountPage, addSpeciesPage, speciesName);
 
     await accountPage.removeSpeciesLink().click();
     await removeSpeciesPage.selectSpeciesToRemove(speciesName);
-    await page.getByRole('button', { name: 'Continue' }).click();
+    await removeSpeciesPage.clickContinue();
 
-    await expect(page).toHaveURL(/\/account$/);
+    await accountPage.expectUrl(/\/account$/);
     await expect(accountPage.speciesCaughtValue()).not.toContainText(speciesName);
   });
 
-  test('TS37 - Verify Return to Account Page After Add Gear', async ({ page, accountPage, addGearPage }) => {
+  test('Verify Return to Account Page After Add Gear', async ({ accountPage, addGearPage }) => {
     const gearOnboard = await accountPage.getGearOnboardText();
     await accountPage.clickAddGear();
     const gearName = await findGear(addGearPage, 'po', (name) => !gearOnboard.includes(name));
     await saveGearFromAddPage(addGearPage, gearName);
-    await expect(page).toHaveURL(/\/account$/);
+    await accountPage.expectUrl(/\/account$/);
     await expect(accountPage.pageHeading()).toBeVisible();
   });
 
-  test('TS38 - Verify Return to Account Page After Remove Gear', async ({
-    page,
-    accountPage,
-    addGearPage,
-    removeGearPage
-  }) => {
+  test('Verify Return to Account Page After Remove Gear', async ({ accountPage, addGearPage, removeGearPage }) => {
     await ensureGearAdded(accountPage, addGearPage, 'Pots');
     await accountPage.clickRemoveGear();
     await removeGearPage.selectGearToRemove('Pots');
     await removeGearPage.clickContinue();
-    await expect(page).toHaveURL(/\/account$/);
+    await accountPage.expectUrl(/\/account$/);
     await expect(accountPage.pageHeading()).toBeVisible();
   });
 
-  test('TS39 - Verify Return to Account Page After Add Port', async ({ page, accountPage }) => {
-    await addPortFromAccount(page, accountPage, 'Plymouth');
+  test('Verify Return to Account Page After Add Port', async ({ page, accountPage, addPortPage }) => {
+    await addPortFromAccount(page, accountPage, addPortPage, 'Plymouth');
     await expect(accountPage.pageHeading()).toBeVisible();
   });
 
-  test('TS41 - Verify Return to Account Page After Add Species', async ({ page, accountPage, addSpeciesPage }) => {
+  test('Verify Return to Account Page After Add Species', async ({ accountPage, addSpeciesPage }) => {
     await accountPage.addSpeciesLink().click();
-    await addSpeciesPage.speciesInput().fill('Atlantic cod (COD)');
-    await page.keyboard.press('Enter');
-    await expect(page).toHaveURL(/\/account$/);
+    await addSpeciesPage.searchAndSelectSpecies('Atlantic cod (COD)');
+    await accountPage.expectUrl(/\/account$/);
   });
 
-  test('TS43 - Verify Added Ports Appear in Catch Record Journey', async ({ page, accountPage }) => {
-    const portName = await addPortFromAccount(page, accountPage, 'Plymouth');
+  test('Verify Added Ports Appear in Catch Record Journey', async ({
+    page,
+    accountPage,
+    addPortPage,
+    recordsPage,
+    selectVesselPage,
+    tripDatePage
+  }) => {
+    const portName = await addPortFromAccount(page, accountPage, addPortPage, 'Plymouth');
     await expect(accountPage.portsUsedValue()).toContainText(portName);
-    await page.goto('/records');
-    await page.getByRole('button', { name: 'Create a new catch record' }).click();
+    await recordsPage.goto('/records');
+    await recordsPage.createNewRecordButton().click();
     await expect(page).toHaveURL(/\/select-vessel$/);
-    await page.getByRole('radio').first().check();
-    await page.getByRole('button', { name: 'Save and continue' }).click();
+    await selectVesselPage.firstVesselRadio().check();
+    await selectVesselPage.clickSaveAndContinue();
     await expect(page).toHaveURL(/\/trip-date$/);
-    await page.getByRole('radio', { name: 'Yes' }).check();
-    await page.getByRole('button', { name: 'Save and continue' }).click();
+    await tripDatePage.yesRadio().check();
+    await tripDatePage.clickSaveAndContinue();
     await expect(page).toHaveURL(/\/add-port\?for=departure/);
-    await page.getByLabel('Enter the port or closest port you set off from').fill(portName);
-    const portOption = page.locator('#port-results li').filter({ hasText: portName }).getByRole('option');
-    await expect(portOption).toBeVisible();
+    await addPortPage.portInput().fill(portName);
+    await expect(addPortPage.portResultItem(portName)).toBeVisible();
   });
 
-  test('TS44 - Verify Added Gear Appears in Catch Record Journey', async ({
+  test('Verify Added Gear Appears in Catch Record Journey', async ({
     page,
     accountPage,
     addGearPage,
@@ -372,7 +344,7 @@ test.describe('Complete user account page', () => {
     await expect(gearSelectionPage.gearCheckbox(gearName)).toBeVisible();
   });
 
-  test('TS45 - Verify Added Species Appears in Catch Record Journey', async ({
+  test('Verify Added Species Appears in Catch Record Journey', async ({
     page,
     accountPage,
     addSpeciesPage,
@@ -384,35 +356,35 @@ test.describe('Complete user account page', () => {
     await expect(speciesSelectionPage.speciesCheckbox(speciesName)).toBeVisible();
   });
 
-  test('TS50 - Verify Empty State for Ports', async ({ page, accountPage }) => {
-    const portsValue = accountSummaryValue(page, 'Ports used');
+  test('Verify Empty State for Ports', async ({ accountPage }) => {
+    const portsValue = accountPage.portsUsedValue();
     await expect(portsValue).toBeVisible();
     await expect(accountPage.addPortLink()).toBeVisible();
     await expect(accountPage.removePortLink()).toBeVisible();
   });
 
-  test('TS51 - Verify Empty State for Gear', async ({ page, accountPage }) => {
-    const gearValue = accountSummaryValue(page, 'Gear onboard');
+  test('Verify Empty State for Gear', async ({ accountPage }) => {
+    const gearValue = accountPage.gearOnboardValue();
     await expect(gearValue).toBeVisible();
     await expect(accountPage.addGearLink()).toBeVisible();
     await expect(accountPage.removeGearLink()).toBeVisible();
   });
 
-  test('TS52 - Verify Empty State for Species', async ({ page, accountPage }) => {
-    const speciesValue = accountSummaryValue(page, 'Species caught');
+  test('Verify Empty State for Species', async ({ accountPage }) => {
+    const speciesValue = accountPage.speciesCaughtValue();
     await expect(speciesValue).toBeVisible();
     await expect(accountPage.addSpeciesLink()).toBeVisible();
     await expect(accountPage.removeSpeciesLink()).toBeVisible();
   });
 
-  test('TS55 - Verify Changes Persist Within Same Prototype Session', async ({ page, accountPage, addGearPage }) => {
+  test('Verify Changes Persist Within Same Prototype Session', async ({ page, accountPage, addGearPage }) => {
     const gearName = 'Pots';
     await ensureGearAdded(accountPage, addGearPage, gearName);
     await page.goto('/account');
     await expect(accountPage.gearOnboardValue()).toContainText(gearName);
   });
 
-  test('TS57 - Verify Search Prefix Matches a Catalogue Gear Option', async ({ page, accountPage, addGearPage }) => {
+  test('Verify Search Prefix Matches a Catalogue Gear Option', async ({ accountPage, addGearPage }) => {
     await accountPage.clickAddGear();
     const gearName = await findGear(addGearPage, 'lo', (name) => /line/i.test(name));
     const searchTerm = gearName.slice(0, 2);
@@ -421,11 +393,11 @@ test.describe('Complete user account page', () => {
     await expect(addGearPage.gearInput()).toHaveValue(searchTerm);
     await addGearPage.searchAndSelectGear(gearName);
     await addGearPage.clickSaveAndContinue();
-    await expect(page.getByRole('heading', { name: /Enter the measurements for/i })).toBeVisible();
-    await expect(page.locator('main input:visible').first()).toBeVisible();
+    await expect(addGearPage.measurementsHeading()).toBeVisible();
+    await expect(addGearPage.measurementInputs().first()).toBeVisible();
   });
 
-  test('TS58 - Verify Gear Outside the Catalogue Is Rejected', async ({ page, accountPage, addGearPage }) => {
+  test('Verify Gear Outside the Catalogue Is Rejected', async ({ page, accountPage, addGearPage }) => {
     const gearBefore = (await accountPage.gearOnboardValue().textContent()) ?? '';
     await accountPage.clickAddGear();
     await addGearPage.gearInput().fill('Not a catalogue gear');
@@ -436,7 +408,7 @@ test.describe('Complete user account page', () => {
     await expect(accountPage.gearOnboardValue()).toHaveText(gearBefore);
   });
 
-  test('TS59 - Verify Gear Selection Is Required', async ({ page, accountPage, addGearPage }) => {
+  test('Verify Gear Selection Is Required', async ({ page, accountPage, addGearPage }) => {
     const gearBefore = (await accountPage.gearOnboardValue().textContent()) ?? '';
     await accountPage.clickAddGear();
     await addGearPage.clickSaveAndContinue();
@@ -446,7 +418,7 @@ test.describe('Complete user account page', () => {
     await expect(accountPage.gearOnboardValue()).toHaveText(gearBefore);
   });
 
-  test('TS60 - Verify Gear Measurements Are Required', async ({ page, accountPage, addGearPage }) => {
+  test('Verify Gear Measurements Are Required', async ({ page, accountPage, addGearPage }) => {
     const gearBefore = (await accountPage.gearOnboardValue().textContent()) ?? '';
     await accountPage.clickAddGear();
     await selectGearWithMeasurements(addGearPage);
@@ -458,15 +430,11 @@ test.describe('Complete user account page', () => {
     await expect(accountPage.gearOnboardValue()).toHaveText(gearBefore);
   });
 
-  test('TS61 - Verify Fractional and Negative Measurements Are Rejected', async ({
-    page,
-    accountPage,
-    addGearPage
-  }) => {
+  test('Verify Fractional and Negative Measurements Are Rejected', async ({ page, accountPage, addGearPage }) => {
     const gearBefore = (await accountPage.gearOnboardValue().textContent()) ?? '';
     await accountPage.clickAddGear();
     await selectGearWithMeasurements(addGearPage);
-    const measurement = page.locator('main input:visible').first();
+    const measurement = addGearPage.measurementInputs().first();
     await measurement.fill('1.5');
     await addGearPage.clickSaveAndContinue();
     await expect(addGearPage.errorSummary()).toContainText('Enter a whole number');
@@ -478,11 +446,11 @@ test.describe('Complete user account page', () => {
     await expect(accountPage.gearOnboardValue()).toHaveText(gearBefore);
   });
 
-  test('TS62 - Verify Zero Measurements Are Rejected', async ({ page, accountPage, addGearPage }) => {
+  test('Verify Zero Measurements Are Rejected', async ({ page, accountPage, addGearPage }) => {
     const gearBefore = (await accountPage.gearOnboardValue().textContent()) ?? '';
     await accountPage.clickAddGear();
     await selectGearWithMeasurements(addGearPage);
-    await page.locator('main input:visible').first().fill('0');
+    await addGearPage.measurementInputs().first().fill('0');
     await addGearPage.clickSaveAndContinue();
     await expect(addGearPage.errorSummary()).toContainText('Enter a number greater than 0');
     await expect(page).toHaveURL(/\/add-gear/);
@@ -490,7 +458,7 @@ test.describe('Complete user account page', () => {
     await expect(accountPage.gearOnboardValue()).toHaveText(gearBefore);
   });
 
-  test('TS63 - Verify Saved Gear Is Available Later in the Same Session', async ({
+  test('Verify Saved Gear Is Available Later in the Same Session', async ({
     page,
     accountPage,
     addGearPage,
@@ -505,12 +473,7 @@ test.describe('Complete user account page', () => {
     await expect(gearSelectionPage.gearCheckbox(gearName)).toBeVisible();
   });
 
-  test('TS64 - Verify Selected Gear Can Be Saved Using Enter', async ({
-    page,
-    accountPage,
-    addGearPage,
-    removeGearPage
-  }) => {
+  test('Verify Selected Gear Can Be Saved Using Enter', async ({ page, accountPage, addGearPage, removeGearPage }) => {
     const gearOnboard = await accountPage.getGearOnboardText();
     await accountPage.clickAddGear();
     const gearName = await findGear(addGearPage, 'lo', (name) => /line/i.test(name));
@@ -532,8 +495,8 @@ test.describe('Complete user account page', () => {
     await expect(saveAndContinueButton).toBeFocused();
     await page.keyboard.press('Enter');
 
-    await expect(page.getByRole('heading', { name: /Enter the measurements for/i })).toBeVisible();
-    for (const input of await page.locator('main input:visible').all()) {
+    await expect(addGearPage.measurementsHeading()).toBeVisible();
+    for (const input of await addGearPage.measurementInputs().all()) {
       for (let tab = 0; tab < 20 && !(await input.evaluate((element) => element === document.activeElement)); tab++) {
         await page.keyboard.press('Tab');
       }
@@ -543,7 +506,7 @@ test.describe('Complete user account page', () => {
     }
     await expect(saveAndContinueButton).toBeFocused();
     await page.keyboard.press('Enter');
-    await expect(page).toHaveURL(/\/account$/);
+    await accountPage.expectUrl(/\/account$/);
     await expect(accountPage.gearOnboardValue()).toContainText(gearName);
   });
 });

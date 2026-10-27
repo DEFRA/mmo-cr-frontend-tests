@@ -16,7 +16,16 @@ export class AddGearPage extends BasePage {
 
   public readonly gearDimensionInput = (): Locator => this.page.getByLabel(/Gear dimension by number/);
 
+  public readonly measurementInputs = (): Locator => this.page.locator('main input:visible');
+
+  public readonly measurementsHeading = (gearName?: string): Locator =>
+    this.page.getByRole('heading', {
+      name: gearName ? `Enter the measurements for ${gearName}` : /Enter the measurements for/i
+    });
+
   public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
+
+  public readonly errorMessage = (): Locator => this.page.locator('.govuk-error-message');
 
   public readonly gearOption = (gearName: string): Locator =>
     this.page.getByRole('option', { name: gearName, exact: true });

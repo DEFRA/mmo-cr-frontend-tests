@@ -8,6 +8,8 @@ export class SpeciesSelectionPage extends BasePage {
 
   public readonly speciesCheckbox = (speciesName: string): Locator => this.page.getByLabel(speciesName);
 
+  public readonly speciesCheckboxes = (): Locator => this.page.getByRole('checkbox');
+
   public readonly weightAboveMinimumInput = (speciesCode: string): Locator =>
     this.page.locator(`#weightAboveMinimum-${speciesCode.toLowerCase()}`);
 

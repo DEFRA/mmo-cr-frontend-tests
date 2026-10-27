@@ -1,13 +1,9 @@
 import { expect, test } from '../../fixtures/commonfixture';
+import { NavigationFlow } from './helpers/navigationFlow';
 
 const favouriteSpecies = 'Atlantic cod (COD)';
 const favouriteGear = 'Pots';
 const favouritePort = 'Plymouth';
-
-async function openAccount(page: import('@playwright/test').Page): Promise<void> {
-  await page.goto('/account');
-  await expect(page.getByRole('heading', { name: 'Your account' })).toBeVisible();
-}
 
 async function addSpeciesToAccount(
   page: import('@playwright/test').Page,
@@ -17,12 +13,9 @@ async function addSpeciesToAccount(
 ): Promise<void> {
   await accountPage.addSpeciesLink().click();
   await expect(page).toHaveURL(/\/add-species\?return=\/account$/);
-  await addSpeciesPage.speciesInput().fill(speciesName);
-  const speciesOption = page.getByRole('option', { name: speciesName, exact: true });
-  await expect(speciesOption).toBeVisible();
-  await speciesOption.click();
-  await page.getByRole('button', { name: 'Save and continue' }).click();
-  await expect(page).toHaveURL(/\/account$/);
+  await addSpeciesPage.searchAndSelectSpecies(speciesName);
+  await addSpeciesPage.clickSaveAndContinue();
+  await accountPage.expectUrl(/\/account$/);
 }
 
 async function ensureSpeciesAdded(
@@ -38,7 +31,6 @@ async function ensureSpeciesAdded(
 }
 
 async function removeSpeciesFromAccount(
-  page: import('@playwright/test').Page,
   accountPage: import('../../pages/accountPage').AccountPage,
   removeSpeciesPage: import('../../pages/removeSpeciesPage').RemoveSpeciesPage,
   speciesName: string
@@ -48,13 +40,12 @@ async function removeSpeciesFromAccount(
 
   await accountPage.removeSpeciesLink().click();
   await removeSpeciesPage.selectSpeciesToRemove(speciesName);
-  await page.getByRole('button', { name: 'Continue' }).click();
-  await expect(page).toHaveURL(/\/account$/);
+  await removeSpeciesPage.clickContinue();
+  await accountPage.expectUrl(/\/account$/);
   await expect(accountPage.speciesCaughtValue()).not.toContainText(speciesName);
 }
 
 async function addGearToAccount(
-  page: import('@playwright/test').Page,
   accountPage: import('../../pages/accountPage').AccountPage,
   addGearPage: import('../../pages/addGearPage').AddGearPage,
   gearName: string
@@ -63,31 +54,29 @@ async function addGearToAccount(
   await addGearPage.searchAndSelectGear(gearName);
   await addGearPage.clickSaveAndContinue();
 
-  const measurementsHeading = page.getByRole('heading', { name: /Enter the measurements for/i });
+  const measurementsHeading = addGearPage.measurementsHeading();
   if (await measurementsHeading.isVisible()) {
-    for (const input of await page.locator('main input:visible').all()) {
+    for (const input of await addGearPage.measurementInputs().all()) {
       await input.fill('1');
     }
     await addGearPage.clickSaveAndContinue();
   }
 
-  await expect(page).toHaveURL(/\/account$/);
+  await accountPage.expectUrl(/\/account$/);
   await expect(accountPage.gearOnboardValue()).toContainText(gearName);
 }
 
 async function ensureGearAdded(
-  page: import('@playwright/test').Page,
   accountPage: import('../../pages/accountPage').AccountPage,
   addGearPage: import('../../pages/addGearPage').AddGearPage,
   gearName: string
 ): Promise<void> {
   if (!(await accountPage.getGearOnboardText()).includes(gearName)) {
-    await addGearToAccount(page, accountPage, addGearPage, gearName);
+    await addGearToAccount(accountPage, addGearPage, gearName);
   }
 }
 
 async function removeGearFromAccount(
-  page: import('@playwright/test').Page,
   accountPage: import('../../pages/accountPage').AccountPage,
   removeGearPage: import('../../pages/removeGearPage').RemoveGearPage,
   gearName: string
@@ -97,7 +86,7 @@ async function removeGearFromAccount(
   await accountPage.clickRemoveGear();
   await removeGearPage.selectGearToRemove(gearName);
   await removeGearPage.clickContinue();
-  await expect(page).toHaveURL(/\/account$/);
+  await accountPage.expectUrl(/\/account$/);
   await expect(accountPage.gearOnboardValue()).not.toContainText(gearName);
 }
 
@@ -111,7 +100,7 @@ async function addPortToAccount(
   await expect(page).toHaveURL(/\/add-port/);
   await addPortPage.searchAndSelectPort(portName);
   await addPortPage.clickSaveAndContinue();
-  await expect(page).toHaveURL(/\/account$/);
+  await accountPage.expectUrl(/\/account$/);
   await expect(accountPage.portsUsedValue()).toContainText(portName);
 }
 
@@ -130,6 +119,7 @@ async function ensurePortAdded(
 async function removePortFromAccount(
   page: import('@playwright/test').Page,
   accountPage: import('../../pages/accountPage').AccountPage,
+  removePortPage: import('../../pages/removePortPage').RemovePortPage,
   portName: string
 ): Promise<void> {
   const savedPorts = (await accountPage.portsUsedValue().textContent()) ?? '';
@@ -137,31 +127,17 @@ async function removePortFromAccount(
 
   await accountPage.removePortLink().click();
   await expect(page).toHaveURL(/\/remove-port/);
-  await page.getByRole('checkbox', { name: portName, exact: true }).check();
-  await page.getByRole('button', { name: 'Continue' }).click();
-  await expect(page).toHaveURL(/\/account$/);
+  await removePortPage.removePorts(portName);
+  await accountPage.expectUrl(/\/account$/);
   await expect(accountPage.portsUsedValue()).not.toContainText(portName);
 }
 
-async function signInAndOpenAccount(
-  signInPage: import('../../pages/sign-in.page').SigninPage,
-  page: import('@playwright/test').Page
-) {
-  const email = process.env.CATCH_RECORDING_EMAIL;
-  const password = process.env.CATCH_RECORDING_PASSWORD;
-  if (!email || !password) {
-    throw new Error('CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for favourites UI tests');
-  }
-
-  await signInPage.goto('/sign-in');
-  await signInPage.login(email, password);
-  await expect(signInPage.page).toHaveURL(/\/records$/);
-  await openAccount(page);
-}
-
 test.describe('Create and amend favourites', () => {
-  test.beforeEach(async ({ signInPage, page }) => {
-    await signInAndOpenAccount(signInPage, page);
+  test.beforeEach(async ({ signInPage, accountPage }) => {
+    await NavigationFlow.signInAndOpenAccount(signInPage, accountPage, {
+      requiredCredentialsMessage:
+        'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for favourites UI tests'
+    });
   });
 
   test('TC1 - Display favourites grouped by species, ports, and gear', async ({ accountPage }) => {
@@ -171,7 +147,7 @@ test.describe('Create and amend favourites', () => {
   });
 
   test('TC2 - Add an approved species favourite', async ({ page, accountPage, addSpeciesPage, removeSpeciesPage }) => {
-    await removeSpeciesFromAccount(page, accountPage, removeSpeciesPage, favouriteSpecies);
+    await removeSpeciesFromAccount(accountPage, removeSpeciesPage, favouriteSpecies);
     await addSpeciesToAccount(page, accountPage, addSpeciesPage, favouriteSpecies);
 
     await expect(accountPage.speciesCaughtValue()).toContainText(favouriteSpecies);
@@ -181,19 +157,19 @@ test.describe('Create and amend favourites', () => {
     await ensureSpeciesAdded(page, accountPage, addSpeciesPage, favouriteSpecies);
     await accountPage.addSpeciesLink().click();
     await addSpeciesPage.speciesInput().fill(favouriteSpecies);
-    const duplicateOption = page.getByRole('option', { name: favouriteSpecies, exact: true });
+    const duplicateOption = addSpeciesPage.suggestionOption(favouriteSpecies);
     if (await duplicateOption.isVisible()) {
       await duplicateOption.click();
     }
-    await page.getByRole('button', { name: 'Save and continue' }).click();
+    await addSpeciesPage.clickSaveAndContinue();
 
     await expect(addSpeciesPage.errorSummary()).toContainText(/already/i);
     await expect(page).toHaveURL(/\/add-species/);
   });
 
-  test('TC4 - Add an approved gear favourite', async ({ page, accountPage, addGearPage, removeGearPage }) => {
-    await removeGearFromAccount(page, accountPage, removeGearPage, favouriteGear);
-    await addGearToAccount(page, accountPage, addGearPage, favouriteGear);
+  test('TC4 - Add an approved gear favourite', async ({ accountPage, addGearPage, removeGearPage }) => {
+    await removeGearFromAccount(accountPage, removeGearPage, favouriteGear);
+    await addGearToAccount(accountPage, addGearPage, favouriteGear);
 
     await expect(accountPage.gearOnboardValue()).toContainText(favouriteGear);
   });
@@ -208,7 +184,7 @@ test.describe('Create and amend favourites', () => {
     accountPage,
     addGearPage
   }) => {
-    await ensureGearAdded(page, accountPage, addGearPage, favouriteGear);
+    await ensureGearAdded(accountPage, addGearPage, favouriteGear);
     await accountPage.clickAddGear();
     await addGearPage.gearInput().fill(favouriteGear);
     await addGearPage.clickSaveAndContinue();
@@ -227,28 +203,28 @@ test.describe('Create and amend favourites', () => {
     await addPortPage.searchAndSelectPort(favouritePort);
     await addPortPage.clickSaveAndContinue();
 
-    await expect(page.locator('.govuk-error-summary')).toBeVisible();
-    await expect(page.locator('.govuk-error-summary')).toContainText(/already/i);
+    await expect(addPortPage.errorSummary()).toBeVisible();
+    await expect(addPortPage.errorSummary()).toContainText(/already/i);
     await expect(page).toHaveURL(/\/add-port/);
   });
 
   test('TC8 - Remove a species favourite', async ({ page, accountPage, addSpeciesPage, removeSpeciesPage }) => {
     await ensureSpeciesAdded(page, accountPage, addSpeciesPage, favouriteSpecies);
-    await removeSpeciesFromAccount(page, accountPage, removeSpeciesPage, favouriteSpecies);
+    await removeSpeciesFromAccount(accountPage, removeSpeciesPage, favouriteSpecies);
 
     await expect(accountPage.speciesCaughtValue()).not.toContainText(favouriteSpecies);
   });
 
-  test('TC9 - Remove a gear favourite', async ({ page, accountPage, addGearPage, removeGearPage }) => {
-    await ensureGearAdded(page, accountPage, addGearPage, favouriteGear);
-    await removeGearFromAccount(page, accountPage, removeGearPage, favouriteGear);
+  test('TC9 - Remove a gear favourite', async ({ accountPage, addGearPage, removeGearPage }) => {
+    await ensureGearAdded(accountPage, addGearPage, favouriteGear);
+    await removeGearFromAccount(accountPage, removeGearPage, favouriteGear);
 
     await expect(accountPage.gearOnboardValue()).not.toContainText(favouriteGear);
   });
 
-  test('TC10 - Remove a port favourite', async ({ page, accountPage, addPortPage }) => {
+  test('TC10 - Remove a port favourite', async ({ page, accountPage, addPortPage, removePortPage }) => {
     await ensurePortAdded(page, accountPage, addPortPage, favouritePort);
-    await removePortFromAccount(page, accountPage, favouritePort);
+    await removePortFromAccount(page, accountPage, removePortPage, favouritePort);
 
     await expect(accountPage.portsUsedValue()).not.toContainText(favouritePort);
   });
@@ -256,11 +232,12 @@ test.describe('Create and amend favourites', () => {
   test('TC11 - Amend a port favourite by replacing it with another saved port', async ({
     page,
     accountPage,
-    addPortPage
+    addPortPage,
+    removePortPage
   }) => {
     const replacementPort = 'Lowestoft';
     await ensurePortAdded(page, accountPage, addPortPage, favouritePort);
-    await removePortFromAccount(page, accountPage, favouritePort);
+    await removePortFromAccount(page, accountPage, removePortPage, favouritePort);
     await addPortToAccount(page, accountPage, addPortPage, replacementPort);
 
     await expect(accountPage.portsUsedValue()).not.toContainText(favouritePort);
@@ -273,9 +250,8 @@ test.describe('Create and amend favourites', () => {
     addGearPage,
     gearSelectionPage
   }) => {
-    await ensureGearAdded(page, accountPage, addGearPage, favouriteGear);
+    await ensureGearAdded(accountPage, addGearPage, favouriteGear);
     await page.goto('/gear-selection');
-
     await expect(gearSelectionPage.gearCheckbox(favouriteGear)).toBeVisible();
   });
 
@@ -296,17 +272,18 @@ test.describe('Create and amend favourites', () => {
     accountPage,
     addPortPage,
     recordsPage,
-    selectVesselPage
+    selectVesselPage,
+    tripDatePage
   }) => {
     await ensurePortAdded(page, accountPage, addPortPage, favouritePort);
-    await page.goto('/records');
+    await recordsPage.goto('/records');
     await recordsPage.createNewRecordButton().click();
     await expect(selectVesselPage.pageHeading()).toBeVisible();
-    await page.getByRole('radio').first().check();
-    await page.getByRole('button', { name: 'Save and continue' }).click();
+    await selectVesselPage.firstVesselRadio().check();
+    await selectVesselPage.clickSaveAndContinue();
     await expect(page).toHaveURL(/\/trip-date$/);
-    await page.getByRole('radio', { name: 'Yes' }).check();
-    await page.getByRole('button', { name: 'Save and continue' }).click();
+    await tripDatePage.yesRadio().check();
+    await tripDatePage.clickSaveAndContinue();
     await expect(page).toHaveURL(/\/add-port\?for=departure/);
 
     await addPortPage.portInput().fill(favouritePort);
@@ -314,7 +291,6 @@ test.describe('Create and amend favourites', () => {
   });
 
   test('TC15 - Port type-ahead search suggests a matching reference-data entry', async ({
-    page,
     accountPage,
     addPortPage
   }) => {
@@ -349,9 +325,9 @@ test.describe('Create and amend favourites', () => {
   test('TC18 - Reject free-text port outside the approved catalogue', async ({ page, accountPage, addPortPage }) => {
     await accountPage.addPortLink().click();
     await addPortPage.portInput().fill(`Not a port ${Date.now()}`);
-    await page.getByRole('button', { name: 'Save and continue' }).click();
+    await addPortPage.clickSaveAndContinue();
 
-    await expect(page.locator('.govuk-error-summary')).toContainText('Select a port from the list');
+    await expect(addPortPage.errorSummary()).toContainText('Select a port from the list');
     await expect(page).toHaveURL(/\/add-port/);
   });
 
@@ -364,14 +340,14 @@ test.describe('Create and amend favourites', () => {
     addPortPage
   }) => {
     await ensureSpeciesAdded(page, accountPage, addSpeciesPage, favouriteSpecies);
-    await ensureGearAdded(page, accountPage, addGearPage, favouriteGear);
+    await ensureGearAdded(accountPage, addGearPage, favouriteGear);
     await ensurePortAdded(page, accountPage, addPortPage, favouritePort);
     await page.reload();
 
     await expect(accountPage.speciesCaughtValue()).toContainText(favouriteSpecies);
     await expect(accountPage.gearOnboardValue()).toContainText(favouriteGear);
     await expect(accountPage.portsUsedValue()).toContainText(favouritePort);
-    await removeGearFromAccount(page, accountPage, removeGearPage, favouriteGear);
+    await removeGearFromAccount(accountPage, removeGearPage, favouriteGear);
   });
 
   test('TC20 - Favourites synchronize between web and mobile channels', async () => {
