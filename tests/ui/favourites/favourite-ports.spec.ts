@@ -29,7 +29,7 @@ test.describe('Favourites', () => {
       await addPortPage.clickSaveAndContinue();
 
       await expect(addPortPage.errorSummary()).toContainText('Select a port from the list');
-      await expect(page).toHaveURL(/\/add-port/);
+      await addPortPage.expectUrl(/\/add-port/);
       await page.goto(accountPath);
       await expect(accountPage.portsUsedValue()).not.toContainText('Notaport Town');
     });

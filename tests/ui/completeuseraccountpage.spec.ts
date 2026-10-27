@@ -1,4 +1,5 @@
 import { expect, test } from '../../fixtures/commonfixture';
+import { GearFlow } from './helpers/gearFlow';
 import { NavigationFlow } from './helpers/navigationFlow';
 
 async function ensureGearAdded(
@@ -10,7 +11,7 @@ async function ensureGearAdded(
   if (current.includes(gearName)) return;
 
   await accountPage.clickAddGear();
-  await saveGearFromAddPage(addGearPage, gearName);
+  await GearFlow.saveGearFromAddPage(addGearPage, gearName);
 
   await accountPage.expectUrl(/\/account$/);
   await expect(accountPage.gearOnboardValue()).toContainText(gearName);
@@ -29,39 +30,6 @@ async function removeGearIfPresent(
   await expect(accountPage.gearOnboardValue()).not.toContainText(gearName);
 }
 
-async function saveGearFromAddPage(
-  addGearPage: import('../../pages/addGearPage').AddGearPage,
-  gearName: string
-): Promise<void> {
-  await addGearPage.searchAndSelectGear(gearName);
-  await addGearPage.clickSaveAndContinue();
-
-  if (await addGearPage.measurementsHeading().isVisible()) {
-    for (const input of await addGearPage.measurementInputs().all()) {
-      await input.fill('1');
-    }
-    await addGearPage.clickSaveAndContinue();
-  }
-}
-
-async function findGear(
-  addGearPage: import('../../pages/addGearPage').AddGearPage,
-  searchTerm: string,
-  matches: (name: string) => boolean
-): Promise<string> {
-  const gearName = (await addGearPage.searchGearOptions(searchTerm)).find(matches);
-  if (!gearName) throw new Error(`No gear option matched search term "${searchTerm}"`);
-  return gearName;
-}
-
-async function selectGearWithMeasurements(addGearPage: import('../../pages/addGearPage').AddGearPage): Promise<string> {
-  const gearName = await findGear(addGearPage, 'lo', (name) => /line/i.test(name));
-  await addGearPage.searchAndSelectGear(gearName);
-  await addGearPage.clickSaveAndContinue();
-  await expect(addGearPage.measurementsHeading()).toBeVisible();
-  return gearName;
-}
-
 async function ensureSpeciesAdded(
   accountPage: import('../../pages/accountPage').AccountPage,
   addSpeciesPage: import('../../pages/addSpeciesPage').AddSpeciesPage,
@@ -77,13 +45,12 @@ async function ensureSpeciesAdded(
 }
 
 async function addPortFromAccount(
-  page: import('@playwright/test').Page,
   accountPage: import('../../pages/accountPage').AccountPage,
   addPortPage: import('../../pages/addPortPage').AddPortPage,
   portName: string
 ): Promise<string> {
   await accountPage.addPortLink().click();
-  await expect(page).toHaveURL(/\/add-port/);
+  await addPortPage.expectUrl(/\/add-port/);
   await addPortPage.searchAndSelectPort(portName);
   await addPortPage.clickSaveAndContinue();
   await accountPage.expectUrl(/\/account$/);
@@ -154,8 +121,8 @@ test.describe('Complete user account page', () => {
     const firstGear = 'Pots';
     await ensureGearAdded(accountPage, addGearPage, firstGear);
     await accountPage.clickAddGear();
-    const secondGear = await findGear(addGearPage, 'tr', (name) => /traps/i.test(name));
-    await saveGearFromAddPage(addGearPage, secondGear);
+    const secondGear = await GearFlow.findGear(addGearPage, 'tr', (name) => /traps/i.test(name));
+    await GearFlow.saveGearFromAddPage(addGearPage, secondGear);
     await expect(accountPage.gearOnboardValue()).toContainText(firstGear);
     await expect(accountPage.gearOnboardValue()).toContainText(secondGear);
   });
@@ -202,38 +169,38 @@ test.describe('Complete user account page', () => {
     await expect(accountPage.gearOnboardValue()).not.toContainText(gearName);
   });
 
-  test('Verify Navigation to Add Port Screen', async ({ page, accountPage }) => {
+  test('Verify Navigation to Add Port Screen', async ({ accountPage, addPortPage }) => {
     await accountPage.addPortLink().click();
-    await expect(page).toHaveURL(/\/add-port/);
+    await addPortPage.expectUrl(/\/add-port/);
   });
 
-  test('Verify Adding a Port', async ({ page, accountPage, addPortPage }) => {
-    const portName = await addPortFromAccount(page, accountPage, addPortPage, 'Plymouth');
+  test('Verify Adding a Port', async ({ accountPage, addPortPage }) => {
+    const portName = await addPortFromAccount(accountPage, addPortPage, 'Plymouth');
     await expect(accountPage.portsUsedValue()).toContainText(portName);
   });
 
-  test('Verify Multiple Ports Can Be Added', async ({ page, accountPage, addPortPage }) => {
-    const first = await addPortFromAccount(page, accountPage, addPortPage, 'Plymouth');
-    const second = await addPortFromAccount(page, accountPage, addPortPage, 'Lowestoft');
+  test('Verify Multiple Ports Can Be Added', async ({ accountPage, addPortPage }) => {
+    const first = await addPortFromAccount(accountPage, addPortPage, 'Plymouth');
+    const second = await addPortFromAccount(accountPage, addPortPage, 'Lowestoft');
     await expect(accountPage.portsUsedValue()).toContainText(first);
     await expect(accountPage.portsUsedValue()).toContainText(second);
   });
 
-  test('Verify Cancel During Add Port Flow', async ({ page, accountPage }) => {
+  test('Verify Cancel During Add Port Flow', async ({ page, accountPage, addPortPage }) => {
     await accountPage.addPortLink().click();
-    await expect(page).toHaveURL(/\/add-port/);
+    await addPortPage.expectUrl(/\/add-port/);
     await page.goBack();
     await accountPage.expectUrl(/\/account$/);
   });
 
-  test('Verify Port Removal Screen Opens', async ({ page, accountPage }) => {
+  test('Verify Port Removal Screen Opens', async ({ accountPage, removePortPage }) => {
     await accountPage.removePortLink().click();
-    await expect(page).toHaveURL(/\/remove-port/);
+    await removePortPage.expectUrl(/\/remove-port/);
   });
 
-  test('Verify Navigation to Add Species Screen', async ({ page, accountPage, addSpeciesPage }) => {
+  test('Verify Navigation to Add Species Screen', async ({ accountPage, addSpeciesPage }) => {
     await accountPage.addSpeciesLink().click();
-    await expect(page).toHaveURL(/\/add-species\?return=\/account$/);
+    await addSpeciesPage.expectUrl(/\/add-species\?return=\/account$/);
     await expect(addSpeciesPage.speciesInput()).toBeVisible();
   });
 
@@ -256,15 +223,15 @@ test.describe('Complete user account page', () => {
 
   test('Verify Cancel During Add Species Flow', async ({ page, accountPage, addSpeciesPage }) => {
     await accountPage.addSpeciesLink().click();
-    await expect(page).toHaveURL(/\/add-species\?return=\/account$/);
+    await addSpeciesPage.expectUrl(/\/add-species\?return=\/account$/);
     await expect(addSpeciesPage.speciesInput()).toBeVisible();
     await page.goBack();
     await accountPage.expectUrl(/\/account$/);
   });
 
-  test('Verify Navigation to Remove Species Screen', async ({ page, accountPage, removeSpeciesPage }) => {
+  test('Verify Navigation to Remove Species Screen', async ({ accountPage, removeSpeciesPage }) => {
     await accountPage.removeSpeciesLink().click();
-    await expect(page).toHaveURL(/\/remove-species\?return=\/account$/);
+    await removeSpeciesPage.expectUrl(/\/remove-species\?return=\/account$/);
     await expect(removeSpeciesPage.pageHeading()).toBeVisible();
   });
 
@@ -283,8 +250,8 @@ test.describe('Complete user account page', () => {
   test('Verify Return to Account Page After Add Gear', async ({ accountPage, addGearPage }) => {
     const gearOnboard = await accountPage.getGearOnboardText();
     await accountPage.clickAddGear();
-    const gearName = await findGear(addGearPage, 'po', (name) => !gearOnboard.includes(name));
-    await saveGearFromAddPage(addGearPage, gearName);
+    const gearName = await GearFlow.findGear(addGearPage, 'po', (name) => !gearOnboard.includes(name));
+    await GearFlow.saveGearFromAddPage(addGearPage, gearName);
     await accountPage.expectUrl(/\/account$/);
     await expect(accountPage.pageHeading()).toBeVisible();
   });
@@ -298,8 +265,8 @@ test.describe('Complete user account page', () => {
     await expect(accountPage.pageHeading()).toBeVisible();
   });
 
-  test('Verify Return to Account Page After Add Port', async ({ page, accountPage, addPortPage }) => {
-    await addPortFromAccount(page, accountPage, addPortPage, 'Plymouth');
+  test('Verify Return to Account Page After Add Port', async ({ accountPage, addPortPage }) => {
+    await addPortFromAccount(accountPage, addPortPage, 'Plymouth');
     await expect(accountPage.pageHeading()).toBeVisible();
   });
 
@@ -310,24 +277,23 @@ test.describe('Complete user account page', () => {
   });
 
   test('Verify Added Ports Appear in Catch Record Journey', async ({
-    page,
     accountPage,
     addPortPage,
     recordsPage,
     selectVesselPage,
     tripDatePage
   }) => {
-    const portName = await addPortFromAccount(page, accountPage, addPortPage, 'Plymouth');
+    const portName = await addPortFromAccount(accountPage, addPortPage, 'Plymouth');
     await expect(accountPage.portsUsedValue()).toContainText(portName);
     await recordsPage.goto('/records');
     await recordsPage.createNewRecordButton().click();
-    await expect(page).toHaveURL(/\/select-vessel$/);
+    await selectVesselPage.expectUrl(/\/select-vessel$/);
     await selectVesselPage.firstVesselRadio().check();
     await selectVesselPage.clickSaveAndContinue();
-    await expect(page).toHaveURL(/\/trip-date$/);
+    await tripDatePage.expectUrl(/\/trip-date$/);
     await tripDatePage.yesRadio().check();
     await tripDatePage.clickSaveAndContinue();
-    await expect(page).toHaveURL(/\/add-port\?for=departure/);
+    await addPortPage.expectUrl(/\/add-port\?for=departure/);
     await addPortPage.portInput().fill(portName);
     await expect(addPortPage.portResultItem(portName)).toBeVisible();
   });
@@ -386,7 +352,7 @@ test.describe('Complete user account page', () => {
 
   test('Verify Search Prefix Matches a Catalogue Gear Option', async ({ accountPage, addGearPage }) => {
     await accountPage.clickAddGear();
-    const gearName = await findGear(addGearPage, 'lo', (name) => /line/i.test(name));
+    const gearName = await GearFlow.findGear(addGearPage, 'lo', (name) => /line/i.test(name));
     const searchTerm = gearName.slice(0, 2);
     await expect(addGearPage.gearInput()).toHaveAttribute('aria-controls', 'gear-results');
     await addGearPage.gearInput().fill(searchTerm);
@@ -403,7 +369,7 @@ test.describe('Complete user account page', () => {
     await addGearPage.gearInput().fill('Not a catalogue gear');
     await addGearPage.clickSaveAndContinue();
     await expect(addGearPage.errorSummary()).toContainText('Select a gear type from the list');
-    await expect(page).toHaveURL(/\/add-gear/);
+    await addGearPage.expectUrl(/\/add-gear/);
     await page.goto('/account');
     await expect(accountPage.gearOnboardValue()).toHaveText(gearBefore);
   });
@@ -413,7 +379,7 @@ test.describe('Complete user account page', () => {
     await accountPage.clickAddGear();
     await addGearPage.clickSaveAndContinue();
     await expect(addGearPage.errorSummary()).toContainText('Select the gear you want to add');
-    await expect(page).toHaveURL(/\/add-gear/);
+    await addGearPage.expectUrl(/\/add-gear/);
     await page.goto('/account');
     await expect(accountPage.gearOnboardValue()).toHaveText(gearBefore);
   });
@@ -421,11 +387,11 @@ test.describe('Complete user account page', () => {
   test('Verify Gear Measurements Are Required', async ({ page, accountPage, addGearPage }) => {
     const gearBefore = (await accountPage.gearOnboardValue().textContent()) ?? '';
     await accountPage.clickAddGear();
-    await selectGearWithMeasurements(addGearPage);
+    await GearFlow.selectLineGear(addGearPage);
     await addGearPage.clickSaveAndContinue();
     await expect(addGearPage.errorSummary()).toContainText('Enter the number of lines');
     await expect(addGearPage.errorSummary()).toContainText(/Enter the gear dimension by number/i);
-    await expect(page).toHaveURL(/\/add-gear/);
+    await addGearPage.expectUrl(/\/add-gear/);
     await page.goto('/account');
     await expect(accountPage.gearOnboardValue()).toHaveText(gearBefore);
   });
@@ -433,7 +399,7 @@ test.describe('Complete user account page', () => {
   test('Verify Fractional and Negative Measurements Are Rejected', async ({ page, accountPage, addGearPage }) => {
     const gearBefore = (await accountPage.gearOnboardValue().textContent()) ?? '';
     await accountPage.clickAddGear();
-    await selectGearWithMeasurements(addGearPage);
+    await GearFlow.selectLineGear(addGearPage);
     const measurement = addGearPage.measurementInputs().first();
     await measurement.fill('1.5');
     await addGearPage.clickSaveAndContinue();
@@ -441,7 +407,7 @@ test.describe('Complete user account page', () => {
     await measurement.fill('-1');
     await addGearPage.clickSaveAndContinue();
     await expect(addGearPage.errorSummary()).toContainText('Enter a number greater than 0');
-    await expect(page).toHaveURL(/\/add-gear/);
+    await addGearPage.expectUrl(/\/add-gear/);
     await page.goto('/account');
     await expect(accountPage.gearOnboardValue()).toHaveText(gearBefore);
   });
@@ -449,11 +415,11 @@ test.describe('Complete user account page', () => {
   test('Verify Zero Measurements Are Rejected', async ({ page, accountPage, addGearPage }) => {
     const gearBefore = (await accountPage.gearOnboardValue().textContent()) ?? '';
     await accountPage.clickAddGear();
-    await selectGearWithMeasurements(addGearPage);
+    await GearFlow.selectLineGear(addGearPage);
     await addGearPage.measurementInputs().first().fill('0');
     await addGearPage.clickSaveAndContinue();
     await expect(addGearPage.errorSummary()).toContainText('Enter a number greater than 0');
-    await expect(page).toHaveURL(/\/add-gear/);
+    await addGearPage.expectUrl(/\/add-gear/);
     await page.goto('/account');
     await expect(accountPage.gearOnboardValue()).toHaveText(gearBefore);
   });
@@ -468,7 +434,7 @@ test.describe('Complete user account page', () => {
     const gearName = 'Pots';
     await removeGearIfPresent(accountPage, removeGearPage, gearName);
     await accountPage.clickAddGear();
-    await saveGearFromAddPage(addGearPage, gearName);
+    await GearFlow.saveGearFromAddPage(addGearPage, gearName);
     await page.goto('/gear-selection');
     await expect(gearSelectionPage.gearCheckbox(gearName)).toBeVisible();
   });
@@ -476,7 +442,7 @@ test.describe('Complete user account page', () => {
   test('Verify Selected Gear Can Be Saved Using Enter', async ({ page, accountPage, addGearPage, removeGearPage }) => {
     const gearOnboard = await accountPage.getGearOnboardText();
     await accountPage.clickAddGear();
-    const gearName = await findGear(addGearPage, 'lo', (name) => /line/i.test(name));
+    const gearName = await GearFlow.findGear(addGearPage, 'lo', (name) => /line/i.test(name));
     if (gearOnboard.includes(gearName)) {
       await page.goto('/account');
       await removeGearIfPresent(accountPage, removeGearPage, gearName);

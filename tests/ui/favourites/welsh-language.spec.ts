@@ -13,7 +13,7 @@ test.describe('Favourites', () => {
       test.fail(true, 'Known gap: Cymraeg link does not translate content');
       await accountPage.common.languageCymraeg().click();
 
-      await expect(page).toHaveURL(/lang=cy/);
+      await accountPage.expectUrl(/lang=cy/);
       await expect(page.locator('html')).toHaveAttribute('lang', 'cy', { timeout: 5000 });
       await expect(accountPage.pageHeading()).not.toHaveText('Your account');
     });

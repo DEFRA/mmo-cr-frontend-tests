@@ -1,106 +1,8 @@
-import { type Page } from '@playwright/test';
 import { expect, test } from '../../fixtures/commonfixture';
-import { type SigninPage } from '../../pages/sign-in.page';
-import { type MapLabel, type StatisticalAreaPage } from '../../pages/statisticalAreaPage';
 import { AddPortPage } from '../../pages/addPortPage';
 import { ConfirmSamePortPage } from '../../pages/confirmSamePortPage';
 import { NavigationFlow } from './helpers/navigationFlow';
-
-type Point = [number, number];
-type MapPolygon = { exterior: Point[]; holes: Point[][] };
-type MapBounds = { minLongitude: number; maxLongitude: number; minLatitude: number; maxLatitude: number };
-type SubrectangleReference = { subCode: string; overlapsSea: boolean; bounds: MapBounds; polygons: MapPolygon[] };
-type LandFeature = { polygons: MapPolygon[] };
-
-async function installCanvasProbe(page: StatisticalAreaPage['page']): Promise<void> {
-  await page.addInitScript(() => {
-    const clearRect = CanvasRenderingContext2D.prototype.clearRect;
-    const fillText = CanvasRenderingContext2D.prototype.fillText;
-    const stroke = CanvasRenderingContext2D.prototype.stroke;
-
-    CanvasRenderingContext2D.prototype.clearRect = function (x, y, width, height) {
-      this.canvas.dataset.playwrightMapLabels = '[]';
-      this.canvas.dataset.playwrightGridCount = '0';
-      this.canvas.dataset.playwrightSelectedGridCount = '0';
-      return clearRect.call(this, x, y, width, height);
-    };
-
-    CanvasRenderingContext2D.prototype.stroke = function () {
-      if (['#0b6b3a', '#e8a63a'].includes(String(this.strokeStyle).toLowerCase())) {
-        const count = Number(this.canvas.dataset.playwrightGridCount ?? '0') + 1;
-        this.canvas.dataset.playwrightGridCount = String(count);
-        if (String(this.strokeStyle).toLowerCase() === '#e8a63a') {
-          const selectedCount = Number(this.canvas.dataset.playwrightSelectedGridCount ?? '0') + 1;
-          this.canvas.dataset.playwrightSelectedGridCount = String(selectedCount);
-        }
-      }
-      return Reflect.apply(stroke, this, []);
-    };
-
-    CanvasRenderingContext2D.prototype.fillText = function (text, x, y, maxWidth) {
-      const labels = JSON.parse(this.canvas.dataset.playwrightMapLabels ?? '[]') as MapLabel[];
-      labels.push({ code: String(text), x, y });
-      this.canvas.dataset.playwrightMapLabels = JSON.stringify(labels);
-      return maxWidth === undefined ? fillText.call(this, text, x, y) : fillText.call(this, text, x, y, maxWidth);
-    };
-  });
-}
-
-async function openMap(signInPage: SigninPage, page: Page, mapPage: StatisticalAreaPage): Promise<string> {
-  await NavigationFlow.signIn(signInPage, {
-    requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for map UI tests'
-  });
-  const portName = 'Plymouth';
-  await NavigationFlow.selectDeparturePort(new AddPortPage(page), new ConfirmSamePortPage(page), portName);
-  await installCanvasProbe(mapPage.page);
-  await mapPage.goto('/statistical-area');
-  await expect(mapPage.pageHeading()).toBeVisible();
-  await expect(mapPage.mapCanvas()).toBeVisible();
-  await expect.poll(async () => mapPage.readMapSubrectangleCount()).toBeGreaterThanOrEqual(9);
-  return portName;
-}
-
-function pointInRing([longitude, latitude]: Point, ring: Point[]): boolean {
-  let inside = false;
-  for (let index = 0, previous = ring.length - 1; index < ring.length; previous = index++) {
-    const [currentLongitude, currentLatitude] = ring[index]!;
-    const [previousLongitude, previousLatitude] = ring[previous]!;
-    const crossesLatitude = currentLatitude > latitude !== previousLatitude > latitude;
-    const intersectionLongitude =
-      ((previousLongitude - currentLongitude) * (latitude - currentLatitude)) / (previousLatitude - currentLatitude) +
-      currentLongitude;
-    if (crossesLatitude && longitude < intersectionLongitude) inside = !inside;
-  }
-  return inside;
-}
-
-function pointInPolygon(point: Point, polygon: MapPolygon): boolean {
-  return pointInRing(point, polygon.exterior) && !polygon.holes.some((hole) => pointInRing(point, hole));
-}
-
-function isPartiallySeaBased(subrectangle: SubrectangleReference, land: LandFeature[]): boolean {
-  let hasLandSample = false;
-  let hasSeaSample = false;
-  const { minLongitude, maxLongitude, minLatitude, maxLatitude } = subrectangle.bounds;
-
-  for (let longitudeStep = 1; longitudeStep < 12; longitudeStep++) {
-    for (let latitudeStep = 1; latitudeStep < 12; latitudeStep++) {
-      const point: Point = [
-        minLongitude + ((maxLongitude - minLongitude) * longitudeStep) / 12,
-        minLatitude + ((maxLatitude - minLatitude) * latitudeStep) / 12
-      ];
-      if (!subrectangle.polygons.some((polygon) => pointInPolygon(point, polygon))) continue;
-
-      if (land.some((feature) => feature.polygons.some((polygon) => pointInPolygon(point, polygon)))) {
-        hasLandSample = true;
-      } else {
-        hasSeaSample = true;
-      }
-      if (hasLandSample && hasSeaSample) return true;
-    }
-  }
-  return false;
-}
+import { MapFlow, type LandFeature, type SubrectangleReference } from './helpers/mapFlow';
 
 test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   test('opens around the declared departure port and displays at least nine relevant sub-rectangles', async ({
@@ -108,7 +10,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     page,
     statisticalAreaPage
   }) => {
-    const portName = await openMap(signInPage, page, statisticalAreaPage);
+    const portName = await MapFlow.openMap(signInPage, page, statisticalAreaPage);
     await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-departure-port', portName);
 
     expect(await statisticalAreaPage.readMapSubrectangleCount()).toBeGreaterThanOrEqual(9);
@@ -119,7 +21,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     page,
     statisticalAreaPage
   }) => {
-    await openMap(signInPage, page, statisticalAreaPage);
+    await MapFlow.openMap(signInPage, page, statisticalAreaPage);
     await statisticalAreaPage.zoomOutButton().click();
 
     await expect.poll(async () => statisticalAreaPage.readMapSubrectangleCount()).toBeGreaterThan(9);
@@ -130,7 +32,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     page,
     statisticalAreaPage
   }) => {
-    await openMap(signInPage, page, statisticalAreaPage);
+    await MapFlow.openMap(signInPage, page, statisticalAreaPage);
     await page.setViewportSize({ width: 1600, height: 1000 });
     await page.reload();
     await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
@@ -146,7 +48,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     page,
     statisticalAreaPage
   }) => {
-    await openMap(signInPage, page, statisticalAreaPage);
+    await MapFlow.openMap(signInPage, page, statisticalAreaPage);
     const initialImage = await statisticalAreaPage.canvasFingerprint();
     const initialCount = await statisticalAreaPage.readMapSubrectangleCount();
 
@@ -168,7 +70,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     { title: 'down', x: 0, y: 60 }
   ]) {
     test(`panning ${direction.title} updates the visible map`, async ({ signInPage, page, statisticalAreaPage }) => {
-      await openMap(signInPage, page, statisticalAreaPage);
+      await MapFlow.openMap(signInPage, page, statisticalAreaPage);
       await statisticalAreaPage.zoomInButton().click();
       await statisticalAreaPage.zoomInButton().click();
       const initialImage = await statisticalAreaPage.canvasFingerprint();
@@ -185,7 +87,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     page,
     statisticalAreaPage
   }) => {
-    await openMap(signInPage, page, statisticalAreaPage);
+    await MapFlow.openMap(signInPage, page, statisticalAreaPage);
     const labels = await statisticalAreaPage.readMapLabels();
     const selectedLabel = labels[Math.floor(labels.length / 2)];
     expect(selectedLabel).toBeDefined();
@@ -195,7 +97,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     expect(selectedLabel.code).toMatch(/^\d{2}[A-Z]\d{2}$/i);
 
     await statisticalAreaPage.clickMapLabel(selectedLabel);
-    await expect(page).toHaveURL(/\/species-selection$/);
+    await statisticalAreaPage.expectUrl(/\/species-selection$/);
 
     await statisticalAreaPage.goto('/statistical-area');
     await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', selectedLabel.code);
@@ -206,7 +108,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     page,
     statisticalAreaPage
   }) => {
-    await openMap(signInPage, page, statisticalAreaPage);
+    await MapFlow.openMap(signInPage, page, statisticalAreaPage);
     const [subrectangleResponse, landResponse] = await Promise.all([
       page.request.get('/public/offline-map/subrectangles.json'),
       page.request.get('/public/offline-map/land.json')
@@ -221,7 +123,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
       (subrectangle) =>
         subrectangle.overlapsSea &&
         visibleCodes.has(subrectangle.subCode) &&
-        isPartiallySeaBased(subrectangle, landData.land)
+        MapFlow.isPartiallySeaBased(subrectangle, landData.land)
     );
     expect(partial, 'The initial map should include a sub-rectangle overlapping both land and sea').toBeDefined();
     if (!partial) throw new Error('No partially sea-based sub-rectangle is visible');
@@ -230,7 +132,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     expect(label).toBeDefined();
     if (!label) throw new Error('The partially sea-based sub-rectangle has no visible map label');
     await statisticalAreaPage.clickMapLabel(label);
-    await expect(page).toHaveURL(/\/species-selection$/);
+    await statisticalAreaPage.expectUrl(/\/species-selection$/);
     await statisticalAreaPage.goto('/statistical-area');
 
     await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', partial.subCode);
@@ -241,14 +143,14 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     page,
     statisticalAreaPage
   }) => {
-    await openMap(signInPage, page, statisticalAreaPage);
+    await MapFlow.openMap(signInPage, page, statisticalAreaPage);
     const visibleLabels = await statisticalAreaPage.readMapLabels();
     const label = visibleLabels[Math.floor(visibleLabels.length / 2)];
     expect(label).toBeDefined();
     if (!label) throw new Error('No visible ICES sub-rectangle is available to select');
 
     await statisticalAreaPage.clickMapLabel(label);
-    await expect(page).toHaveURL(/\/species-selection$/);
+    await statisticalAreaPage.expectUrl(/\/species-selection$/);
     await statisticalAreaPage.goto('/statistical-area');
 
     await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', label.code);
@@ -260,7 +162,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     page,
     statisticalAreaPage
   }) => {
-    await openMap(signInPage, page, statisticalAreaPage);
+    await MapFlow.openMap(signInPage, page, statisticalAreaPage);
     const initialLabels = await statisticalAreaPage.readMapLabels();
     const middleIndex = Math.floor(initialLabels.length / 2);
     const first = initialLabels[middleIndex];
@@ -270,7 +172,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     if (!first || !second) throw new Error('At least two visible sub-rectangles are required');
 
     await statisticalAreaPage.clickMapLabel(first);
-    await expect(page).toHaveURL(/\/species-selection$/);
+    await statisticalAreaPage.expectUrl(/\/species-selection$/);
     await statisticalAreaPage.goto('/statistical-area');
     await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', first.code);
 
@@ -279,7 +181,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     expect(replacement).toBeDefined();
     if (!replacement) throw new Error('The second sub-rectangle is not visible after revisiting the map');
     await statisticalAreaPage.clickMapLabel(replacement);
-    await expect(page).toHaveURL(/\/species-selection$/);
+    await statisticalAreaPage.expectUrl(/\/species-selection$/);
     await statisticalAreaPage.goto('/statistical-area');
 
     await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', second.code);
@@ -292,7 +194,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     page,
     statisticalAreaPage
   }) => {
-    await openMap(signInPage, page, statisticalAreaPage);
+    await MapFlow.openMap(signInPage, page, statisticalAreaPage);
     const response = await page.request.get('/public/offline-map/subrectangles.json');
     expect(response.ok()).toBeTruthy();
     const referenceData = (await response.json()) as { subrectangles: SubrectangleReference[] };
@@ -318,7 +220,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     });
     await page.goto('/statistical-area');
 
-    await expect(page).toHaveURL(/\/add-port\?for=departure&entry=1$/);
+    await addPortPage.expectUrl(/\/add-port\?for=departure&entry=1$/);
     await expect(addPortPage.pageHeading()).toBeVisible();
     await expect(statisticalAreaPage.mapRegion()).toHaveCount(0);
   });
@@ -342,7 +244,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
       }
       await route.continue();
     });
-    await installCanvasProbe(page);
+    await MapFlow.installCanvasProbe(page);
     await page.goto('/statistical-area');
 
     const error = statisticalAreaPage.mapError();
@@ -362,7 +264,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     page,
     statisticalAreaPage
   }) => {
-    await openMap(signInPage, page, statisticalAreaPage);
+    await MapFlow.openMap(signInPage, page, statisticalAreaPage);
     await page.setViewportSize({ width: 700, height: 900 });
     await page.reload();
 
@@ -380,7 +282,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     page,
     statisticalAreaPage
   }) => {
-    const portName = await openMap(signInPage, page, statisticalAreaPage);
+    const portName = await MapFlow.openMap(signInPage, page, statisticalAreaPage);
     await page.reload();
 
     await expect(statisticalAreaPage.pageHeading()).toBeVisible();
@@ -390,7 +292,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   });
 
   test('NFR1 - zoom controls are labelled and keyboard operable', async ({ signInPage, page, statisticalAreaPage }) => {
-    await openMap(signInPage, page, statisticalAreaPage);
+    await MapFlow.openMap(signInPage, page, statisticalAreaPage);
     const initialImage = await statisticalAreaPage.canvasFingerprint();
 
     await expect(statisticalAreaPage.zoomInButton()).toHaveAccessibleName('Zoom in');

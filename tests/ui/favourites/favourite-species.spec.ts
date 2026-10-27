@@ -35,13 +35,13 @@ test.describe('Favourites', () => {
       expect(species.split('Atlantic cod (COD)')).toHaveLength(2);
     });
 
-    test('rejects a species that is not in the reference data', async ({ page, accountPage, addSpeciesPage }) => {
+    test('rejects a species that is not in the reference data', async ({ accountPage, addSpeciesPage }) => {
       await accountPage.addSpeciesLink().click();
       await addSpeciesPage.speciesInput().fill('Not a fish');
       await addSpeciesPage.clickSaveAndContinue();
 
       await expect(addSpeciesPage.errorSummary()).toContainText('Select a species to add');
-      await expect(page).toHaveURL(/\/add-species/);
+      await addSpeciesPage.expectUrl(/\/add-species/);
     });
 
     test('requires a species to be selected before removing', async ({ accountPage, removeSpeciesPage }) => {
