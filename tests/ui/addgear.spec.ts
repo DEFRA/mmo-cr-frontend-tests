@@ -1,16 +1,26 @@
+/*
+ * Run CAR-300 tests (defaults to test env; set CATCH_RECORDING_ENV=dev|test|prod to switch):
+ *   npx playwright test tests/ui/addgear.spec.ts --project=Chromium --grep "CAR-300"
+ *   CATCH_RECORDING_ENV=dev npx playwright test tests/ui/addgear.spec.ts --project=Chromium --grep "CAR-300"
+ *   npx playwright test tests/ui/addgear.spec.ts --project=Chromium --grep "CAR-300" --headed
+ *   npx playwright test tests/ui/addgear.spec.ts --grep "CAR-300" --ui
+ *   npx playwright test tests/ui/addgear.spec.ts --project=Chromium --grep "CAR-300" --trace=on && npx playwright show-report
+ * Run the whole spec:
+ *   npx playwright test tests/ui/addgear.spec.ts --project=Chromium
+ */
 import { type Page } from '@playwright/test';
 import { expect, test } from '../../fixtures/commonfixture';
 import { type SigninPage } from '../../pages/sign-in.page';
 import { type AddGearPage } from '../../pages/addGearPage';
+import { type AccountPage } from '../../pages/accountPage';
+import { type RemoveGearPage } from '../../pages/removeGearPage';
 
 const accountPath = '/account';
 
 async function signIn(signInPage: SigninPage): Promise<void> {
-  const email = process.env.CATCH_RECORDING_EMAIL;
-  const password = process.env.CATCH_RECORDING_PASSWORD;
-  if (!email || !password) {
-    throw new Error('CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Add gear UI tests');
-  }
+  // Sign-in is currently mocked, so blank credentials are accepted
+  const email = process.env.CATCH_RECORDING_EMAIL ?? '';
+  const password = process.env.CATCH_RECORDING_PASSWORD ?? '';
 
   await signInPage.goto('/sign-in');
   await signInPage.login(email, password);
@@ -59,9 +69,57 @@ async function saveLineGear(addGearPage: AddGearPage): Promise<string> {
   return gearName;
 }
 
+async function selectLongLine(addGearPage: AddGearPage): Promise<void> {
+  await addGearPage.searchAndSelectGear('Long line');
+  await addGearPage.clickSaveAndContinue();
+  await expect(addGearPage.page.getByRole('heading', { name: 'Enter the measurements for long line' })).toBeVisible();
+}
+
+async function saveLongLine(addGearPage: AddGearPage, hooksHauled = '12', hooksInWater = '3'): Promise<void> {
+  await selectLongLine(addGearPage);
+  await addGearPage.hooksHauledInput().fill(hooksHauled);
+  await addGearPage.hooksInWaterInput().fill(hooksInWater);
+  await addGearPage.clickSaveAndContinue();
+  await expect(addGearPage.page).toHaveURL(/\/account$/);
+}
+
+async function savePots(addGearPage: AddGearPage, gearDimension: string): Promise<void> {
+  await addGearPage.searchAndSelectGear('Pots');
+  await addGearPage.clickSaveAndContinue();
+  await expect(addGearPage.page.getByRole('heading', { name: 'Enter the measurements for pots' })).toBeVisible();
+  await addGearPage.gearDimensionInput().fill(gearDimension);
+  await addGearPage.clickSaveAndContinue();
+  await expect(addGearPage.page).toHaveURL(/\/account$/);
+}
+
+async function removeSavedGear(
+  page: Page,
+  accountPage: AccountPage,
+  removeGearPage: RemoveGearPage,
+  gearNames: string[]
+): Promise<void> {
+  await page.goto(accountPath);
+  const gearText = await accountPage.getGearOnboardText();
+  const present = gearNames.filter((name) => gearText.includes(name));
+  if (present.length === 0) return;
+
+  await accountPage.clickRemoveGear();
+  await removeGearPage.selectGearToRemove(...present);
+  await removeGearPage.clickContinue();
+  await expect(page).toHaveURL(/\/account$/);
+}
+
+function occurrences(text: string, value: string): number {
+  return text.split(value).length - 1;
+}
+
 test.describe('Add favourite gear', () => {
-  test.beforeEach(async ({ signInPage }) => {
+  // Tests share one account's favourite gear, so parallel runs would interfere
+  test.describe.configure({ mode: 'serial' });
+
+  test.beforeEach(async ({ page, signInPage, accountPage, removeGearPage }) => {
     await signIn(signInPage);
+    await removeSavedGear(page, accountPage, removeGearPage, ['Long line', 'Set net', 'Pots']);
   });
 
   test('shows a matching gear option and the required fields after selection', async ({ page, addGearPage }) => {
@@ -109,6 +167,64 @@ test.describe('Add favourite gear', () => {
     await expect(accountGear(page)).toContainText(gearName);
     await page.goto('/gear-selection');
     await expect(gearSelectionPage.gearCheckbox(gearName)).toBeVisible();
+  });
+
+  test('CAR-300 shows saved pots measurement under the favourite gear on the account page', async ({
+    page,
+    addGearPage,
+    accountPage
+  }) => {
+    await openAddGear(page);
+    await savePots(addGearPage, '45');
+
+    await expect(accountPage.gearOnboardValue()).toContainText('Pots');
+    await expect(accountPage.gearOnboardValue()).toContainText(/Gear dimension by number.*: 45/);
+  });
+
+  test('CAR-300 does not offer a gear that is already a favourite in the search list', async ({
+    page,
+    addGearPage
+  }) => {
+    await openAddGear(page);
+    await savePots(addGearPage, '45');
+
+    await openAddGear(page);
+    await addGearPage.gearInput().pressSequentially('Pot');
+    await expect(addGearPage.gearOption('Pots')).toHaveCount(0);
+  });
+
+  test('CAR-300 blocks adding a gear that is already a favourite', async ({ page, addGearPage, accountPage }) => {
+    await openAddGear(page);
+    await savePots(addGearPage, '45');
+
+    await openAddGear(page);
+    await addGearPage.gearInput().fill('Pots');
+    await addGearPage.clickSaveAndContinue();
+
+    await expect(page).toHaveURL(/\/add-gear/);
+    await expect(addGearPage.errorSummary()).toContainText('Pots has already been added to your gear');
+    await expect(page.locator('.govuk-error-message')).toContainText('Pots has already been added to your gear');
+
+    await page.goto(accountPath);
+    expect(occurrences(await accountPage.getGearOnboardText(), 'Pots')).toBe(1);
+    await expect(accountPage.gearOnboardValue()).toContainText(/: 45/);
+  });
+
+  test('CAR-300 lists a duplicate-attempted gear only once on the remove gear page', async ({
+    page,
+    addGearPage,
+    accountPage,
+    removeGearPage
+  }) => {
+    await openAddGear(page);
+    await savePots(addGearPage, '45');
+    await openAddGear(page);
+    await addGearPage.gearInput().fill('Pots');
+    await addGearPage.clickSaveAndContinue();
+
+    await page.goto(accountPath);
+    await accountPage.clickRemoveGear();
+    await expect(removeGearPage.gearCheckbox('Pots')).toHaveCount(1);
   });
 
   test('keeps multiple different favourite gears', async ({ page, addGearPage }) => {

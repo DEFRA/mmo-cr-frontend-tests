@@ -1,5 +1,4 @@
 import { expect, type Locator } from '@playwright/test';
-import { expect, type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
 export class AddGearPage extends BasePage {
@@ -15,7 +14,12 @@ export class AddGearPage extends BasePage {
 
   public readonly hooksInWaterInput = (): Locator => this.page.getByLabel('Total hooks left in water');
 
+  public readonly gearDimensionInput = (): Locator => this.page.getByLabel(/Gear dimension by number/);
+
   public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
+
+  public readonly gearOption = (gearName: string): Locator =>
+    this.page.getByRole('option', { name: gearName, exact: true });
 
   async searchGearOptions(searchTerm: string): Promise<string[]> {
     if (searchTerm.length < 2) {
@@ -30,7 +34,7 @@ export class AddGearPage extends BasePage {
 
   async searchAndSelectGear(gearName: string): Promise<void> {
     await this.searchGearOptions(gearName.slice(0, 2));
-    await this.gearResultsList().getByRole('option', { name: gearName, exact: true }).click();
+    await this.gearOption(gearName).click();
     await expect(this.gearInput()).toHaveValue(gearName);
   }
 }
