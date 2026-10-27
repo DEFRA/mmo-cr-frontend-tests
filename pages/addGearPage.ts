@@ -8,7 +8,7 @@ export class AddGearPage extends BasePage {
 
   public readonly gearInput = (): Locator => this.page.getByLabel('What gear did you use?');
 
-  public readonly gearResultsList = (): Locator => this.page.locator('#gear-options');
+  public readonly gearResultsList = (): Locator => this.page.getByRole('listbox');
 
   public readonly hooksHauledInput = (): Locator => this.page.getByLabel('Total hooks hauled');
 
@@ -16,8 +16,20 @@ export class AddGearPage extends BasePage {
 
   public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
 
+  async searchGearOptions(searchTerm: string): Promise<string[]> {
+    if (searchTerm.length < 2) {
+      throw new Error('Gear searches require at least two characters');
+    }
+
+    await this.gearInput().fill(searchTerm);
+    const options = this.gearResultsList().getByRole('option');
+    await expect(options.first()).toBeVisible();
+    return (await options.allTextContents()).map((name) => name.trim());
+  }
+
   async searchAndSelectGear(gearName: string): Promise<void> {
-    await expect(this.gearResultsList().locator(`option[value="${gearName}"]`)).toHaveCount(1);
-    await this.gearInput().fill(gearName);
+    await this.searchGearOptions(gearName.slice(0, 2));
+    await this.gearResultsList().getByRole('option', { name: gearName, exact: true }).click();
+    await expect(this.gearInput()).toHaveValue(gearName);
   }
 }

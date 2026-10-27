@@ -1,4 +1,5 @@
 import { expect, test } from '../../fixtures/commonfixture';
+import { type Page } from '@playwright/test';
 
 async function signIn(page: import('@playwright/test').Page): Promise<void> {
   const email = process.env.CATCH_RECORDING_EMAIL;
@@ -14,22 +15,56 @@ async function signIn(page: import('@playwright/test').Page): Promise<void> {
   await expect(page).toHaveURL(/\/records$/);
 }
 
-async function openSpeciesSelection(page: import('@playwright/test').Page): Promise<void> {
+async function openSpeciesSelection(page: Page): Promise<void> {
   await page.goto('/species-selection');
   await expect(page.getByRole('heading', { name: /What species did you catch/ })).toBeVisible();
 }
 
-async function openAddSpecies(page: import('@playwright/test').Page): Promise<void> {
+async function openAddSpecies(page: Page): Promise<void> {
   await page.getByRole('link', { name: 'Add species' }).click();
   await expect(page).toHaveURL(/\/add-species\?return=\/species-selection/);
   await expect(page.getByLabel(/Add species to your vessel/)).toBeVisible();
 }
 
-async function addSpecies(page: import('@playwright/test').Page, species: string): Promise<void> {
+async function speciesOptions(page: Page, searchTerm: string): Promise<string[]> {
+  await page.getByLabel(/Add species to your vessel/).fill(searchTerm);
+  const options = page.getByRole('listbox').getByRole('option');
+  await expect(options.first()).toBeVisible();
+  return (await options.allTextContents()).map((species) => species.trim());
+}
+
+async function findSpecies(
+  page: Page,
+  searchTerm: string,
+  matches: (species: string) => boolean = () => true
+): Promise<string> {
+  const species = (await speciesOptions(page, searchTerm)).find(matches);
+  if (!species) throw new Error('Expected a matching species in the current catalogue');
+  return species;
+}
+
+async function expectMatchingSpecies(page: Page, searchTerm: string, species: string): Promise<void> {
+  const matchingSpecies = (await speciesOptions(page, searchTerm)).filter((option) =>
+    option.toLocaleLowerCase().startsWith(searchTerm.toLocaleLowerCase())
+  );
+  expect(matchingSpecies).toContain(species);
+}
+
+async function selectSpeciesFromSuggestions(page: Page, species: string): Promise<void> {
+  const speciesInput = page.getByLabel(/Add species to your vessel/);
+  await speciesInput.fill(species.slice(0, 2));
+  const speciesOption = page.getByRole('option', { name: species, exact: true });
+  await expect(speciesOption).toBeVisible();
+  await speciesOption.click();
+  await expect(speciesInput).toHaveValue(species);
+}
+
+async function addSpecies(page: Page, species: string): Promise<void> {
   await openAddSpecies(page);
-  await page.getByLabel(/Add species to your vessel/).fill(species);
+  await selectSpeciesFromSuggestions(page, species);
   await page.getByRole('button', { name: 'Save and continue' }).click();
   await expect(page).toHaveURL(/\/species-selection$/);
+  await expect(page.getByLabel(species)).toBeVisible();
 }
 
 test.describe('Add species to a catch record', () => {
@@ -41,81 +76,116 @@ test.describe('Add species to a catch record', () => {
   test('TS01 - species search is displayed and accepts user input', async ({ page }) => {
     await openAddSpecies(page);
     const speciesInput = page.getByLabel(/Add species to your vessel/);
+    const species = await findSpecies(page, 'at');
+    const searchTerm = species.slice(0, 2);
 
     await expect(speciesInput).toBeVisible();
     await expect(speciesInput).toBeEditable();
-    await speciesInput.fill('He');
-    await expect(speciesInput).toHaveValue('He');
+    await speciesInput.fill(searchTerm);
+    await expect(speciesInput).toHaveValue(searchTerm);
   });
 
   test('TS02 - changing the search term allows another matching catalogue species to be selected', async ({ page }) => {
     await openAddSpecies(page);
     const speciesInput = page.getByLabel(/Add species to your vessel/);
+    const firstSpecies = await findSpecies(page, 'at');
+    const firstSearchTerm = firstSpecies.slice(0, 2);
+    const secondSpecies = await findSpecies(
+      page,
+      'ha',
+      (species) =>
+        species !== firstSpecies && species.slice(0, 2).toLocaleLowerCase() !== firstSearchTerm.toLocaleLowerCase()
+    );
+    const secondSearchTerm = secondSpecies.slice(0, 2);
 
-    await speciesInput.fill('He');
-    await expect(page.locator('#species-options option[value="Herring (HER)"]')).toHaveCount(1);
-    await speciesInput.fill('Mac');
-    await expect(page.locator('#species-options option[value="Mackerel (MAC)"]')).toHaveCount(1);
-    await speciesInput.fill('Mackerel (MAC)');
+    await speciesInput.fill(firstSearchTerm);
+    await expect(speciesInput).toHaveValue(firstSearchTerm);
+    await expectMatchingSpecies(page, firstSearchTerm, firstSpecies);
+    await speciesInput.fill(secondSearchTerm);
+    await expect(speciesInput).toHaveValue(secondSearchTerm);
+    await expectMatchingSpecies(page, secondSearchTerm, secondSpecies);
+    await selectSpeciesFromSuggestions(page, secondSpecies);
     await page.getByRole('button', { name: 'Save and continue' }).click();
 
     await expect(page).toHaveURL(/\/species-selection$/);
-    await expect(page.getByLabel('Mackerel (MAC)')).toBeVisible();
+    await expect(page.getByLabel(secondSpecies)).toBeVisible();
   });
 
   test('TS03 - opens Add Species and adds a selected species to the current catch record', async ({ page }) => {
     await openAddSpecies(page);
     const speciesInput = page.getByLabel(/Add species to your vessel/);
-    await expect(page.locator('#species-options option[value="Herring (HER)"]')).toHaveCount(1);
-    await speciesInput.fill('Herring (HER)');
+    const species = await findSpecies(page, 'at');
+    await selectSpeciesFromSuggestions(page, species);
     await page.getByRole('button', { name: 'Save and continue' }).click();
 
     await expect(page).toHaveURL(/\/species-selection$/);
-    await expect(page.getByLabel('Herring (HER)')).toBeVisible();
+    await expect(page.getByLabel(species)).toBeVisible();
   });
 
   test('TS04 - searches the approved species list after entering at least two characters', async ({ page }) => {
     await openAddSpecies(page);
     const speciesInput = page.getByLabel(/Add species to your vessel/);
-    await speciesInput.fill('He');
-    await expect(page.locator('#species-options option[value="Herring (HER)"]')).toHaveCount(1);
+    const species = await findSpecies(page, 'at');
+    const searchTerm = species.slice(0, 2);
+    await speciesInput.fill(searchTerm);
+    await expect(speciesInput).toHaveValue(searchTerm);
+    await expectMatchingSpecies(page, searchTerm, species);
 
-    await speciesInput.fill('Herring (HER)');
+    await selectSpeciesFromSuggestions(page, species);
     await page.getByRole('button', { name: 'Save and continue' }).click();
-    await expect(page.getByLabel('Herring (HER)')).toBeVisible();
+    await expect(page.getByLabel(species)).toBeVisible();
   });
 
   test('TS05 - adds multiple species while retaining previously added species', async ({ page }) => {
-    await addSpecies(page, 'Herring (HER)');
-    await addSpecies(page, 'Mackerel (MAC)');
+    await openAddSpecies(page);
+    const firstSpecies = await findSpecies(page, 'at');
+    await selectSpeciesFromSuggestions(page, firstSpecies);
+    await page.getByRole('button', { name: 'Save and continue' }).click();
+    await expect(page).toHaveURL(/\/species-selection$/);
 
-    await expect(page.getByLabel('Herring (HER)')).toBeVisible();
-    await expect(page.getByLabel('Mackerel (MAC)')).toBeVisible();
+    await openAddSpecies(page);
+    const secondSpecies = await findSpecies(page, 'ha');
+    await selectSpeciesFromSuggestions(page, secondSpecies);
+    await page.getByRole('button', { name: 'Save and continue' }).click();
+    await expect(page).toHaveURL(/\/species-selection$/);
+
+    await expect(page.getByLabel(firstSpecies)).toBeVisible();
+    await expect(page.getByLabel(secondSpecies)).toBeVisible();
   });
 
-  test('TS06 - an already-added species is omitted from the available species options', async ({ page }) => {
-    await addSpecies(page, 'Herring (HER)');
+  test('TS06 - an already-added species remains available in search suggestions', async ({ page }) => {
     await openAddSpecies(page);
-
-    await expect(page.locator('#species-options option[value="Herring (HER)"]')).toHaveCount(0);
-    await expect(page.locator('#species-options option[value="Mackerel (MAC)"]')).toHaveCount(1);
+    const addedSpecies = await findSpecies(page, 'at');
+    await selectSpeciesFromSuggestions(page, addedSpecies);
+    await page.getByRole('button', { name: 'Save and continue' }).click();
+    await expect(page).toHaveURL(/\/species-selection$/);
+    await openAddSpecies(page);
+    const remainingOptions = await speciesOptions(page, addedSpecies.slice(0, 2));
+    expect(remainingOptions).toContain(addedSpecies);
   });
 
   test('TS07 - arbitrary text that is not an approved species cannot be added', async ({ page }) => {
     await openAddSpecies(page);
-    await page.getByLabel(/Add species to your vessel/).fill('Not an approved species');
-    await page.getByRole('button', { name: 'Save and continue' }).click();
+    const invalidSpecies = `Not an approved species ${Date.now()}`;
+    await page.getByLabel(/Add species to your vessel/).fill(invalidSpecies);
+    await page.getByLabel(/Add species to your vessel/).press('Enter');
 
-    await expect(page.locator('.govuk-error-summary')).toContainText('Select a species to add');
+    await expect(page.locator('.govuk-error-summary')).toContainText('Enter the species you want to add');
     await expect(page).toHaveURL(/\/add-species/);
     await openSpeciesSelection(page);
-    await expect(page.getByLabel('Not an approved species')).toHaveCount(0);
+    await expect(page.getByLabel(invalidSpecies)).toHaveCount(0);
   });
 
   test('TS08 - prevents a duplicate species and displays the duplicate message', async ({ page }) => {
-    await addSpecies(page, 'Herring (HER)');
     await openAddSpecies(page);
-    await page.getByLabel(/Add species to your vessel/).fill('Herring (HER)');
+    const species = await findSpecies(page, 'at');
+    await selectSpeciesFromSuggestions(page, species);
+    await page.getByRole('button', { name: 'Save and continue' }).click();
+    await expect(page).toHaveURL(/\/species-selection$/);
+    await openAddSpecies(page);
+    await page.getByLabel(/Add species to your vessel/).fill(species);
+    const duplicateOption = page.getByRole('option', { name: species, exact: true });
+    if (await duplicateOption.isVisible()) await duplicateOption.click();
     await page.getByRole('button', { name: 'Save and continue' }).click();
 
     await expect(page.locator('.govuk-error-summary')).toContainText('This species has already been added.');
@@ -123,18 +193,30 @@ test.describe('Add species to a catch record', () => {
   });
 
   test('TS09 - retains existing species selection when adding another species', async ({ page }) => {
-    await addSpecies(page, 'Herring (HER)');
-    await page.getByLabel('Herring (HER)').check();
-    await page.locator('#weightAboveMinimum-her').fill('5');
+    await openAddSpecies(page);
+    const firstSpecies = await findSpecies(page, 'at');
+    await selectSpeciesFromSuggestions(page, firstSpecies);
+    await page.getByRole('button', { name: 'Save and continue' }).click();
+    await expect(page).toHaveURL(/\/species-selection$/);
+
+    const firstCheckbox = page.getByLabel(firstSpecies);
+    await firstCheckbox.check();
+    const speciesId = await firstCheckbox.getAttribute('value');
+    if (!speciesId) throw new Error('Expected the species checkbox to have an ID value');
+    await page.locator(`#weightAboveMinimum-${speciesId}`).fill('5');
     await page.getByRole('button', { name: 'Save and continue' }).click();
     await expect(page).toHaveURL(/\/catch-not-landed$/);
 
     await openSpeciesSelection(page);
-    await expect(page.getByLabel('Herring (HER)')).toBeChecked();
-    await addSpecies(page, 'Mackerel (MAC)');
+    await expect(page.getByLabel(firstSpecies)).toBeChecked();
+    await openAddSpecies(page);
+    const secondSpecies = await findSpecies(page, 'ha');
+    await selectSpeciesFromSuggestions(page, secondSpecies);
+    await page.getByRole('button', { name: 'Save and continue' }).click();
+    await expect(page).toHaveURL(/\/species-selection$/);
 
-    await expect(page.getByLabel('Herring (HER)')).toBeChecked();
-    await expect(page.getByLabel('Mackerel (MAC)')).toBeVisible();
+    await expect(page.getByLabel(firstSpecies)).toBeChecked();
+    await expect(page.getByLabel(secondSpecies)).toBeVisible();
   });
 
   test('TS10 - requires at least one species before continuing', async ({ page }) => {

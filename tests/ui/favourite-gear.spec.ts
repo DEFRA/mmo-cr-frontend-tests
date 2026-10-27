@@ -23,9 +23,6 @@ const removeGears = async (accountPage: AccountPage, removeGearPage: RemoveGearP
 };
 
 test.describe('Favourite Gear Management (Account Page)', () => {
-  // All tests share one account's gear list, so parallel runs would interfere
-  test.describe.configure({ mode: 'serial' });
-
   test.beforeEach(async ({ signInPage, recordsPage, accountPage }) => {
     await signInPage.goto('/sign-in');
     await signInPage.login(email, password);
