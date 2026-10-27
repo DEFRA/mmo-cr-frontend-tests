@@ -1,7 +1,6 @@
 .DS_Store
 .npm/
-.vscode/*
-!.vscode/settings.json
+.vscode
 .idea
 .server
 node_modules
