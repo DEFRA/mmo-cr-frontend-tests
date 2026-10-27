@@ -1,4 +1,5 @@
 import { expect, type Locator } from '@playwright/test';
+import { expect, type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
 export class AddGearPage extends BasePage {

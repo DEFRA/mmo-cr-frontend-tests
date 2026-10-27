@@ -170,12 +170,7 @@ test.describe('Create and amend favourites', () => {
     await expect(accountPage.summaryRow('Gear onboard')).toBeVisible();
   });
 
-  test('TC2 - Add an approved species favourite', async ({
-    page,
-    accountPage,
-    addSpeciesPage,
-    removeSpeciesPage
-  }) => {
+  test('TC2 - Add an approved species favourite', async ({ page, accountPage, addSpeciesPage, removeSpeciesPage }) => {
     await removeSpeciesFromAccount(page, accountPage, removeSpeciesPage, favouriteSpecies);
     await addSpeciesToAccount(page, accountPage, addSpeciesPage, favouriteSpecies);
 
@@ -258,7 +253,11 @@ test.describe('Create and amend favourites', () => {
     await expect(accountPage.portsUsedValue()).not.toContainText(favouritePort);
   });
 
-  test('TC11 - Amend a port favourite by replacing it with another saved port', async ({ page, accountPage, addPortPage }) => {
+  test('TC11 - Amend a port favourite by replacing it with another saved port', async ({
+    page,
+    accountPage,
+    addPortPage
+  }) => {
     const replacementPort = 'Lowestoft';
     await ensurePortAdded(page, accountPage, addPortPage, favouritePort);
     await removePortFromAccount(page, accountPage, favouritePort);
@@ -325,11 +324,7 @@ test.describe('Create and amend favourites', () => {
     await expect(addPortPage.portResultItem(favouritePort).getByRole('option')).toBeVisible();
   });
 
-  test('TC16 - Reject free-text gear outside the approved catalogue', async ({
-    page,
-    accountPage,
-    addGearPage
-  }) => {
+  test('TC16 - Reject free-text gear outside the approved catalogue', async ({ page, accountPage, addGearPage }) => {
     await accountPage.clickAddGear();
     await addGearPage.gearInput().fill('Not a catalogue gear');
     await addGearPage.clickSaveAndContinue();
@@ -351,11 +346,7 @@ test.describe('Create and amend favourites', () => {
     await expect(page).toHaveURL(/\/add-species/);
   });
 
-  test('TC18 - Reject free-text port outside the approved catalogue', async ({
-    page,
-    accountPage,
-    addPortPage
-  }) => {
+  test('TC18 - Reject free-text port outside the approved catalogue', async ({ page, accountPage, addPortPage }) => {
     await accountPage.addPortLink().click();
     await addPortPage.portInput().fill(`Not a port ${Date.now()}`);
     await page.getByRole('button', { name: 'Save and continue' }).click();
