@@ -12,7 +12,7 @@ export class RemoveSpeciesPage extends BasePage {
 
   public readonly errorMessage = (): Locator => this.page.locator('.govuk-error-message');
 
-  public readonly continueButton = (): Locator => this.page.getByRole('button', { name: 'Continue', exact: true });
+  public readonly continueButton = (): Locator => this.common.saveAndContinueButton();
 
   async selectSpeciesToRemove(speciesName: string) {
     await this.speciesCheckbox(speciesName).check();

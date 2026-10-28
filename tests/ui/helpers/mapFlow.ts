@@ -67,6 +67,32 @@ export class MapFlow {
     return portName;
   }
 
+  async fetchSubrectangles(): Promise<SubrectangleReference[]> {
+    return (await this.fetchMapData<{ subrectangles: SubrectangleReference[] }>('subrectangles.json')).subrectangles;
+  }
+
+  async fetchLandFeatures(): Promise<LandFeature[]> {
+    return (await this.fetchMapData<{ land: LandFeature[] }>('land.json')).land;
+  }
+
+  private async fetchMapData<T>(file: string): Promise<T> {
+    const response = await this.mapPage.page.request.get(`/public/offline-map/${file}`);
+    expect(response.ok()).toBeTruthy();
+    return (await response.json()) as T;
+  }
+
+  async failFirstSubrectanglesRequest(): Promise<void> {
+    let firstRequest = true;
+    await this.mapPage.page.route('**/public/offline-map/subrectangles.json', async (route) => {
+      if (firstRequest) {
+        firstRequest = false;
+        await route.abort();
+        return;
+      }
+      await route.continue();
+    });
+  }
+
   private static pointInRing([longitude, latitude]: Point, ring: Point[]): boolean {
     let inside = false;
     for (let index = 0, previous = ring.length - 1; index < ring.length; previous = index++) {

@@ -1,5 +1,4 @@
 import { expect, test } from '../../fixtures/commonfixture';
-import { type SpeciesSelectionPage } from '../../pages/speciesSelectionPage';
 
 test.describe('Add species to a catch record', () => {
   test.beforeEach(async ({ navigationFlow }) => {
@@ -179,9 +178,9 @@ test.describe('Add species to a catch record', () => {
 
     const firstCheckbox = speciesSelectionPage.speciesCheckbox(firstSpecies);
     await firstCheckbox.check();
-    const speciesId = await firstCheckbox.getAttribute('value');
-    if (!speciesId) throw new Error('Expected the species checkbox to have an ID value');
-    await speciesSelectionPage.weightAboveMinimumInput(speciesId).fill('5');
+    const speciesCode = firstSpecies.match(/\((\w+)\)$/)?.[1];
+    if (!speciesCode) throw new Error(`Expected a species code in "${firstSpecies}"`);
+    await speciesSelectionPage.weightAboveMinimumInput(speciesCode).fill('5');
     await speciesSelectionPage.clickSaveAndContinue();
     await speciesSelectionPage.expectUrl(/\/catch-not-landed$/);
 

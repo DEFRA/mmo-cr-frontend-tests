@@ -11,6 +11,10 @@ export class StatisticalAreaOtherPage extends BasePage {
 
   public readonly otherRadio = (): Locator => this.page.getByLabel('Other', { exact: true });
 
+  // Suggestions depend on the departure port, so tests should not hard-code an area code
+  public readonly suggestedAreaRadios = (): Locator =>
+    this.page.locator('input[name="statisticalArea"]:not([value="other"])');
+
   public readonly alternativeAreaInput = (): Locator => this.page.locator('#alternativeStatisticalArea');
 
   public readonly alternativeAreaResultsList = (): Locator => this.page.locator('#statistical-area-results');
@@ -25,11 +29,6 @@ export class StatisticalAreaOtherPage extends BasePage {
       .getByRole('option')
       .filter({ has: this.page.getByText(areaName, { exact: true }) })
       .locator('.app-statistical-area-search__option-detail');
-
-  public readonly noResultsMessage = (): Locator =>
-    this.alternativeAreaResultsList()
-      .locator('li')
-      .filter({ hasText: /no results/i });
 
   public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
 

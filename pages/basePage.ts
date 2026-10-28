@@ -29,6 +29,7 @@ export abstract class BasePage {
     privacyPolicyLink: (): Locator => this.page.getByRole('link', { name: 'Privacy policy' }),
     accessibilityStatementLink: (): Locator => this.page.getByRole('link', { name: 'Accessibility Statement' })
   };
+
   async goto(url: string) {
     try {
       await this.page.goto(url, { waitUntil: 'load' });
@@ -40,6 +41,32 @@ export abstract class BasePage {
       await this.page.waitForTimeout(10_000);
       await this.page.goto(url, { waitUntil: 'load' });
     }
+  }
+
+  async goBack() {
+    await this.page.goBack();
+  }
+
+  async reload() {
+    await this.page.reload();
+  }
+
+  async resizeViewportAndReload(width: number, height: number) {
+    await this.page.setViewportSize({ width, height });
+    await this.page.reload();
+  }
+
+  public readonly htmlRoot = (): Locator => this.page.locator('html');
+
+  async pressKey(key: string) {
+    await this.page.keyboard.press(key);
+  }
+
+  async tabUntilFocused(target: Locator, maxTabs = 20) {
+    for (let tab = 0; tab < maxTabs && !(await target.evaluate((el) => el === document.activeElement)); tab++) {
+      await this.pressKey('Tab');
+    }
+    await expect(target).toBeFocused();
   }
 
   async acceptCookies() {

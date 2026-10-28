@@ -1,7 +1,5 @@
 import { expect, test } from '../../../fixtures/commonfixture';
 
-const accountPath = '/account';
-
 test.describe('Favourites', () => {
   test.beforeEach(async ({ navigationFlow }) => {
     await navigationFlow.signInAndOpenAccount();
@@ -22,14 +20,14 @@ test.describe('Favourites', () => {
       await expect(accountPage.portsUsedValue()).toContainText('Plymouth');
     });
 
-    test('rejects a port that is not in the reference data', async ({ page, accountPage, addPortPage }) => {
+    test('rejects a port that is not in the reference data', async ({ accountPage, addPortPage }) => {
       await accountPage.addPortLink().click();
       await addPortPage.portInput().fill('Notaport Town');
       await addPortPage.clickSaveAndContinue();
 
       await expect(addPortPage.errorSummary()).toContainText('Select a port from the list');
       await addPortPage.expectUrl(/\/add-port/);
-      await page.goto(accountPath);
+      await accountPage.goto('/account');
       await expect(accountPage.portsUsedValue()).not.toContainText('Notaport Town');
     });
 
@@ -41,22 +39,22 @@ test.describe('Favourites', () => {
     });
 
     test('does not create a duplicate when an existing favourite port is added again', async ({
-      page,
       accountPage,
       addPortPage
     }) => {
-      const existing = (await accountPage.portsUsedValue().innerText()).trim().split('\n')[0]!.trim();
+      const [existing] = await accountPage.getPortsUsed();
+      if (!existing) throw new Error('Expected at least one saved port');
       await accountPage.addPortLink().click();
       await addPortPage.searchAndSelectPort(existing);
       await addPortPage.clickSaveAndContinue();
 
-      await page.goto(accountPath);
-      const ports = (await accountPage.portsUsedValue().innerText()).split('\n').map((p) => p.trim());
-      expect(ports.filter((p) => p === existing)).toHaveLength(1);
+      await accountPage.goto('/account');
+      expect((await accountPage.getPortsUsed()).filter((p) => p === existing)).toHaveLength(1);
     });
 
     test('tells the user when the port is already a favourite', async ({ accountPage, addPortPage }) => {
-      const existing = (await accountPage.portsUsedValue().innerText()).trim().split('\n')[0]!.trim();
+      const [existing] = await accountPage.getPortsUsed();
+      if (!existing) throw new Error('Expected at least one saved port');
       await accountPage.addPortLink().click();
       await addPortPage.searchAndSelectPort(existing);
       await addPortPage.clickSaveAndContinue();
@@ -86,15 +84,11 @@ test.describe('Favourites', () => {
       await expect(accountPage.portsUsedValue()).not.toContainText('Plymouth');
     });
 
-    test('shows favourite ports first when searching for a departure port', async ({
-      page,
-      accountPage,
-      addPortPage
-    }) => {
+    test('shows favourite ports first when searching for a departure port', async ({ accountPage, addPortPage }) => {
       test.fail(true, 'Known gap: port results are alphabetical and do not prioritise favourites');
       await expect(accountPage.portsUsedValue()).toContainText('Hastings');
 
-      await page.goto('/add-port?for=departure&entry=1');
+      await addPortPage.goto('/add-port?for=departure&entry=1');
       await addPortPage.portInput().fill('Ha');
       await expect(addPortPage.portResultItem('Hastings')).toBeVisible();
       await expect(addPortPage.portResultsList().locator('li').first()).toHaveText(/Hastings/, { timeout: 5000 });

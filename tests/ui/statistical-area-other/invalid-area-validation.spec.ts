@@ -52,12 +52,11 @@ test.describe('Statistical Sub Area – Other Selection', () => {
       await expect(statisticalAreaOtherPage.alternativeAreaInput()).toBeFocused();
     });
 
-    test('no results message is shown when a non-existent area code is searched', async ({
-      statisticalAreaOtherPage
-    }) => {
+    test('no suggestions are shown when a non-existent area code is searched', async ({ statisticalAreaOtherPage }) => {
       await statisticalAreaOtherPage.typeInAlternativeArea('99.99.z');
 
-      await expect(statisticalAreaOtherPage.noResultsMessage()).toBeVisible();
+      await expect(statisticalAreaOtherPage.alternativeAreaResultsList()).toBeHidden();
+      await expect(statisticalAreaOtherPage.alternativeAreaResultItems()).toHaveCount(0);
     });
 
     test('validation error is cleared after selecting a valid area', async ({ statisticalAreaOtherPage }) => {

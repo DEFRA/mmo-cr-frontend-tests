@@ -1,15 +1,10 @@
 import { expect, test } from '../../fixtures/commonfixture';
 
-const accountPath = '/account';
-
 function occurrences(text: string, value: string): number {
   return text.split(value).length - 1;
 }
 
 test.describe('Add favourite gear', () => {
-  // Tests share one account's favourite gear, so parallel runs would interfere
-  test.describe.configure({ mode: 'serial' });
-
   test.beforeEach(async ({ navigationFlow, gearFlow }) => {
     await navigationFlow.signIn();
     await gearFlow.removeSavedGears(['Long line', 'Set net', 'Pots']);
@@ -56,7 +51,6 @@ test.describe('Add favourite gear', () => {
   test('saves gear with measurements and makes it available for the next catch record', async ({
     navigationFlow,
     gearFlow,
-    page,
     accountPage,
     gearSelectionPage
   }) => {
@@ -64,7 +58,7 @@ test.describe('Add favourite gear', () => {
     const gearName = await gearFlow.saveLineGear();
 
     await expect(accountPage.gearOnboardValue()).toContainText(gearName);
-    await page.goto('/gear-selection');
+    await gearSelectionPage.goto('/gear-selection');
     await expect(gearSelectionPage.gearCheckbox(gearName)).toBeVisible();
   });
 
@@ -96,7 +90,6 @@ test.describe('Add favourite gear', () => {
   test('blocks adding a gear that is already a favourite', async ({
     navigationFlow,
     gearFlow,
-    page,
     addGearPage,
     accountPage
   }) => {
@@ -111,7 +104,7 @@ test.describe('Add favourite gear', () => {
     await expect(addGearPage.errorSummary()).toContainText('Pots has already been added to your gear');
     await expect(addGearPage.errorMessage()).toContainText('Pots has already been added to your gear');
 
-    await page.goto(accountPath);
+    await accountPage.goto('/account');
     expect(occurrences(await accountPage.getGearOnboardText(), 'Pots')).toBe(1);
     await expect(accountPage.gearOnboardValue()).toContainText(/: 45/);
   });
@@ -119,7 +112,6 @@ test.describe('Add favourite gear', () => {
   test('lists a duplicate-attempted gear only once on the remove gear page', async ({
     navigationFlow,
     gearFlow,
-    page,
     addGearPage,
     accountPage,
     removeGearPage
@@ -130,7 +122,7 @@ test.describe('Add favourite gear', () => {
     await addGearPage.gearInput().fill('Pots');
     await addGearPage.clickSaveAndContinue();
 
-    await page.goto(accountPath);
+    await accountPage.goto('/account');
     await accountPage.clickRemoveGear();
     await expect(removeGearPage.gearCheckbox('Pots')).toHaveCount(1);
   });
@@ -198,7 +190,6 @@ test.describe('Add favourite gear', () => {
   test('offers saved gear when starting a new catch record in the same session', async ({
     navigationFlow,
     gearFlow,
-    page,
     recordsPage,
     accountPage,
     gearSelectionPage,
@@ -208,50 +199,34 @@ test.describe('Add favourite gear', () => {
     const gearName = await gearFlow.saveLineGear();
 
     await expect(accountPage.gearOnboardValue()).toContainText(gearName);
-    await page.goto('/records');
+    await recordsPage.goto('/records');
     await recordsPage.createNewRecordButton().click();
     await expect(selectVesselPage.pageHeading()).toBeVisible();
     await selectVesselPage.firstVesselRadio().check();
     await selectVesselPage.clickSaveAndContinue();
     await selectVesselPage.expectUrl(/\/trip-date$/);
-    await page.goto('/gear-selection');
+    await gearSelectionPage.goto('/gear-selection');
 
     await expect(gearSelectionPage.gearCheckbox(gearName)).toBeVisible();
   });
 
-  test('can save selected gear using the keyboard', async ({
-    navigationFlow,
-    gearFlow,
-    page,
-    addGearPage,
-    accountPage
-  }) => {
+  test('can save selected gear using the keyboard', async ({ navigationFlow, gearFlow, addGearPage, accountPage }) => {
     await navigationFlow.openAddGear();
     const gearName = await gearFlow.findGear('lo', (name) => /line/i.test(name));
     await addGearPage.searchAndSelectGear(gearName);
 
     const saveAndContinueButton = addGearPage.common.saveAndContinueButton();
-    for (
-      let tab = 0;
-      tab < 20 && !(await saveAndContinueButton.evaluate((button) => button === document.activeElement));
-      tab++
-    ) {
-      await page.keyboard.press('Tab');
-    }
-    await expect(saveAndContinueButton).toBeFocused();
-    await page.keyboard.press('Enter');
+    await addGearPage.tabUntilFocused(saveAndContinueButton);
+    await addGearPage.pressKey('Enter');
 
     await expect(addGearPage.measurementsHeading()).toBeVisible();
     for (const input of await addGearPage.measurementInputs().all()) {
-      for (let tab = 0; tab < 20 && !(await input.evaluate((element) => element === document.activeElement)); tab++) {
-        await page.keyboard.press('Tab');
-      }
-      await expect(input).toBeFocused();
-      await page.keyboard.type('1');
-      await page.keyboard.press('Tab');
+      await addGearPage.tabUntilFocused(input);
+      await addGearPage.pressKey('1');
+      await addGearPage.pressKey('Tab');
     }
     await expect(saveAndContinueButton).toBeFocused();
-    await page.keyboard.press('Enter');
+    await addGearPage.pressKey('Enter');
 
     await accountPage.expectUrl(/\/account$/);
     await expect(accountPage.gearOnboardValue()).toContainText(gearName);

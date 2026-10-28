@@ -12,7 +12,9 @@ export class AccountPage extends BasePage {
 
   public readonly summaryRow = (key: string): Locator =>
     this.page.locator('.govuk-summary-list__row').filter({
-      has: this.page.locator('.govuk-summary-list__key', { hasText: key })
+      has: this.page.locator('.govuk-summary-list__key', {
+        hasText: new RegExp(`^\\s*${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`)
+      })
     });
 
   public readonly summaryValue = (key: string): Locator => this.summaryRow(key).locator('.govuk-summary-list__value');
@@ -41,6 +43,21 @@ export class AccountPage extends BasePage {
 
   public readonly viewAllCatchRecordsButton = (): Locator =>
     this.page.getByRole('button', { name: 'View all catch records' });
+
+  async getPortsUsed(): Promise<string[]> {
+    return this.listValues(this.portsUsedValue());
+  }
+
+  async getSpeciesCaught(): Promise<string[]> {
+    return this.listValues(this.speciesCaughtValue());
+  }
+
+  private async listValues(value: Locator): Promise<string[]> {
+    return (await value.innerText())
+      .split('\n')
+      .map((item) => item.trim())
+      .filter(Boolean);
+  }
 
   async getGearOnboardText(): Promise<string> {
     const text = await this.gearOnboardValue().textContent();

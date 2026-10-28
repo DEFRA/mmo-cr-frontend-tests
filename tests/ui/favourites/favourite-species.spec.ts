@@ -1,7 +1,5 @@
 import { expect, test } from '../../../fixtures/commonfixture';
 
-const accountPath = '/account';
-
 test.describe('Favourites', () => {
   test.beforeEach(async ({ navigationFlow }) => {
     await navigationFlow.signInAndOpenAccount();
@@ -18,7 +16,6 @@ test.describe('Favourites', () => {
     });
 
     test('blocks a duplicate favourite species with an informative message', async ({
-      page,
       accountPage,
       addSpeciesPage
     }) => {
@@ -27,15 +24,14 @@ test.describe('Favourites', () => {
       await addSpeciesPage.clickSaveAndContinue();
 
       await expect(addSpeciesPage.errorSummary()).toContainText('This species has already been added.');
-      await page.goto(accountPath);
-      const species = await accountPage.speciesCaughtValue().innerText();
-      expect(species.split('Atlantic cod (COD)')).toHaveLength(2);
+      await accountPage.goto('/account');
+      expect((await accountPage.getSpeciesCaught()).filter((s) => s === 'Atlantic cod (COD)')).toHaveLength(1);
     });
 
     test('rejects a species that is not in the reference data', async ({ accountPage, addSpeciesPage }) => {
       await accountPage.addSpeciesLink().click();
       await addSpeciesPage.speciesInput().fill('Not a fish');
-      await expect(addSpeciesPage.page.getByText('No results found')).toBeVisible();
+      await expect(addSpeciesPage.noResultsMessage()).toBeVisible();
       await addSpeciesPage.speciesInput().press('Escape');
       await addSpeciesPage.clickSaveAndContinue();
 
@@ -65,7 +61,6 @@ test.describe('Favourites', () => {
     });
 
     test('shows favourite species on the catch record species page', async ({
-      page,
       accountPage,
       addSpeciesPage,
       speciesSelectionPage
@@ -73,12 +68,9 @@ test.describe('Favourites', () => {
       await accountPage.addSpeciesLink().click();
       await addSpeciesPage.searchAndSelectSpecies('European plaice (PLE)');
       await addSpeciesPage.clickSaveAndContinue();
-      const favourites = (await accountPage.speciesCaughtValue().innerText())
-        .split('\n')
-        .map((s) => s.trim())
-        .filter(Boolean);
+      const favourites = await accountPage.getSpeciesCaught();
 
-      await page.goto('/species-selection');
+      await speciesSelectionPage.goto('/species-selection');
       for (const species of favourites) {
         await expect(speciesSelectionPage.speciesCheckbox(species)).toBeVisible();
       }

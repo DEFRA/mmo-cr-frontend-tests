@@ -11,6 +11,8 @@ export class AddSpeciesPage extends BasePage {
 
   public readonly errorMessage = (): Locator => this.page.locator('#species-error');
 
+  public readonly noResultsMessage = (): Locator => this.page.getByText('No results found');
+
   public readonly searchResults = (): Locator => this.page.getByRole('listbox').getByRole('option');
 
   public readonly suggestionOption = (speciesName: string): Locator =>

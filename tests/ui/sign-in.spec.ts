@@ -23,13 +23,10 @@ test.describe('Sign in', () => {
     await signInPage.expectUrl('/forgotten-password');
   });
 
-  test('create an account guidance can be expanded and collapsed', async ({ signInPage }) => {
+  test('create an account guidance can be collapsed and expanded', async ({ signInPage }) => {
     await signInPage.goto('/sign-in');
 
-    await expect(signInPage.registrationGuidance()).toBeHidden();
-
-    await signInPage.registerLink().click();
-
+    // Guidance is expanded by default
     await expect(signInPage.registrationGuidance()).toBeVisible();
     await expect(signInPage.registrationGuidance()).toContainText(
       'You will receive an email invitation to register when your vessel is added to the system.'
@@ -39,7 +36,9 @@ test.describe('Sign in', () => {
     );
 
     await signInPage.registerLink().click();
-
     await expect(signInPage.registrationGuidance()).toBeHidden();
+
+    await signInPage.registerLink().click();
+    await expect(signInPage.registrationGuidance()).toBeVisible();
   });
 });

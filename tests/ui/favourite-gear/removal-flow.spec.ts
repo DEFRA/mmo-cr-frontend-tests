@@ -38,7 +38,7 @@ test.describe('Favourite Gear Management (Account Page)', () => {
       await favouritesFlow.removeGears('Pots');
       await expect(accountPage.gearOnboardValue()).not.toContainText('Pots');
 
-      await accountPage.page.reload();
+      await accountPage.reload();
 
       await expect(accountPage.gearOnboardValue()).not.toContainText('Pots');
     });

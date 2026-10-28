@@ -111,19 +111,15 @@ test.describe('Create and amend favourites', () => {
     await expect(accountPage.portsUsedValue()).toContainText(replacementPort);
   });
 
-  test('Favourite gear is available during catch recording', async ({ favouritesFlow, page, gearSelectionPage }) => {
+  test('Favourite gear is available during catch recording', async ({ favouritesFlow, gearSelectionPage }) => {
     await favouritesFlow.ensureGearAdded(favouriteGear);
-    await page.goto('/gear-selection');
+    await gearSelectionPage.goto('/gear-selection');
     await expect(gearSelectionPage.gearCheckbox(favouriteGear)).toBeVisible();
   });
 
-  test('Favourite species is available during catch recording', async ({
-    favouritesFlow,
-    page,
-    speciesSelectionPage
-  }) => {
+  test('Favourite species is available during catch recording', async ({ favouritesFlow, speciesSelectionPage }) => {
     await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
-    await page.goto('/species-selection');
+    await speciesSelectionPage.goto('/species-selection');
 
     await expect(speciesSelectionPage.speciesCheckbox(favouriteSpecies)).toBeVisible();
   });
@@ -184,19 +180,15 @@ test.describe('Create and amend favourites', () => {
     await addPortPage.expectUrl(/\/add-port/);
   });
 
-  test('Favourites persist against the user account after reload', async ({ favouritesFlow, page, accountPage }) => {
+  test('Favourites persist against the user account after reload', async ({ favouritesFlow, accountPage }) => {
     await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
     await favouritesFlow.ensureGearAdded(favouriteGear);
     await favouritesFlow.ensurePortAdded(favouritePort);
-    await page.reload();
+    await accountPage.reload();
 
     await expect(accountPage.speciesCaughtValue()).toContainText(favouriteSpecies);
     await expect(accountPage.gearOnboardValue()).toContainText(favouriteGear);
     await expect(accountPage.portsUsedValue()).toContainText(favouritePort);
     await favouritesFlow.removeGearFromAccount(favouriteGear);
-  });
-
-  test('Favourites synchronize between web and mobile channels', async () => {
-    test.skip(true, 'Cross-channel sync requires the mobile app and sync-service test fixtures.');
   });
 });

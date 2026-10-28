@@ -1,7 +1,5 @@
 import { expect, test } from '../../../fixtures/commonfixture';
 
-const AREA_A = '27E06';
-
 test.describe('Statistical Sub Area – Other Selection', () => {
   test.beforeEach(async ({ navigationFlow }) => {
     await navigationFlow.openStatisticalAreaOther();
@@ -24,7 +22,7 @@ test.describe('Statistical Sub Area – Other Selection', () => {
       await statisticalAreaOtherPage.selectAreaRadio('Other');
       await expect(statisticalAreaOtherPage.alternativeAreaInput()).toBeVisible();
 
-      await statisticalAreaOtherPage.selectAreaRadio(AREA_A);
+      await statisticalAreaOtherPage.suggestedAreaRadios().first().check();
       await expect(statisticalAreaOtherPage.alternativeAreaInput()).toBeHidden();
     });
   });
