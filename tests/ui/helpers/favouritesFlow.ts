@@ -81,6 +81,20 @@ export class FavouritesFlow {
     await expect(accountPage.gearOnboardValue()).not.toContainText(gearName);
   }
 
+  async setupFavouriteGears(gears: string[]): Promise<void> {
+    for (const gear of gears) {
+      await this.ensureGearAdded(gear);
+    }
+  }
+
+  async removeGears(...gears: string[]): Promise<void> {
+    const { accountPage, removeGearPage } = this.pages;
+
+    await accountPage.clickRemoveGear();
+    await removeGearPage.selectGearToRemove(...gears);
+    await removeGearPage.clickContinue();
+  }
+
   async addPortToAccount(portName: string): Promise<void> {
     const { accountPage, addPortPage } = this.pages;
 

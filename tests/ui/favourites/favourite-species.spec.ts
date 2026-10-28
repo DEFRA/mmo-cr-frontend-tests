@@ -10,8 +10,7 @@ test.describe('Favourites', () => {
   test.describe('Favourite species', () => {
     test('adds a species from the approved list to favourites', async ({ accountPage, addSpeciesPage }) => {
       await accountPage.addSpeciesLink().click();
-      await expect(addSpeciesPage.speciesOption('European plaice (PLE)')).toHaveCount(1);
-      await addSpeciesPage.speciesInput().fill('European plaice (PLE)');
+      await addSpeciesPage.searchAndSelectSpecies('European plaice (PLE)');
       await addSpeciesPage.clickSaveAndContinue();
 
       await accountPage.expectUrl(/\/account$/);
@@ -24,8 +23,7 @@ test.describe('Favourites', () => {
       addSpeciesPage
     }) => {
       await accountPage.addSpeciesLink().click();
-      await expect(addSpeciesPage.speciesOption('Atlantic cod (COD)')).toHaveCount(0);
-      await addSpeciesPage.speciesInput().fill('Atlantic cod (COD)');
+      await addSpeciesPage.searchAndSelectSpecies('Atlantic cod (COD)');
       await addSpeciesPage.clickSaveAndContinue();
 
       await expect(addSpeciesPage.errorSummary()).toContainText('This species has already been added.');
@@ -37,9 +35,11 @@ test.describe('Favourites', () => {
     test('rejects a species that is not in the reference data', async ({ accountPage, addSpeciesPage }) => {
       await accountPage.addSpeciesLink().click();
       await addSpeciesPage.speciesInput().fill('Not a fish');
+      await expect(addSpeciesPage.page.getByText('No results found')).toBeVisible();
+      await addSpeciesPage.speciesInput().press('Escape');
       await addSpeciesPage.clickSaveAndContinue();
 
-      await expect(addSpeciesPage.errorSummary()).toContainText('Select a species to add');
+      await expect(addSpeciesPage.errorSummary()).toContainText('Enter the species you want to add');
       await addSpeciesPage.expectUrl(/\/add-species/);
     });
 
@@ -52,7 +52,7 @@ test.describe('Favourites', () => {
 
     test('removes a favourite species from the account', async ({ accountPage, addSpeciesPage, removeSpeciesPage }) => {
       await accountPage.addSpeciesLink().click();
-      await addSpeciesPage.speciesInput().fill('European plaice (PLE)');
+      await addSpeciesPage.searchAndSelectSpecies('European plaice (PLE)');
       await addSpeciesPage.clickSaveAndContinue();
       await expect(accountPage.speciesCaughtValue()).toContainText('European plaice (PLE)');
 
@@ -71,7 +71,7 @@ test.describe('Favourites', () => {
       speciesSelectionPage
     }) => {
       await accountPage.addSpeciesLink().click();
-      await addSpeciesPage.speciesInput().fill('European plaice (PLE)');
+      await addSpeciesPage.searchAndSelectSpecies('European plaice (PLE)');
       await addSpeciesPage.clickSaveAndContinue();
       const favourites = (await accountPage.speciesCaughtValue().innerText())
         .split('\n')

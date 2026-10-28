@@ -56,13 +56,13 @@ test.describe('Favourites', () => {
     });
 
     test('tells the user when the port is already a favourite', async ({ accountPage, addPortPage }) => {
-      test.fail(true, 'Known gap: duplicate port is silently ignored with no informative message');
       const existing = (await accountPage.portsUsedValue().innerText()).trim().split('\n')[0]!.trim();
       await accountPage.addPortLink().click();
       await addPortPage.searchAndSelectPort(existing);
       await addPortPage.clickSaveAndContinue();
 
-      await expect(addPortPage.errorSummary()).toBeVisible({ timeout: 5000 });
+      await expect(addPortPage.errorSummary()).toContainText(`${existing} is already saved in your favourites`);
+      await addPortPage.expectUrl(/\/add-port/);
     });
 
     test('requires a port to be selected before removing', async ({ accountPage, removePortPage }) => {

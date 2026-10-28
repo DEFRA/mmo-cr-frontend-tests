@@ -7,11 +7,6 @@ export class AddSpeciesPage extends BasePage {
 
   public readonly speciesInput = (): Locator => this.page.locator('#species');
 
-  public readonly speciesOptions = (): Locator => this.page.locator('#species-options');
-
-  public readonly speciesOption = (speciesName: string): Locator =>
-    this.speciesOptions().locator(`option[value="${speciesName}"]`);
-
   public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
 
   public readonly errorMessage = (): Locator => this.page.locator('#species-error');
@@ -21,10 +16,12 @@ export class AddSpeciesPage extends BasePage {
   public readonly suggestionOption = (speciesName: string): Locator =>
     this.page.getByRole('option', { name: speciesName, exact: true });
 
-  // Since this uses an HTML5 datalist, filling the input and pressing Enter typically sets the value.
   async searchAndSelectSpecies(speciesName: string) {
-    await this.speciesInput().fill(speciesName);
-    await this.page.keyboard.press('Enter');
+    await this.speciesInput().fill(speciesName.slice(0, 2));
+    const option = this.suggestionOption(speciesName);
+    await option.scrollIntoViewIfNeeded();
+    await option.click();
+    await expect(this.speciesInput()).toHaveValue(speciesName);
   }
 
   async searchSpeciesOptions(searchTerm: string): Promise<string[]> {

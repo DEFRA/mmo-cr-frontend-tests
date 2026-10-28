@@ -54,6 +54,7 @@ export class GearFlow {
 
     await addGearPage.searchAndSelectGear(gearName);
     await addGearPage.clickSaveAndContinue();
+    await expect(addGearPage.pageHeading()).toBeHidden();
 
     if (await addGearPage.measurementsHeading().isVisible()) {
       for (const input of await addGearPage.measurementInputs().all()) {
