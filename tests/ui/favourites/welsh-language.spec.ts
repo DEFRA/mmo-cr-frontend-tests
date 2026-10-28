@@ -1,11 +1,10 @@
 import { expect, test } from '../../../fixtures/commonfixture';
-import { NavigationFlow } from '../helpers/navigationFlow';
 
 const accountPath = '/account';
 
 test.describe('Favourites', () => {
-  test.beforeEach(async ({ signInPage, accountPage }) => {
-    await NavigationFlow.signInAndOpenAccount(signInPage, accountPage);
+  test.beforeEach(async ({ navigationFlow }) => {
+    await navigationFlow.signInAndOpenAccount();
   });
 
   test.describe('Welsh language', () => {

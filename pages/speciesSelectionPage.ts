@@ -2,28 +2,32 @@ import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
 export class SpeciesSelectionPage extends BasePage {
-  // Uses a regex because the gear name is dynamically inserted into the heading
-  public readonly pageHeading = (): Locator =>
-    this.page.getByRole('heading', { name: /What species did you catch using .*\?/ });
+  public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: /What species did you catch\?/ });
 
   public readonly speciesCheckbox = (speciesName: string): Locator => this.page.getByLabel(speciesName);
 
   public readonly speciesCheckboxes = (): Locator => this.page.getByRole('checkbox');
 
+  // Field IDs use a species GUID, so scope to the conditional block revealed by the species checkbox
+  private readonly speciesSection = (speciesCode: string): Locator =>
+    this.page.locator(
+      `.govuk-checkboxes__item:has(label:has-text("(${speciesCode})")) + .govuk-checkboxes__conditional`
+    );
+
   public readonly weightAboveMinimumInput = (speciesCode: string): Locator =>
-    this.page.locator(`#weightAboveMinimum-${speciesCode.toLowerCase()}`);
+    this.speciesSection(speciesCode).locator('input[id^="weightAboveMinimum-"]');
 
   public readonly weightBelowMinimumInput = (speciesCode: string): Locator =>
-    this.page.locator(`#weightBelowMinimum-${speciesCode.toLowerCase()}`);
+    this.speciesSection(speciesCode).locator('input[id^="weightBelowMinimum-"]');
 
   public readonly weightDiscardedInput = (speciesCode: string): Locator =>
-    this.page.locator(`#weightDiscarded-${speciesCode.toLowerCase()}`);
+    this.speciesSection(speciesCode).locator('input[id^="weightDiscarded-"]');
 
   public readonly addWeightBelowMinimumLink = (speciesCode: string): Locator =>
-    this.page.locator(`.js-weight-toggle[data-target="weightBelowMinimum-${speciesCode.toLowerCase()}-group"]`);
+    this.speciesSection(speciesCode).locator('[data-target^="weightBelowMinimum-"]');
 
   public readonly addWeightDiscardedLink = (speciesCode: string): Locator =>
-    this.page.locator(`.js-weight-toggle[data-target="weightDiscarded-${speciesCode.toLowerCase()}-group"]`);
+    this.speciesSection(speciesCode).locator('[data-target^="weightDiscarded-"]');
 
   public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
 
@@ -32,7 +36,7 @@ export class SpeciesSelectionPage extends BasePage {
   public readonly speciesErrorMessage = (): Locator => this.page.locator('#speciesIds-error');
 
   public readonly weightAboveMinimumError = (speciesCode: string): Locator =>
-    this.page.locator(`#weightAboveMinimum-${speciesCode.toLowerCase()}-error`);
+    this.page.locator('.govuk-error-message[id^="weightAboveMinimum-"]').filter({ hasText: `(${speciesCode})` });
 
   public readonly weightBelowMinimumError = (speciesCode: string): Locator =>
     this.page.locator(`#weightBelowMinimum-${speciesCode.toLowerCase()}-error`);

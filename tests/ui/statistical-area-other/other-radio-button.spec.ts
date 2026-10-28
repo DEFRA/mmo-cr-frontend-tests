@@ -1,12 +1,8 @@
 import { expect, test } from '../../../fixtures/commonfixture';
-import { NavigationFlow } from '../helpers/navigationFlow';
-
-const AREA_A = '27.4.b';
-const AREA_B = '27.7.a';
 
 test.describe('Statistical Sub Area – Other Selection', () => {
-  test.beforeEach(async ({ statisticalAreaOtherPage }) => {
-    await NavigationFlow.openStatisticalAreaOther(statisticalAreaOtherPage);
+  test.beforeEach(async ({ navigationFlow }) => {
+    await navigationFlow.openStatisticalAreaOther();
   });
 
   test.describe('Other Radio Button', () => {

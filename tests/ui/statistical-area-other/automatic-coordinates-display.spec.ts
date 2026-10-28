@@ -1,38 +1,46 @@
 import { expect, test } from '../../../fixtures/commonfixture';
-import { NavigationFlow } from '../helpers/navigationFlow';
 
-const AREA_A = '27.4.b';
-const AREA_B = '27.7.a';
+const AREA_A = '46D86';
+const AREA_B = '27D86';
+const COORDINATES_PATTERN = /[-\u2212]?\d+\.\d+,\s*[-\u2212]?\d+\.\d+/;
 
 test.describe('Statistical Sub Area – Other Selection', () => {
-  test.beforeEach(async ({ statisticalAreaOtherPage }) => {
-    await NavigationFlow.openStatisticalAreaOther(statisticalAreaOtherPage);
+  test.beforeEach(async ({ navigationFlow }) => {
+    await navigationFlow.openStatisticalAreaOther();
   });
 
   test.describe('Automatic Coordinates Display', () => {
-    test('coordinates appear automatically when a valid area is selected from the dropdown', async ({
+    test('coordinates appear alongside a matching dropdown result before selection', async ({
       statisticalAreaOtherPage
     }) => {
-      await statisticalAreaOtherPage.searchAndSelectAlternativeArea(AREA_A);
+      await statisticalAreaOtherPage.typeInAlternativeArea(AREA_A.slice(0, 2));
 
-      await expect(statisticalAreaOtherPage.coordinatesDisplay()).toBeVisible();
-      await expect(statisticalAreaOtherPage.coordinatesDisplay()).toHaveText(/\S/);
+      const coords = statisticalAreaOtherPage.coordinatesDisplay(AREA_A);
+      await expect(coords).toBeVisible();
+      await expect(coords).toContainText(COORDINATES_PATTERN);
     });
 
-    test('coordinates update when a different valid area is selected', async ({ statisticalAreaOtherPage }) => {
-      const coords = statisticalAreaOtherPage.coordinatesDisplay();
-      await statisticalAreaOtherPage.searchAndSelectAlternativeArea(AREA_A);
-      await expect(coords).toHaveText(/\S/);
-      const firstCoords = (await coords.textContent()) ?? '';
+    test('coordinates update for matching results when the search changes', async ({ statisticalAreaOtherPage }) => {
+      await statisticalAreaOtherPage.typeInAlternativeArea(AREA_A.slice(0, 2));
+      const firstResult = statisticalAreaOtherPage.coordinatesDisplay(AREA_A);
+      await expect(firstResult).toBeVisible();
+      await expect(firstResult).toContainText(COORDINATES_PATTERN);
+      const firstCoords = (await firstResult.innerText()).match(COORDINATES_PATTERN)?.[0];
 
-      await statisticalAreaOtherPage.searchAndSelectAlternativeArea(AREA_B);
-      await expect(coords).not.toHaveText(firstCoords);
+      await statisticalAreaOtherPage.alternativeAreaInput().fill(AREA_B.slice(0, 2));
+      const secondResult = statisticalAreaOtherPage.coordinatesDisplay(AREA_B);
+      await expect(secondResult).toBeVisible();
+      await expect(secondResult).toContainText(COORDINATES_PATTERN);
+      const secondCoords = (await secondResult.innerText()).match(COORDINATES_PATTERN)?.[0];
+      expect(secondCoords).not.toEqual(firstCoords);
+      await expect(firstResult).toBeHidden();
     });
 
-    test('coordinates are not displayed before a valid area is selected', async ({ statisticalAreaOtherPage }) => {
-      await statisticalAreaOtherPage.typeInAlternativeArea('27');
-      await expect(statisticalAreaOtherPage.alternativeAreaResultsList()).toBeVisible();
-      await expect(statisticalAreaOtherPage.coordinatesDisplay()).toBeHidden();
+    test('coordinates are not displayed before searching', async ({ statisticalAreaOtherPage }) => {
+      await statisticalAreaOtherPage.selectAreaRadio('Other');
+      await expect(statisticalAreaOtherPage.alternativeAreaInput()).toBeEmpty();
+      await expect(statisticalAreaOtherPage.alternativeAreaResultsList()).toBeHidden();
+      await expect(statisticalAreaOtherPage.coordinatesDisplay(AREA_A)).toBeHidden();
     });
   });
 });

@@ -25,6 +25,11 @@ import { SubmittedRecordPage } from '../pages/submittedRecordPage';
 import { AccountPage } from '../pages/accountPage';
 import { RemoveGearPage } from '../pages/removeGearPage';
 import { RemovePortPage } from '../pages/removePortPage';
+import { MapFlow } from '../tests/ui/helpers/mapFlow';
+import { NavigationFlow } from '../tests/ui/helpers/navigationFlow';
+import { GearFlow } from '../tests/ui/helpers/gearFlow';
+import { SpeciesFlow } from '../tests/ui/helpers/speciesFlow';
+import { FavouritesFlow } from '../tests/ui/helpers/favouritesFlow';
 
 type CommonFixtures = {
   signInPage: SigninPage;
@@ -53,9 +58,60 @@ type CommonFixtures = {
   accountPage: AccountPage;
   removeGearPage: RemoveGearPage;
   removePortPage: RemovePortPage;
+  mapFlow: MapFlow;
+  navigationFlow: NavigationFlow;
+  gearFlow: GearFlow;
+  speciesFlow: SpeciesFlow;
+  favouritesFlow: FavouritesFlow;
 };
 
 export const test = base.extend<CommonFixtures>({
+  navigationFlow: async (
+    {
+      signInPage,
+      accountPage,
+      recordsPage,
+      speciesSelectionPage,
+      addSpeciesPage,
+      statisticalAreaOtherPage,
+      addPortPage,
+      confirmSamePortPage
+    },
+    use
+  ) => {
+    await use(
+      new NavigationFlow({
+        signInPage,
+        accountPage,
+        recordsPage,
+        speciesSelectionPage,
+        addSpeciesPage,
+        statisticalAreaOtherPage,
+        addPortPage,
+        confirmSamePortPage
+      })
+    );
+  },
+  gearFlow: async ({ addGearPage, accountPage, removeGearPage }, use) => {
+    await use(new GearFlow({ addGearPage, accountPage, removeGearPage }));
+  },
+  speciesFlow: async ({ addSpeciesPage }, use) => {
+    await use(new SpeciesFlow({ addSpeciesPage }));
+  },
+  favouritesFlow: async (
+    { accountPage, addSpeciesPage, removeSpeciesPage, removeGearPage, addPortPage, removePortPage, gearFlow },
+    use
+  ) => {
+    await use(
+      new FavouritesFlow(
+        { accountPage, addSpeciesPage, removeSpeciesPage, removeGearPage, addPortPage, removePortPage },
+        gearFlow
+      )
+    );
+  },
+  mapFlow: async ({ statisticalAreaPage, navigationFlow }, use) => {
+    await use(new MapFlow(statisticalAreaPage, navigationFlow));
+  },
   signInPage: async ({ page }: { page: Page }, use) => {
     const signInPage = new SigninPage(page);
     await use(signInPage);

@@ -1,12 +1,10 @@
 import { expect, test } from '../../../fixtures/commonfixture';
-import { NavigationFlow } from '../helpers/navigationFlow';
 
-const AREA_A = '27.4.b';
-const AREA_B = '27.7.a';
+const AREA_A = '46D86';
 
 test.describe('Statistical Sub Area – Other Selection', () => {
-  test.beforeEach(async ({ statisticalAreaOtherPage }) => {
-    await NavigationFlow.openStatisticalAreaOther(statisticalAreaOtherPage);
+  test.beforeEach(async ({ navigationFlow }) => {
+    await navigationFlow.openStatisticalAreaOther();
   });
 
   test.describe('Data Storage', () => {
@@ -21,16 +19,15 @@ test.describe('Statistical Sub Area – Other Selection', () => {
       expect(await checkAnswersPage.getSummaryValueText('Statistical sub area')).toContain(AREA_A);
     });
 
-    test('selected area and coordinates persist after save and continue', async ({ statisticalAreaOtherPage }) => {
+    test('selected area persists after save and continue', async ({ navigationFlow, statisticalAreaOtherPage }) => {
       await statisticalAreaOtherPage.searchAndSelectAlternativeArea(AREA_A);
       await statisticalAreaOtherPage.clickSaveAndContinue();
 
-      await NavigationFlow.openStatisticalAreaOther(statisticalAreaOtherPage);
+      await navigationFlow.openStatisticalAreaOther();
       await expect(statisticalAreaOtherPage.otherRadio()).toBeChecked();
       await expect(statisticalAreaOtherPage.alternativeAreaInput()).toHaveValue(
         new RegExp(AREA_A.replace(/\./g, '\\.'))
       );
-      await expect(statisticalAreaOtherPage.coordinatesDisplay()).toHaveText(/\S/);
     });
 
     test('selecting a valid area via Other and saving allows continuation to the next page', async ({

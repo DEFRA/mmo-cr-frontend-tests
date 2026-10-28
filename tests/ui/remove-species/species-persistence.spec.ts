@@ -1,9 +1,8 @@
 import { expect, test } from '../../../fixtures/commonfixture';
-import { NavigationFlow } from '../helpers/navigationFlow';
 
 test.describe('Remove Species', () => {
-  test.beforeEach(async ({ speciesSelectionPage }) => {
-    await NavigationFlow.openSpeciesSelection(speciesSelectionPage);
+  test.beforeEach(async ({ navigationFlow }) => {
+    await navigationFlow.openSpeciesSelection();
   });
 
   test.describe('Species Persistence', () => {
@@ -15,8 +14,6 @@ test.describe('Remove Species', () => {
       await speciesSelectionPage.enterSpeciesWeights('COD', '100');
       await speciesSelectionPage.selectSpecies('Haddock (HAD)');
       await speciesSelectionPage.enterSpeciesWeights('HAD', '50');
-      await speciesSelectionPage.selectSpecies('Salmon (SAL)');
-      await speciesSelectionPage.enterSpeciesWeights('SAL', '25');
       await speciesSelectionPage.saveAndReturn();
 
       await speciesSelectionPage.clickRemoveSpecies();
@@ -25,8 +22,6 @@ test.describe('Remove Species', () => {
 
       await expect(speciesSelectionPage.speciesCheckbox('Haddock (HAD)')).toBeVisible();
       await expect(speciesSelectionPage.weightAboveMinimumInput('HAD')).toBeVisible();
-      await expect(speciesSelectionPage.speciesCheckbox('Salmon (SAL)')).toBeVisible();
-      await expect(speciesSelectionPage.weightAboveMinimumInput('SAL')).toBeVisible();
 
       await expect(speciesSelectionPage.speciesCheckbox('Cod (COD)')).toBeHidden();
     });

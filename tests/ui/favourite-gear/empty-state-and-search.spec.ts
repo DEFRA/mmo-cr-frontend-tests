@@ -1,10 +1,9 @@
 import { expect, test } from '../../../fixtures/commonfixture';
 import { email, password, setupFavouriteGears, removeGears } from './helpers';
-import { NavigationFlow } from '../helpers/navigationFlow';
 
 test.describe('Favourite Gear Management (Account Page)', () => {
-  test.beforeEach(async ({ signInPage, recordsPage, accountPage }) => {
-    await NavigationFlow.signInAndOpenAccountFromRecords(signInPage, recordsPage, accountPage, { email, password });
+  test.beforeEach(async ({ navigationFlow }) => {
+    await navigationFlow.signInAndOpenAccountFromRecords({ email, password });
   });
 
   test.describe('Empty State and Search', () => {

@@ -1,12 +1,10 @@
 import { expect, test } from '../../../fixtures/commonfixture';
-import { NavigationFlow } from '../helpers/navigationFlow';
 
-const AREA_A = '27.4.b';
-const AREA_B = '27.7.a';
+const AREA_A = '27E06';
 
 test.describe('Statistical Sub Area – Other Selection', () => {
-  test.beforeEach(async ({ statisticalAreaOtherPage }) => {
-    await NavigationFlow.openStatisticalAreaOther(statisticalAreaOtherPage);
+  test.beforeEach(async ({ navigationFlow }) => {
+    await navigationFlow.openStatisticalAreaOther();
   });
 
   test.describe('Type-Ahead Search Behaviour', () => {

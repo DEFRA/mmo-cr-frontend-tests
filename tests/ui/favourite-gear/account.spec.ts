@@ -1,9 +1,8 @@
 import { expect, test } from '../../../fixtures/commonfixture';
-import { NavigationFlow } from '../helpers/navigationFlow';
 
 test.describe('Favourite Gear Management (Account Page)', () => {
-  test.beforeEach(async ({ signInPage, recordsPage, accountPage }) => {
-    await NavigationFlow.signInAndOpenAccountFromRecords(signInPage, recordsPage, accountPage, {
+  test.beforeEach(async ({ navigationFlow }) => {
+    await navigationFlow.signInAndOpenAccountFromRecords({
       email: process.env.CATCH_RECORDING_EMAIL ?? 'test@example.com',
       password: process.env.CATCH_RECORDING_PASSWORD ?? 'password'
     });

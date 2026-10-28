@@ -1,6 +1,4 @@
 import { expect, test } from '../../fixtures/commonfixture';
-import { GearFlow } from './helpers/gearFlow';
-import { NavigationFlow } from './helpers/navigationFlow';
 
 const accountPath = '/account';
 
@@ -12,14 +10,18 @@ test.describe('Add favourite gear', () => {
   // Tests share one account's favourite gear, so parallel runs would interfere
   test.describe.configure({ mode: 'serial' });
 
-  test.beforeEach(async ({ signInPage, accountPage, removeGearPage }) => {
-    await NavigationFlow.signIn(signInPage);
-    await GearFlow.removeSavedGears(accountPage, removeGearPage, ['Long line', 'Set net', 'Pots']);
+  test.beforeEach(async ({ navigationFlow, gearFlow }) => {
+    await navigationFlow.signIn();
+    await gearFlow.removeSavedGears(['Long line', 'Set net', 'Pots']);
   });
 
-  test('shows a matching gear option and the required fields after selection', async ({ addGearPage, accountPage }) => {
-    await NavigationFlow.openAddGear(accountPage);
-    const gearName = await GearFlow.findGear(addGearPage, 'lo', (name) => /line/i.test(name));
+  test('shows a matching gear option and the required fields after selection', async ({
+    navigationFlow,
+    gearFlow,
+    addGearPage
+  }) => {
+    await navigationFlow.openAddGear();
+    const gearName = await gearFlow.findGear('lo', (name) => /line/i.test(name));
 
     await addGearPage.searchAndSelectGear(gearName);
     await expect(addGearPage.gearInput()).toHaveValue(gearName);
@@ -29,8 +31,8 @@ test.describe('Add favourite gear', () => {
     await expect(addGearPage.measurementInputs().first()).toBeVisible();
   });
 
-  test('searches approved gear and rejects a value outside the catalogue', async ({ addGearPage, accountPage }) => {
-    await NavigationFlow.openAddGear(accountPage);
+  test('searches approved gear and rejects a value outside the catalogue', async ({ navigationFlow, addGearPage }) => {
+    await navigationFlow.openAddGear();
     await expect(addGearPage.pageHeading()).toBeVisible();
     const [firstGear] = await addGearPage.searchGearOptions('po');
     expect(firstGear).toBeTruthy();
@@ -43,8 +45,8 @@ test.describe('Add favourite gear', () => {
     await addGearPage.expectUrl(/\/add-gear/);
   });
 
-  test('requires a gear type before continuing', async ({ addGearPage, accountPage }) => {
-    await NavigationFlow.openAddGear(accountPage);
+  test('requires a gear type before continuing', async ({ navigationFlow, addGearPage }) => {
+    await navigationFlow.openAddGear();
     await addGearPage.clickSaveAndContinue();
 
     await expect(addGearPage.errorSummary()).toContainText('Select the gear you want to add');
@@ -52,13 +54,14 @@ test.describe('Add favourite gear', () => {
   });
 
   test('saves gear with measurements and makes it available for the next catch record', async ({
+    navigationFlow,
+    gearFlow,
     page,
-    addGearPage,
     accountPage,
     gearSelectionPage
   }) => {
-    await NavigationFlow.openAddGear(accountPage);
-    const gearName = await GearFlow.saveLineGear(addGearPage);
+    await navigationFlow.openAddGear();
+    const gearName = await gearFlow.saveLineGear();
 
     await expect(accountPage.gearOnboardValue()).toContainText(gearName);
     await page.goto('/gear-selection');
@@ -66,30 +69,41 @@ test.describe('Add favourite gear', () => {
   });
 
   test('shows saved pots measurement under the favourite gear on the account page', async ({
-    addGearPage,
+    navigationFlow,
+    gearFlow,
     accountPage
   }) => {
-    await NavigationFlow.openAddGear(accountPage);
-    await GearFlow.savePots(addGearPage, '45');
+    await navigationFlow.openAddGear();
+    await gearFlow.savePots('45');
 
     await expect(accountPage.gearOnboardValue()).toContainText('Pots');
     await expect(accountPage.gearOnboardValue()).toContainText(/Gear dimension by number.*: 45/);
   });
 
-  test('does not offer a gear that is already a favourite in the search list', async ({ addGearPage, accountPage }) => {
-    await NavigationFlow.openAddGear(accountPage);
-    await GearFlow.savePots(addGearPage, '45');
+  test('does not offer a gear that is already a favourite in the search list', async ({
+    navigationFlow,
+    gearFlow,
+    addGearPage
+  }) => {
+    await navigationFlow.openAddGear();
+    await gearFlow.savePots('45');
 
-    await NavigationFlow.openAddGear(accountPage);
+    await navigationFlow.openAddGear();
     await addGearPage.gearInput().pressSequentially('Pot');
     await expect(addGearPage.gearOption('Pots')).toHaveCount(0);
   });
 
-  test('blocks adding a gear that is already a favourite', async ({ page, addGearPage, accountPage }) => {
-    await NavigationFlow.openAddGear(accountPage);
-    await GearFlow.savePots(addGearPage, '45');
+  test('blocks adding a gear that is already a favourite', async ({
+    navigationFlow,
+    gearFlow,
+    page,
+    addGearPage,
+    accountPage
+  }) => {
+    await navigationFlow.openAddGear();
+    await gearFlow.savePots('45');
 
-    await NavigationFlow.openAddGear(accountPage);
+    await navigationFlow.openAddGear();
     await addGearPage.gearInput().fill('Pots');
     await addGearPage.clickSaveAndContinue();
 
@@ -103,14 +117,16 @@ test.describe('Add favourite gear', () => {
   });
 
   test('lists a duplicate-attempted gear only once on the remove gear page', async ({
+    navigationFlow,
+    gearFlow,
     page,
     addGearPage,
     accountPage,
     removeGearPage
   }) => {
-    await NavigationFlow.openAddGear(accountPage);
-    await GearFlow.savePots(addGearPage, '45');
-    await NavigationFlow.openAddGear(accountPage);
+    await navigationFlow.openAddGear();
+    await gearFlow.savePots('45');
+    await navigationFlow.openAddGear();
     await addGearPage.gearInput().fill('Pots');
     await addGearPage.clickSaveAndContinue();
 
@@ -119,12 +135,12 @@ test.describe('Add favourite gear', () => {
     await expect(removeGearPage.gearCheckbox('Pots')).toHaveCount(1);
   });
 
-  test('keeps multiple different favourite gears', async ({ addGearPage, accountPage }) => {
-    await NavigationFlow.openAddGear(accountPage);
-    const lineGear = await GearFlow.saveLineGear(addGearPage);
+  test('keeps multiple different favourite gears', async ({ navigationFlow, gearFlow, addGearPage, accountPage }) => {
+    await navigationFlow.openAddGear();
+    const lineGear = await gearFlow.saveLineGear();
 
-    await NavigationFlow.openAddGear(accountPage);
-    const secondGear = await GearFlow.findGear(addGearPage, 'po', (name) => name !== lineGear);
+    await navigationFlow.openAddGear();
+    const secondGear = await gearFlow.findGear('po', (name) => name !== lineGear);
     await addGearPage.searchAndSelectGear(secondGear);
     await addGearPage.clickSaveAndContinue();
     const measurementsHeading = addGearPage.measurementsHeading();
@@ -140,18 +156,22 @@ test.describe('Add favourite gear', () => {
     await expect(accountPage.gearOnboardValue()).toContainText(secondGear);
   });
 
-  test('does not save gear when required measurements are missing', async ({ addGearPage, accountPage }) => {
-    await NavigationFlow.openAddGear(accountPage);
-    await GearFlow.selectLineGear(addGearPage);
+  test('does not save gear when required measurements are missing', async ({
+    navigationFlow,
+    gearFlow,
+    addGearPage
+  }) => {
+    await navigationFlow.openAddGear();
+    await gearFlow.selectLineGear();
     await addGearPage.clickSaveAndContinue();
 
     await expect(addGearPage.errorSummary()).toBeVisible();
     await addGearPage.expectUrl(/\/add-gear/);
   });
 
-  test('rejects fractional and negative measurements', async ({ addGearPage, accountPage }) => {
-    await NavigationFlow.openAddGear(accountPage);
-    await GearFlow.selectLineGear(addGearPage);
+  test('rejects fractional and negative measurements', async ({ navigationFlow, gearFlow, addGearPage }) => {
+    await navigationFlow.openAddGear();
+    await gearFlow.selectLineGear();
     const input = addGearPage.measurementInputs().first();
     await input.fill('1.5');
     await addGearPage.clickSaveAndContinue();
@@ -165,9 +185,9 @@ test.describe('Add favourite gear', () => {
     await addGearPage.expectUrl(/\/add-gear/);
   });
 
-  test('rejects zero measurements', async ({ addGearPage, accountPage }) => {
-    await NavigationFlow.openAddGear(accountPage);
-    await GearFlow.selectLineGear(addGearPage);
+  test('rejects zero measurements', async ({ navigationFlow, gearFlow, addGearPage }) => {
+    await navigationFlow.openAddGear();
+    await gearFlow.selectLineGear();
     await addGearPage.measurementInputs().first().fill('0');
     await addGearPage.clickSaveAndContinue();
 
@@ -176,15 +196,16 @@ test.describe('Add favourite gear', () => {
   });
 
   test('offers saved gear when starting a new catch record in the same session', async ({
+    navigationFlow,
+    gearFlow,
     page,
     recordsPage,
-    addGearPage,
     accountPage,
     gearSelectionPage,
     selectVesselPage
   }) => {
-    await NavigationFlow.openAddGear(accountPage);
-    const gearName = await GearFlow.saveLineGear(addGearPage);
+    await navigationFlow.openAddGear();
+    const gearName = await gearFlow.saveLineGear();
 
     await expect(accountPage.gearOnboardValue()).toContainText(gearName);
     await page.goto('/records');
@@ -198,9 +219,15 @@ test.describe('Add favourite gear', () => {
     await expect(gearSelectionPage.gearCheckbox(gearName)).toBeVisible();
   });
 
-  test('can save selected gear using the keyboard', async ({ page, addGearPage, accountPage }) => {
-    await NavigationFlow.openAddGear(accountPage);
-    const gearName = await GearFlow.findGear(addGearPage, 'lo', (name) => /line/i.test(name));
+  test('can save selected gear using the keyboard', async ({
+    navigationFlow,
+    gearFlow,
+    page,
+    addGearPage,
+    accountPage
+  }) => {
+    await navigationFlow.openAddGear();
+    const gearName = await gearFlow.findGear('lo', (name) => /line/i.test(name));
     await addGearPage.searchAndSelectGear(gearName);
 
     const saveAndContinueButton = addGearPage.common.saveAndContinueButton();

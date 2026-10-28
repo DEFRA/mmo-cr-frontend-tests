@@ -1,12 +1,8 @@
 import { expect, test } from '../../../fixtures/commonfixture';
-import { NavigationFlow } from '../helpers/navigationFlow';
-
-const AREA_A = '27.4.b';
-const AREA_B = '27.7.a';
 
 test.describe('Statistical Sub Area – Other Selection', () => {
-  test.beforeEach(async ({ statisticalAreaOtherPage }) => {
-    await NavigationFlow.openStatisticalAreaOther(statisticalAreaOtherPage);
+  test.beforeEach(async ({ navigationFlow }) => {
+    await navigationFlow.openStatisticalAreaOther();
   });
 
   test.describe('Real-Time Results', () => {
@@ -22,11 +18,11 @@ test.describe('Statistical Sub Area – Other Selection', () => {
 
     test('results update dynamically as the search term changes', async ({ statisticalAreaOtherPage }) => {
       const firstItem = statisticalAreaOtherPage.alternativeAreaResultItems().first();
-      await statisticalAreaOtherPage.typeInAlternativeArea('27.4');
-      await expect(firstItem).toContainText('27.4');
+      await statisticalAreaOtherPage.typeInAlternativeArea('27');
+      await expect(firstItem).toContainText('27');
 
-      await statisticalAreaOtherPage.alternativeAreaInput().fill('27.7');
-      await expect(firstItem).toContainText('27.7');
+      await statisticalAreaOtherPage.alternativeAreaInput().fill('27E');
+      await expect(firstItem).toContainText('27E');
     });
   });
 });

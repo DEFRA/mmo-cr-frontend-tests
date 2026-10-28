@@ -2,9 +2,8 @@ import { expect, type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
 export class AddSpeciesPage extends BasePage {
-  // Uses a regex because the vessel name is dynamically inserted into the heading
-  public readonly pageHeading = (): Locator =>
-    this.page.getByRole('heading', { name: /What species did you catch using .*\?/ });
+  // Uses a regex because the "New catch record" caption is part of the heading's accessible name
+  public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: /What species did you catch\?/ });
 
   public readonly speciesInput = (): Locator => this.page.locator('#species');
 

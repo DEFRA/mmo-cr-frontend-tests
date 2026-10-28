@@ -16,14 +16,15 @@ export class StatisticalAreaOtherPage extends BasePage {
   public readonly alternativeAreaResultsList = (): Locator => this.page.locator('#statistical-area-results');
 
   public readonly alternativeAreaResultItem = (areaName: string): Locator =>
-    this.alternativeAreaResultsList()
-      .locator('li')
-      .filter({ hasText: new RegExp(`(^|\\s)${areaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s|$)`) })
-      .first();
+    this.alternativeAreaResultsList().getByText(areaName, { exact: true });
 
   public readonly alternativeAreaResultItems = (): Locator => this.alternativeAreaResultsList().locator('li');
 
-  public readonly coordinatesDisplay = (): Locator => this.page.locator('#statistical-area-coordinates');
+  public readonly coordinatesDisplay = (areaName: string): Locator =>
+    this.alternativeAreaResultsList()
+      .getByRole('option')
+      .filter({ has: this.page.getByText(areaName, { exact: true }) })
+      .locator('.app-statistical-area-search__option-detail');
 
   public readonly noResultsMessage = (): Locator =>
     this.alternativeAreaResultsList()
@@ -43,10 +44,12 @@ export class StatisticalAreaOtherPage extends BasePage {
   async searchAndSelectAlternativeArea(areaName: string) {
     await this.selectAreaRadio('Other');
 
-    await this.alternativeAreaInput().fill(areaName);
+    await this.alternativeAreaInput().fill(areaName.slice(0, 2));
 
     await this.alternativeAreaResultsList().waitFor({ state: 'visible' });
-    await this.alternativeAreaResultItem(areaName).click();
+    const matchingArea = this.alternativeAreaResultItem(areaName);
+    await matchingArea.waitFor({ state: 'visible' });
+    await matchingArea.click();
   }
 
   async typeInAlternativeArea(text: string) {

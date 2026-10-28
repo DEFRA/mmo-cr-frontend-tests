@@ -1,19 +1,28 @@
-import { expect } from '../../../fixtures/commonfixture';
+import { expect } from '@playwright/test';
 import { type AccountPage } from '../../../pages/accountPage';
-import { type AddGearPage } from '../../../pages/addGearPage';
 import { type AddPortPage } from '../../../pages/addPortPage';
 import { type AddSpeciesPage } from '../../../pages/addSpeciesPage';
 import { type RemoveGearPage } from '../../../pages/removeGearPage';
 import { type RemovePortPage } from '../../../pages/removePortPage';
 import { type RemoveSpeciesPage } from '../../../pages/removeSpeciesPage';
-import { GearFlow } from './gearFlow';
+import { type GearFlow } from './gearFlow';
 
 export class FavouritesFlow {
-  static async addSpeciesToAccount(
-    accountPage: AccountPage,
-    addSpeciesPage: AddSpeciesPage,
-    speciesName: string
-  ): Promise<void> {
+  constructor(
+    private readonly pages: {
+      accountPage: AccountPage;
+      addSpeciesPage: AddSpeciesPage;
+      removeSpeciesPage: RemoveSpeciesPage;
+      removeGearPage: RemoveGearPage;
+      addPortPage: AddPortPage;
+      removePortPage: RemovePortPage;
+    },
+    private readonly gearFlow: GearFlow
+  ) {}
+
+  async addSpeciesToAccount(speciesName: string): Promise<void> {
+    const { accountPage, addSpeciesPage } = this.pages;
+
     await accountPage.addSpeciesLink().click();
     await expect(accountPage.page).toHaveURL(/\/add-species\?return=\/account$/);
     await addSpeciesPage.searchAndSelectSpecies(speciesName);
@@ -21,22 +30,18 @@ export class FavouritesFlow {
     await accountPage.expectUrl(/\/account$/);
   }
 
-  static async ensureSpeciesAdded(
-    accountPage: AccountPage,
-    addSpeciesPage: AddSpeciesPage,
-    speciesName: string
-  ): Promise<void> {
+  async ensureSpeciesAdded(speciesName: string): Promise<void> {
+    const { accountPage } = this.pages;
+
     const savedSpecies = (await accountPage.speciesCaughtValue().textContent()) ?? '';
     if (!savedSpecies.includes(speciesName)) {
-      await this.addSpeciesToAccount(accountPage, addSpeciesPage, speciesName);
+      await this.addSpeciesToAccount(speciesName);
     }
   }
 
-  static async removeSpeciesFromAccount(
-    accountPage: AccountPage,
-    removeSpeciesPage: RemoveSpeciesPage,
-    speciesName: string
-  ): Promise<void> {
+  async removeSpeciesFromAccount(speciesName: string): Promise<void> {
+    const { accountPage, removeSpeciesPage } = this.pages;
+
     const savedSpecies = (await accountPage.speciesCaughtValue().textContent()) ?? '';
     if (!savedSpecies.includes(speciesName)) return;
 
@@ -47,24 +52,26 @@ export class FavouritesFlow {
     await expect(accountPage.speciesCaughtValue()).not.toContainText(speciesName);
   }
 
-  static async addGearToAccount(accountPage: AccountPage, addGearPage: AddGearPage, gearName: string): Promise<void> {
+  async addGearToAccount(gearName: string): Promise<void> {
+    const { accountPage } = this.pages;
+
     await accountPage.clickAddGear();
-    await GearFlow.saveGearFromAddPage(addGearPage, gearName);
+    await this.gearFlow.saveGearFromAddPage(gearName);
     await accountPage.expectUrl(/\/account$/);
     await expect(accountPage.gearOnboardValue()).toContainText(gearName);
   }
 
-  static async ensureGearAdded(accountPage: AccountPage, addGearPage: AddGearPage, gearName: string): Promise<void> {
+  async ensureGearAdded(gearName: string): Promise<void> {
+    const { accountPage } = this.pages;
+
     if (!(await accountPage.getGearOnboardText()).includes(gearName)) {
-      await this.addGearToAccount(accountPage, addGearPage, gearName);
+      await this.addGearToAccount(gearName);
     }
   }
 
-  static async removeGearFromAccount(
-    accountPage: AccountPage,
-    removeGearPage: RemoveGearPage,
-    gearName: string
-  ): Promise<void> {
+  async removeGearFromAccount(gearName: string): Promise<void> {
+    const { accountPage, removeGearPage } = this.pages;
+
     if (!(await accountPage.getGearOnboardText()).includes(gearName)) return;
 
     await accountPage.clickRemoveGear();
@@ -74,7 +81,9 @@ export class FavouritesFlow {
     await expect(accountPage.gearOnboardValue()).not.toContainText(gearName);
   }
 
-  static async addPortToAccount(accountPage: AccountPage, addPortPage: AddPortPage, portName: string): Promise<void> {
+  async addPortToAccount(portName: string): Promise<void> {
+    const { accountPage, addPortPage } = this.pages;
+
     await accountPage.addPortLink().click();
     await expect(accountPage.page).toHaveURL(/\/add-port/);
     await addPortPage.searchAndSelectPort(portName);
@@ -83,18 +92,18 @@ export class FavouritesFlow {
     await expect(accountPage.portsUsedValue()).toContainText(portName);
   }
 
-  static async ensurePortAdded(accountPage: AccountPage, addPortPage: AddPortPage, portName: string): Promise<void> {
+  async ensurePortAdded(portName: string): Promise<void> {
+    const { accountPage } = this.pages;
+
     const savedPorts = (await accountPage.portsUsedValue().textContent()) ?? '';
     if (!savedPorts.includes(portName)) {
-      await this.addPortToAccount(accountPage, addPortPage, portName);
+      await this.addPortToAccount(portName);
     }
   }
 
-  static async removePortFromAccount(
-    accountPage: AccountPage,
-    removePortPage: RemovePortPage,
-    portName: string
-  ): Promise<void> {
+  async removePortFromAccount(portName: string): Promise<void> {
+    const { accountPage, removePortPage } = this.pages;
+
     const savedPorts = (await accountPage.portsUsedValue().textContent()) ?? '';
     if (!savedPorts.includes(portName)) return;
 

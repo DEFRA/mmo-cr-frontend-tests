@@ -1,9 +1,8 @@
 import { expect, test } from '../../../fixtures/commonfixture';
-import { NavigationFlow } from '../helpers/navigationFlow';
 
 test.describe('Catch Weight Recording', () => {
-  test.beforeEach(async ({ speciesSelectionPage }) => {
-    await NavigationFlow.openSpeciesSelection(speciesSelectionPage);
+  test.beforeEach(async ({ navigationFlow }) => {
+    await navigationFlow.openSpeciesSelection();
   });
 
   test.describe('Error Messages', () => {

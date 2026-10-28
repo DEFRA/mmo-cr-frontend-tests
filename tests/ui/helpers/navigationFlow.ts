@@ -1,6 +1,5 @@
-import { expect } from '../../../fixtures/commonfixture';
+import { expect } from '@playwright/test';
 import { type AccountPage } from '../../../pages/accountPage';
-import { type AddGearPage } from '../../../pages/addGearPage';
 import { type AddPortPage } from '../../../pages/addPortPage';
 import { type AddSpeciesPage } from '../../../pages/addSpeciesPage';
 import { type ConfirmSamePortPage } from '../../../pages/confirmSamePortPage';
@@ -16,7 +15,22 @@ export type SignInOptions = {
 };
 
 export class NavigationFlow {
-  static async signIn(signInPage: SigninPage, options: SignInOptions = {}): Promise<void> {
+  constructor(
+    private readonly pages: {
+      signInPage: SigninPage;
+      accountPage: AccountPage;
+      recordsPage: RecordsPage;
+      speciesSelectionPage: SpeciesSelectionPage;
+      addSpeciesPage: AddSpeciesPage;
+      statisticalAreaOtherPage: StatisticalAreaOtherPage;
+      addPortPage: AddPortPage;
+      confirmSamePortPage: ConfirmSamePortPage;
+    }
+  ) {}
+
+  async signIn(options: SignInOptions = {}): Promise<void> {
+    const { signInPage } = this.pages;
+
     const email = options.email ?? process.env.CATCH_RECORDING_EMAIL ?? '';
     const password = options.password ?? process.env.CATCH_RECORDING_PASSWORD ?? '';
     if (options.requiredCredentialsMessage && (!email || !password)) {
@@ -28,61 +42,59 @@ export class NavigationFlow {
     await expect(signInPage.page).toHaveURL(/\/records$/);
   }
 
-  static async openAccount(accountPage: AccountPage): Promise<void> {
+  async openAccount(): Promise<void> {
+    const { accountPage } = this.pages;
+
     await accountPage.goto('/account');
     await accountPage.expectUrl(/\/account$/);
     await expect(accountPage.pageHeading()).toBeVisible();
   }
 
-  static async signInAndOpenAccount(
-    signInPage: SigninPage,
-    accountPage: AccountPage,
-    options: SignInOptions = {}
-  ): Promise<void> {
-    await this.signIn(signInPage, options);
-    await this.openAccount(accountPage);
+  async signInAndOpenAccount(options: SignInOptions = {}): Promise<void> {
+    await this.signIn(options);
+    await this.openAccount();
   }
 
-  static async signInAndOpenAccountFromRecords(
-    signInPage: SigninPage,
-    recordsPage: RecordsPage,
-    accountPage: AccountPage,
-    options: SignInOptions = {}
-  ): Promise<void> {
-    await this.signIn(signInPage, options);
+  async signInAndOpenAccountFromRecords(options: SignInOptions = {}): Promise<void> {
+    const { recordsPage, accountPage } = this.pages;
+
+    await this.signIn(options);
     await recordsPage.topMenu.yourAccount().click();
     await expect(accountPage.vesselDetailsHeading()).toBeVisible();
   }
 
-  static async openAddGear(accountPage: AccountPage): Promise<void> {
+  async openAddGear(): Promise<void> {
+    const { accountPage } = this.pages;
+
     await accountPage.goto('/account');
     await accountPage.clickAddGear();
     await expect(accountPage.page).toHaveURL(/\/add-gear\?return=/);
   }
 
-  static async openSpeciesSelection(speciesSelectionPage: SpeciesSelectionPage): Promise<void> {
+  async openSpeciesSelection(): Promise<void> {
+    const { speciesSelectionPage } = this.pages;
+
     await speciesSelectionPage.goto('/species-selection');
     await expect(speciesSelectionPage.pageHeading()).toBeVisible();
   }
 
-  static async openAddSpecies(
-    speciesSelectionPage: SpeciesSelectionPage,
-    addSpeciesPage: AddSpeciesPage
-  ): Promise<void> {
+  async openAddSpecies(): Promise<void> {
+    const { speciesSelectionPage, addSpeciesPage } = this.pages;
+
     await speciesSelectionPage.clickAddSpecies();
     await expect(addSpeciesPage.page).toHaveURL(/\/add-species\?return=\/species-selection/);
     await expect(addSpeciesPage.speciesInput()).toBeVisible();
   }
 
-  static async openStatisticalAreaOther(page: StatisticalAreaOtherPage): Promise<void> {
+  async openStatisticalAreaOther(): Promise<void> {
+    const { statisticalAreaOtherPage: page } = this.pages;
+
     await page.goto('/statistical-area-other');
   }
 
-  static async selectDeparturePort(
-    addPortPage: AddPortPage,
-    confirmSamePortPage: ConfirmSamePortPage,
-    portName: string
-  ): Promise<void> {
+  async selectDeparturePort(portName: string): Promise<void> {
+    const { addPortPage, confirmSamePortPage } = this.pages;
+
     await addPortPage.goto('/add-port?for=departure&entry=1');
     await addPortPage.searchAndSelectPort(portName);
     await addPortPage.clickSaveAndContinue();

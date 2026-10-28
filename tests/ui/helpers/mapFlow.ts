@@ -1,10 +1,6 @@
-import { type Page } from '@playwright/test';
-import { expect } from '../../../fixtures/commonfixture';
-import { AddPortPage } from '../../../pages/addPortPage';
-import { ConfirmSamePortPage } from '../../../pages/confirmSamePortPage';
-import { type SigninPage } from '../../../pages/sign-in.page';
+import { expect } from '@playwright/test';
 import { type MapLabel, type StatisticalAreaPage } from '../../../pages/statisticalAreaPage';
-import { NavigationFlow } from './navigationFlow';
+import { type NavigationFlow } from './navigationFlow';
 
 type Point = [number, number];
 type MapPolygon = { exterior: Point[]; holes: Point[][] };
@@ -18,8 +14,13 @@ export type SubrectangleReference = {
 export type LandFeature = { polygons: MapPolygon[] };
 
 export class MapFlow {
-  static async installCanvasProbe(page: Page): Promise<void> {
-    await page.addInitScript(() => {
+  constructor(
+    private readonly mapPage: StatisticalAreaPage,
+    private readonly navigationFlow: NavigationFlow
+  ) {}
+
+  async installCanvasProbe(): Promise<void> {
+    await this.mapPage.page.addInitScript(() => {
       const clearRect = CanvasRenderingContext2D.prototype.clearRect;
       const fillText = CanvasRenderingContext2D.prototype.fillText;
       const stroke = CanvasRenderingContext2D.prototype.stroke;
@@ -52,17 +53,17 @@ export class MapFlow {
     });
   }
 
-  static async openMap(signInPage: SigninPage, page: Page, mapPage: StatisticalAreaPage): Promise<string> {
-    await NavigationFlow.signIn(signInPage, {
+  async openMap(): Promise<string> {
+    await this.navigationFlow.signIn({
       requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for map UI tests'
     });
     const portName = 'Plymouth';
-    await NavigationFlow.selectDeparturePort(new AddPortPage(page), new ConfirmSamePortPage(page), portName);
-    await this.installCanvasProbe(mapPage.page);
-    await mapPage.goto('/statistical-area');
-    await expect(mapPage.pageHeading()).toBeVisible();
-    await expect(mapPage.mapCanvas()).toBeVisible();
-    await expect.poll(async () => mapPage.readMapSubrectangleCount()).toBeGreaterThanOrEqual(9);
+    await this.navigationFlow.selectDeparturePort(portName);
+    await this.installCanvasProbe();
+    await this.mapPage.goto('/statistical-area');
+    await expect(this.mapPage.pageHeading()).toBeVisible();
+    await expect(this.mapPage.mapCanvas()).toBeVisible();
+    await expect.poll(() => this.mapPage.readMapSubrectangleCount()).toBeGreaterThanOrEqual(9);
     return portName;
   }
 

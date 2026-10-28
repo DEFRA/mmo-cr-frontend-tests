@@ -71,6 +71,24 @@ npx playwright test tests/ui/addgear.spec.ts --project=Chromium
 
 These tests cover catalogue search and selection, required and invalid hook measurements (including zero), saving one or more gears, keyboard-only entry, and availability when starting a new catch record in the same login session. They create favourites in the test environment; use a dedicated test account. The zero-measurement test currently fails because the test environment accepts zero. Native datalist suggestion popups cannot be inspected reliably by Playwright; the search test checks the available matching option and the invalid-gear submission error instead. Offline synchronisation, audit records, mobile-app behavior, and performance targets require separate integration/device checks and are not asserted by this web UI spec.
 
+### UI flow helpers
+
+Shared UI flows are test-scoped fixtures from [fixtures/commonfixture.ts](fixtures/commonfixture.ts).
+Use `navigationFlow`, `favouritesFlow`, `gearFlow`, `speciesFlow`, and `mapFlow` instead of passing page objects
+to static helper methods. Each flow reuses the current test's page objects; calls take only the data they need.
+
+```ts
+import { test } from './fixtures/commonfixture';
+
+test('add a favourite gear', async ({ navigationFlow, favouritesFlow }) => {
+  await navigationFlow.signInAndOpenAccount();
+  await favouritesFlow.ensureGearAdded('Pots');
+});
+```
+
+The import path depends on the spec's location. Request page objects or `page` separately when making assertions
+or performing direct browser actions.
+
 ### API tests
 
 Alongside the browser journey tests, this suite supports pure API tests using Playwright's `request` fixture.

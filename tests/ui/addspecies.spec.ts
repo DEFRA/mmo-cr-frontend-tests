@@ -1,21 +1,23 @@
 import { expect, test } from '../../fixtures/commonfixture';
 import { type SpeciesSelectionPage } from '../../pages/speciesSelectionPage';
-import { NavigationFlow } from './helpers/navigationFlow';
-import { SpeciesFlow } from './helpers/speciesFlow';
 
 test.describe('Add species to a catch record', () => {
-  test.beforeEach(async ({ signInPage, speciesSelectionPage }) => {
-    await NavigationFlow.signIn(signInPage, {
+  test.beforeEach(async ({ navigationFlow }) => {
+    await navigationFlow.signIn({
       requiredCredentialsMessage:
         'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Add species UI tests'
     });
-    await NavigationFlow.openSpeciesSelection(speciesSelectionPage);
+    await navigationFlow.openSpeciesSelection();
   });
 
-  test('species search is displayed and accepts user input', async ({ addSpeciesPage, speciesSelectionPage }) => {
-    await NavigationFlow.openAddSpecies(speciesSelectionPage, addSpeciesPage);
+  test('species search is displayed and accepts user input', async ({
+    navigationFlow,
+    speciesFlow,
+    addSpeciesPage
+  }) => {
+    await navigationFlow.openAddSpecies();
     const speciesInput = addSpeciesPage.speciesInput();
-    const species = await SpeciesFlow.findSpecies(addSpeciesPage, 'at');
+    const species = await speciesFlow.findSpecies('at');
     const searchTerm = species.slice(0, 2);
 
     await expect(speciesInput).toBeVisible();
@@ -25,15 +27,16 @@ test.describe('Add species to a catch record', () => {
   });
 
   test('changing the search term allows another matching catalogue species to be selected', async ({
+    navigationFlow,
+    speciesFlow,
     addSpeciesPage,
     speciesSelectionPage
   }) => {
-    await NavigationFlow.openAddSpecies(speciesSelectionPage, addSpeciesPage);
+    await navigationFlow.openAddSpecies();
     const speciesInput = addSpeciesPage.speciesInput();
-    const firstSpecies = await SpeciesFlow.findSpecies(addSpeciesPage, 'at');
+    const firstSpecies = await speciesFlow.findSpecies('at');
     const firstSearchTerm = firstSpecies.slice(0, 2);
-    const secondSpecies = await SpeciesFlow.findSpecies(
-      addSpeciesPage,
+    const secondSpecies = await speciesFlow.findSpecies(
       'ha',
       (species) =>
         species !== firstSpecies && species.slice(0, 2).toLocaleLowerCase() !== firstSearchTerm.toLocaleLowerCase()
@@ -42,10 +45,10 @@ test.describe('Add species to a catch record', () => {
 
     await speciesInput.fill(firstSearchTerm);
     await expect(speciesInput).toHaveValue(firstSearchTerm);
-    await SpeciesFlow.expectMatchingSpecies(addSpeciesPage, firstSearchTerm, firstSpecies);
+    await speciesFlow.expectMatchingSpecies(firstSearchTerm, firstSpecies);
     await speciesInput.fill(secondSearchTerm);
     await expect(speciesInput).toHaveValue(secondSearchTerm);
-    await SpeciesFlow.expectMatchingSpecies(addSpeciesPage, secondSearchTerm, secondSpecies);
+    await speciesFlow.expectMatchingSpecies(secondSearchTerm, secondSpecies);
     await addSpeciesPage.selectSpeciesFromSuggestions(secondSpecies);
     await addSpeciesPage.clickSaveAndContinue();
 
@@ -54,11 +57,13 @@ test.describe('Add species to a catch record', () => {
   });
 
   test('opens Add Species and adds a selected species to the current catch record', async ({
+    navigationFlow,
+    speciesFlow,
     addSpeciesPage,
     speciesSelectionPage
   }) => {
-    await NavigationFlow.openAddSpecies(speciesSelectionPage, addSpeciesPage);
-    const species = await SpeciesFlow.findSpecies(addSpeciesPage, 'at');
+    await navigationFlow.openAddSpecies();
+    const species = await speciesFlow.findSpecies('at');
     await addSpeciesPage.selectSpeciesFromSuggestions(species);
     await addSpeciesPage.clickSaveAndContinue();
 
@@ -67,16 +72,18 @@ test.describe('Add species to a catch record', () => {
   });
 
   test('searches the approved species list after entering at least two characters', async ({
+    navigationFlow,
+    speciesFlow,
     addSpeciesPage,
     speciesSelectionPage
   }) => {
-    await NavigationFlow.openAddSpecies(speciesSelectionPage, addSpeciesPage);
+    await navigationFlow.openAddSpecies();
     const speciesInput = addSpeciesPage.speciesInput();
-    const species = await SpeciesFlow.findSpecies(addSpeciesPage, 'at');
+    const species = await speciesFlow.findSpecies('at');
     const searchTerm = species.slice(0, 2);
     await speciesInput.fill(searchTerm);
     await expect(speciesInput).toHaveValue(searchTerm);
-    await SpeciesFlow.expectMatchingSpecies(addSpeciesPage, searchTerm, species);
+    await speciesFlow.expectMatchingSpecies(searchTerm, species);
 
     await addSpeciesPage.selectSpeciesFromSuggestions(species);
     await addSpeciesPage.clickSaveAndContinue();
@@ -84,17 +91,19 @@ test.describe('Add species to a catch record', () => {
   });
 
   test('adds multiple species while retaining previously added species', async ({
+    navigationFlow,
+    speciesFlow,
     addSpeciesPage,
     speciesSelectionPage
   }) => {
-    await NavigationFlow.openAddSpecies(speciesSelectionPage, addSpeciesPage);
-    const firstSpecies = await SpeciesFlow.findSpecies(addSpeciesPage, 'at');
+    await navigationFlow.openAddSpecies();
+    const firstSpecies = await speciesFlow.findSpecies('at');
     await addSpeciesPage.selectSpeciesFromSuggestions(firstSpecies);
     await addSpeciesPage.clickSaveAndContinue();
     await speciesSelectionPage.expectUrl(/\/species-selection$/);
 
-    await NavigationFlow.openAddSpecies(speciesSelectionPage, addSpeciesPage);
-    const secondSpecies = await SpeciesFlow.findSpecies(addSpeciesPage, 'ha');
+    await navigationFlow.openAddSpecies();
+    const secondSpecies = await speciesFlow.findSpecies('ha');
     await addSpeciesPage.selectSpeciesFromSuggestions(secondSpecies);
     await addSpeciesPage.clickSaveAndContinue();
     await speciesSelectionPage.expectUrl(/\/species-selection$/);
@@ -104,44 +113,49 @@ test.describe('Add species to a catch record', () => {
   });
 
   test('an already-added species remains available in search suggestions', async ({
+    navigationFlow,
+    speciesFlow,
     addSpeciesPage,
     speciesSelectionPage
   }) => {
-    await NavigationFlow.openAddSpecies(speciesSelectionPage, addSpeciesPage);
-    const addedSpecies = await SpeciesFlow.findSpecies(addSpeciesPage, 'at');
+    await navigationFlow.openAddSpecies();
+    const addedSpecies = await speciesFlow.findSpecies('at');
     await addSpeciesPage.selectSpeciesFromSuggestions(addedSpecies);
     await addSpeciesPage.clickSaveAndContinue();
     await speciesSelectionPage.expectUrl(/\/species-selection$/);
-    await NavigationFlow.openAddSpecies(speciesSelectionPage, addSpeciesPage);
+    await navigationFlow.openAddSpecies();
     const remainingOptions = await addSpeciesPage.searchSpeciesOptions(addedSpecies.slice(0, 2));
     expect(remainingOptions).toContain(addedSpecies);
   });
 
   test('arbitrary text that is not an approved species cannot be added', async ({
+    navigationFlow,
     addSpeciesPage,
     speciesSelectionPage
   }) => {
-    await NavigationFlow.openAddSpecies(speciesSelectionPage, addSpeciesPage);
+    await navigationFlow.openAddSpecies();
     const invalidSpecies = `Not an approved species ${Date.now()}`;
     await addSpeciesPage.speciesInput().fill(invalidSpecies);
     await addSpeciesPage.speciesInput().press('Enter');
 
     await expect(addSpeciesPage.errorSummary()).toContainText('Enter the species you want to add');
     await addSpeciesPage.expectUrl(/\/add-species/);
-    await NavigationFlow.openSpeciesSelection(speciesSelectionPage);
+    await navigationFlow.openSpeciesSelection();
     await expect(speciesSelectionPage.speciesCheckbox(invalidSpecies)).toHaveCount(0);
   });
 
   test('prevents a duplicate species and displays the duplicate message', async ({
+    navigationFlow,
+    speciesFlow,
     addSpeciesPage,
     speciesSelectionPage
   }) => {
-    await NavigationFlow.openAddSpecies(speciesSelectionPage, addSpeciesPage);
-    const species = await SpeciesFlow.findSpecies(addSpeciesPage, 'at');
+    await navigationFlow.openAddSpecies();
+    const species = await speciesFlow.findSpecies('at');
     await addSpeciesPage.selectSpeciesFromSuggestions(species);
     await addSpeciesPage.clickSaveAndContinue();
     await speciesSelectionPage.expectUrl(/\/species-selection$/);
-    await NavigationFlow.openAddSpecies(speciesSelectionPage, addSpeciesPage);
+    await navigationFlow.openAddSpecies();
     await addSpeciesPage.speciesInput().fill(species);
     const duplicateOption = addSpeciesPage.suggestionOption(species);
     if (await duplicateOption.isVisible()) await duplicateOption.click();
@@ -152,11 +166,13 @@ test.describe('Add species to a catch record', () => {
   });
 
   test('retains existing species selection when adding another species', async ({
+    navigationFlow,
+    speciesFlow,
     addSpeciesPage,
     speciesSelectionPage
   }) => {
-    await NavigationFlow.openAddSpecies(speciesSelectionPage, addSpeciesPage);
-    const firstSpecies = await SpeciesFlow.findSpecies(addSpeciesPage, 'at');
+    await navigationFlow.openAddSpecies();
+    const firstSpecies = await speciesFlow.findSpecies('at');
     await addSpeciesPage.selectSpeciesFromSuggestions(firstSpecies);
     await addSpeciesPage.clickSaveAndContinue();
     await speciesSelectionPage.expectUrl(/\/species-selection$/);
@@ -169,10 +185,10 @@ test.describe('Add species to a catch record', () => {
     await speciesSelectionPage.clickSaveAndContinue();
     await speciesSelectionPage.expectUrl(/\/catch-not-landed$/);
 
-    await NavigationFlow.openSpeciesSelection(speciesSelectionPage);
+    await navigationFlow.openSpeciesSelection();
     await expect(speciesSelectionPage.speciesCheckbox(firstSpecies)).toBeChecked();
-    await NavigationFlow.openAddSpecies(speciesSelectionPage, addSpeciesPage);
-    const secondSpecies = await SpeciesFlow.findSpecies(addSpeciesPage, 'ha');
+    await navigationFlow.openAddSpecies();
+    const secondSpecies = await speciesFlow.findSpecies('ha');
     await addSpeciesPage.selectSpeciesFromSuggestions(secondSpecies);
     await addSpeciesPage.clickSaveAndContinue();
     await speciesSelectionPage.expectUrl(/\/species-selection$/);

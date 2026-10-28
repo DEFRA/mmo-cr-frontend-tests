@@ -4,9 +4,8 @@ import { BasePage } from './basePage';
 export type MapLabel = { code: string; x: number; y: number };
 
 export class StatisticalAreaPage extends BasePage {
-  // Uses a regex because the gear name is dynamically inserted into the heading
   public readonly pageHeading = (): Locator =>
-    this.page.getByRole('heading', { name: /Where was most of your catch caught using .*\?/ });
+    this.page.getByRole('heading', { name: 'Where was the majority of your catch caught?', exact: true });
 
   public readonly mapCanvas = (): Locator => this.page.locator('.app-offline-map__canvas');
 
