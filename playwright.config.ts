@@ -49,11 +49,6 @@ export default defineConfig({
   /* Configure projects for the supported desktop browsers. */
   projects: [
     {
-      name: 'Chromium',
-      testDir: './tests/ui',
-      use: { ...devices['Desktop Chrome'] }
-    },
-    {
       name: 'Chrome',
       testDir: './tests/ui',
       use: { ...devices['Desktop Chrome'], channel: 'chrome' }

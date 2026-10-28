@@ -22,7 +22,7 @@ inputs:
     description: 'Playwright UI project to run, or "all"'
     required: false
     type: string
-    default: Chromium
+    default: Chrome
   email:
     description: 'Email for sign-in tests'
     required: false
@@ -62,12 +62,11 @@ runs:
         BROWSER: ${{ inputs.browser }}
       run: |
         case "$BROWSER" in
-          Chrome) npx playwright install --with-deps chrome ;;
           Edge) npx playwright install --with-deps msedge ;;
           Firefox) npx playwright install --with-deps firefox ;;
           Safari) npx playwright install --with-deps webkit ;;
-          all) npx playwright install --with-deps chromium chrome msedge firefox webkit ;;
-          *) npx playwright install --with-deps chromium ;;
+          all) npx playwright install --with-deps chrome msedge firefox webkit ;;
+          *) npx playwright install --with-deps chrome ;;
         esac
     - name: Start docker compose
       shell: bash

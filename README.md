@@ -2,7 +2,7 @@ mmo-cr-frontend-tests
 
 A Playwright test suite that runs journey tests against the MMO Catch Recording frontend.
 
-The UI journey suite runs against Chromium, Chrome, Microsoft Edge, Firefox and desktop Safari.
+The UI journey suite runs against Chrome, Microsoft Edge, Firefox and desktop Safari.
 
 Internet Explorer 11 is not supported by Playwright and is therefore subject to separate technical confirmation. It is
 not included in the automated browser matrix until an IE11-compatible test approach is agreed.
@@ -44,7 +44,7 @@ npm install
 Install the browsers used by the UI projects when running locally for the first time:
 
 ```bash
-npx playwright install chromium firefox webkit chrome msedge
+npx playwright install firefox webkit chrome msedge
 ```
 
 ### Running local tests
@@ -66,7 +66,7 @@ npx playwright test --debug
 Set `CATCH_RECORDING_EMAIL` and `CATCH_RECORDING_PASSWORD` for a test account (for example in the local `.env` file), then run:
 
 ```bash
-npx playwright test tests/ui/addgear.spec.ts --project=Chromium
+npx playwright test tests/ui/addgear.spec.ts --project=Chrome
 ```
 
 These tests cover catalogue search and selection, required and invalid hook measurements (including zero), saving one or more gears, keyboard-only entry, and availability when starting a new catch record in the same login session. They create favourites in the test environment; use a dedicated test account. The zero-measurement test currently fails because the test environment accepts zero. Native datalist suggestion popups cannot be inspected reliably by Playwright; the search test checks the available matching option and the invalid-gear submission error instead. Offline synchronisation, audit records, mobile-app behavior, and performance targets require separate integration/device checks and are not asserted by this web UI spec.

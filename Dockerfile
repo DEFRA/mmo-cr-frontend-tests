@@ -22,7 +22,7 @@ WORKDIR /app
 # Copy manifests first so dependency layers are cached across source changes
 COPY package*.json ./
 RUN npm install \
-    && npx playwright install --with-deps chromium firefox webkit chrome msedge \
+    && npx playwright install --with-deps firefox webkit chrome msedge \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . .
