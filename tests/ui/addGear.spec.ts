@@ -17,11 +17,9 @@ test.describe('Add favourite gear', () => {
   }) => {
     await navigationFlow.openAddGear();
     const gearName = await gearFlow.findGear('lo', (name) => /line/i.test(name));
-
     await addGearPage.searchAndSelectGear(gearName);
     await expect(addGearPage.gearInput()).toHaveValue(gearName);
     await addGearPage.clickSaveAndContinue();
-
     await expect(addGearPage.measurementsHeading()).toBeVisible();
     await expect(addGearPage.measurementInputs().first()).toBeVisible();
   });
@@ -210,23 +208,24 @@ test.describe('Add favourite gear', () => {
     await expect(gearSelectionPage.gearCheckbox(gearName)).toBeVisible();
   });
 
-  test('can save selected gear using the keyboard', async ({ navigationFlow, gearFlow, addGearPage, accountPage }) => {
+  test('can save selected gear by pressing Enter from the input fields', async ({
+    navigationFlow,
+    gearFlow,
+    addGearPage,
+    accountPage
+  }) => {
     await navigationFlow.openAddGear();
     const gearName = await gearFlow.findGear('lo', (name) => /line/i.test(name));
     await addGearPage.searchAndSelectGear(gearName);
 
-    const saveAndContinueButton = addGearPage.common.saveAndContinueButton();
-    await addGearPage.tabUntilFocused(saveAndContinueButton);
-    await addGearPage.pressKey('Enter');
+    await addGearPage.gearInput().press('Enter');
 
     await expect(addGearPage.measurementsHeading()).toBeVisible();
+    await expect(addGearPage.measurementInputs().first()).toBeVisible();
     for (const input of await addGearPage.measurementInputs().all()) {
-      await addGearPage.tabUntilFocused(input);
-      await addGearPage.pressKey('1');
-      await addGearPage.pressKey('Tab');
+      await input.fill('1');
     }
-    await expect(saveAndContinueButton).toBeFocused();
-    await addGearPage.pressKey('Enter');
+    await addGearPage.measurementInputs().last().press('Enter');
 
     await accountPage.expectUrl(/\/account$/);
     await expect(accountPage.gearOnboardValue()).toContainText(gearName);

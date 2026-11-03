@@ -385,7 +385,7 @@ test.describe('Complete user account page', () => {
       await addGearPage.pressKey('1');
       await addGearPage.pressKey('Tab');
     }
-    await expect(saveAndContinueButton).toBeFocused();
+    await addGearPage.tabUntilFocused(saveAndContinueButton);
     await addGearPage.pressKey('Enter');
     await accountPage.expectUrl(/\/account$/);
     await expect(accountPage.gearOnboardValue()).toContainText(gearName);

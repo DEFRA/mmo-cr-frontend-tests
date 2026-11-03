@@ -146,6 +146,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     await statisticalAreaPage.goto('/statistical-area');
     await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', first.code);
 
+    await expect.poll(() => statisticalAreaPage.readMapSubrectangleCount()).toBeGreaterThanOrEqual(9);
     const currentLabels = await statisticalAreaPage.readMapLabels();
     const replacement = currentLabels.find(({ code }) => code === second.code);
     expect(replacement).toBeDefined();

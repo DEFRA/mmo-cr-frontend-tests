@@ -63,8 +63,9 @@ export abstract class BasePage {
   }
 
   async tabUntilFocused(target: Locator, maxTabs = 20) {
+    const tabKey = this.page.context().browser()?.browserType().name() === 'webkit' ? 'Alt+Tab' : 'Tab';
     for (let tab = 0; tab < maxTabs && !(await target.evaluate((el) => el === document.activeElement)); tab++) {
-      await this.pressKey('Tab');
+      await this.pressKey(tabKey);
     }
     await expect(target).toBeFocused();
   }

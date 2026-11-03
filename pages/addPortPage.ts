@@ -1,4 +1,4 @@
-import { type Locator } from '@playwright/test';
+import { expect, type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
 export class AddPortPage extends BasePage {
@@ -14,9 +14,15 @@ export class AddPortPage extends BasePage {
   public readonly portResultItem = (portName: string): Locator =>
     this.portResultsList().locator('li').filter({ hasText: portName });
 
+  async searchPorts(searchTerm: string): Promise<void> {
+    await this.page.waitForLoadState('load');
+    await this.portInput().fill(searchTerm);
+    await expect(this.portResultsList().getByRole('option').first()).toBeVisible();
+  }
+
   async searchAndSelectPort(portName: string) {
-    await this.portInput().fill(portName);
-    await this.portResultsList().waitFor({ state: 'visible' });
-    await this.portResultItem(portName).click();
+    await this.searchPorts(portName);
+    await this.portResultItem(portName).getByRole('option', { name: portName, exact: true }).click();
+    await expect(this.portInput()).toHaveValue(portName);
   }
 }
