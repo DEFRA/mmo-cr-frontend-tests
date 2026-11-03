@@ -84,6 +84,7 @@ export class NavigationFlow {
     await speciesSelectionPage.clickAddSpecies();
     await expect(addSpeciesPage.page).toHaveURL(/\/add-species\?return=\/species-selection/);
     await expect(addSpeciesPage.speciesInput()).toBeVisible();
+    await expect(addSpeciesPage.speciesInput()).toBeEditable();
   }
 
   async openStatisticalAreaOther(): Promise<void> {

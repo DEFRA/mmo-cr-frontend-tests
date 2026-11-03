@@ -36,7 +36,7 @@ export class MapFlow {
         if (['#0b6b3a', '#e8a63a'].includes(String(this.strokeStyle).toLowerCase())) {
           const count = Number(this.canvas.dataset.playwrightGridCount ?? '0') + 1;
           this.canvas.dataset.playwrightGridCount = String(count);
-          if (String(this.strokeStyle).toLowerCase() === '#e8a63a') {
+          if (String(this.strokeStyle).toLowerCase() === '#e8a63a' || this.lineWidth > 1) {
             const selectedCount = Number(this.canvas.dataset.playwrightSelectedGridCount ?? '0') + 1;
             this.canvas.dataset.playwrightSelectedGridCount = String(selectedCount);
           }
@@ -45,9 +45,11 @@ export class MapFlow {
       };
 
       CanvasRenderingContext2D.prototype.fillText = function (text, x, y, maxWidth) {
-        const labels = JSON.parse(this.canvas.dataset.playwrightMapLabels ?? '[]') as MapLabel[];
-        labels.push({ code: String(text), x, y });
-        this.canvas.dataset.playwrightMapLabels = JSON.stringify(labels);
+        if (/^\d{2}[A-Z]\d{2}$/i.test(String(text))) {
+          const labels = JSON.parse(this.canvas.dataset.playwrightMapLabels ?? '[]') as MapLabel[];
+          labels.push({ code: String(text), x, y });
+          this.canvas.dataset.playwrightMapLabels = JSON.stringify(labels);
+        }
         return maxWidth === undefined ? fillText.call(this, text, x, y) : fillText.call(this, text, x, y, maxWidth);
       };
     });
@@ -82,15 +84,19 @@ export class MapFlow {
   }
 
   async failFirstSubrectanglesRequest(): Promise<void> {
-    let firstRequest = true;
-    await this.mapPage.page.route('**/public/offline-map/subrectangles.json', async (route) => {
-      if (firstRequest) {
-        firstRequest = false;
-        await route.abort();
-        return;
+    const failedSources = new Set<string>();
+    await this.mapPage.page.route(
+      (url) => ['/public/offline-map/subrectangles.json', '/map-data/statistical-areas'].includes(url.pathname),
+      async (route) => {
+        const source = new URL(route.request().url()).pathname;
+        if (!failedSources.has(source)) {
+          failedSources.add(source);
+          await route.fulfill({ status: 503, contentType: 'application/json', body: '{}' });
+          return;
+        }
+        await route.continue();
       }
-      await route.continue();
-    });
+    );
   }
 
   private static pointInRing([longitude, latitude]: Point, ring: Point[]): boolean {

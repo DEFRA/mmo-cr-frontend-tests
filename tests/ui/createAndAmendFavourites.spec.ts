@@ -30,8 +30,11 @@ test.describe('Create and amend favourites', () => {
     await accountPage.addSpeciesLink().click();
     await addSpeciesPage.speciesInput().fill(favouriteSpecies);
     const duplicateOption = addSpeciesPage.suggestionOption(favouriteSpecies);
+    await expect(duplicateOption.or(addSpeciesPage.noResultsMessage())).toBeVisible();
     if (await duplicateOption.isVisible()) {
       await duplicateOption.click();
+    } else {
+      await addSpeciesPage.speciesInput().press('Tab');
     }
     await addSpeciesPage.clickSaveAndContinue();
 
@@ -105,7 +108,7 @@ test.describe('Create and amend favourites', () => {
     const replacementPort = 'Lowestoft';
     await favouritesFlow.ensurePortAdded(favouritePort);
     await favouritesFlow.removePortFromAccount(favouritePort);
-    await favouritesFlow.addPortToAccount(replacementPort);
+    await favouritesFlow.ensurePortAdded(replacementPort);
 
     await expect(accountPage.portsUsedValue()).not.toContainText(favouritePort);
     await expect(accountPage.portsUsedValue()).toContainText(replacementPort);
@@ -142,13 +145,13 @@ test.describe('Create and amend favourites', () => {
     await tripDatePage.clickSaveAndContinue();
     await addPortPage.expectUrl(/\/add-port\?for=departure/);
 
-    await addPortPage.portInput().fill(favouritePort);
+    await addPortPage.searchPorts(favouritePort);
     await expect(addPortPage.portResultItem(favouritePort).getByRole('option')).toBeVisible();
   });
 
   test('Port type-ahead search suggests a matching reference-data entry', async ({ accountPage, addPortPage }) => {
     await accountPage.addPortLink().click();
-    await addPortPage.portInput().fill(favouritePort.slice(0, 2));
+    await addPortPage.searchPorts(favouritePort.slice(0, 2));
 
     await expect(addPortPage.portResultItem(favouritePort).getByRole('option')).toBeVisible();
   });
@@ -165,7 +168,9 @@ test.describe('Create and amend favourites', () => {
   test('Reject free-text species outside the approved catalogue', async ({ accountPage, addSpeciesPage }) => {
     await accountPage.addSpeciesLink().click();
     await addSpeciesPage.speciesInput().fill(`Not an approved species ${Date.now()}`);
-    await addSpeciesPage.speciesInput().press('Enter');
+    await expect(addSpeciesPage.noResultsMessage()).toBeVisible();
+    await addSpeciesPage.speciesInput().press('Tab');
+    await addSpeciesPage.clickSaveAndContinue();
 
     await expect(addSpeciesPage.errorSummary()).toContainText('Enter the species you want to add');
     await addSpeciesPage.expectUrl(/\/add-species/);
