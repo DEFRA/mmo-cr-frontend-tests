@@ -12,6 +12,20 @@ on:
       - ready_for_review
 
 jobs:
+  check-branch-name:
+    name: Check Branch Name
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch name
+        env:
+          BRANCH_NAME: ${{ github.head_ref }}
+        run: |
+          if [[ ! "$BRANCH_NAME" =~ ^feature/CRAR-[0-9]+_[A-Za-z0-9._-]+$ ]]; then
+            echo "::error::Branch name '$BRANCH_NAME' is invalid. Expected format: feature/CRAR-<number>_<description> (e.g. feature/CRAR-123_add-login-tests)"
+            exit 1
+          fi
+          echo "Branch name '$BRANCH_NAME' is valid."
+
   cdp-workflows:
     name: Run Pull Request Checks
     runs-on: ubuntu-latest
