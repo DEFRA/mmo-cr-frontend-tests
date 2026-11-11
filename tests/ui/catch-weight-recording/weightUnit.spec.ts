@@ -7,10 +7,12 @@ test.describe('Catch Weight Recording', () => {
 
   test.describe('Weight Unit', () => {
     test('weight labels display kilograms (kg) as the unit', async ({ speciesSelectionPage }) => {
-      await speciesSelectionPage.selectSpecies('Cod (COD)');
+      await test.step('Scenario: weight labels display kilograms (kg) as the unit', async () => {
+        await speciesSelectionPage.selectSpecies('Cod (COD)');
 
-      const weightGroup = speciesSelectionPage.weightAboveMinimumInput('COD');
-      await expect(weightGroup).toBeVisible();
+        const weightGroup = speciesSelectionPage.weightAboveMinimumInput('COD');
+        await expect(weightGroup).toBeVisible();
+      });
     });
   });
 });

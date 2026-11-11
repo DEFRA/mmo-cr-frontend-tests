@@ -10,88 +10,104 @@ test.describe('Favourites', () => {
       accountPage,
       addPortPage
     }) => {
-      await accountPage.addPortLink().click();
-      await addPortPage.portInput().fill('Plym');
-      await expect(addPortPage.portResultItem('Plymouth')).toBeVisible();
-      await addPortPage.portResultItem('Plymouth').click();
-      await addPortPage.clickSaveAndContinue();
+      await test.step('Scenario: searches with a partial name and saves the selected port as a favourite', async () => {
+        await accountPage.addPortLink().click();
+        await addPortPage.portInput().fill('Plym');
+        await expect(addPortPage.portResultItem('Plymouth')).toBeVisible();
+        await addPortPage.portResultItem('Plymouth').click();
+        await addPortPage.clickSaveAndContinue();
 
-      await accountPage.expectUrl(/\/account$/);
-      await expect(accountPage.portsUsedValue()).toContainText('Plymouth');
+        await accountPage.expectUrl(/\/account$/);
+        await expect(accountPage.portsUsedValue()).toContainText('Plymouth');
+      });
     });
 
     test('rejects a port that is not in the reference data', async ({ accountPage, addPortPage }) => {
-      await accountPage.addPortLink().click();
-      await addPortPage.portInput().fill('Notaport Town');
-      await addPortPage.clickSaveAndContinue();
+      await test.step('Scenario: rejects a port that is not in the reference data', async () => {
+        await accountPage.addPortLink().click();
+        await addPortPage.portInput().fill('Notaport Town');
+        await addPortPage.clickSaveAndContinue();
 
-      await expect(addPortPage.errorSummary()).toContainText('Select a port from the list');
-      await addPortPage.expectUrl(/\/add-port/);
-      await accountPage.goto('/account');
-      await expect(accountPage.portsUsedValue()).not.toContainText('Notaport Town');
+        await expect(addPortPage.errorSummary()).toContainText('Select a port from the list');
+        await addPortPage.expectUrl(/\/add-port/);
+        await accountPage.goto('/account');
+        await expect(accountPage.portsUsedValue()).not.toContainText('Notaport Town');
+      });
     });
 
     test('requires a port before continuing', async ({ accountPage, addPortPage }) => {
-      await accountPage.addPortLink().click();
-      await addPortPage.clickSaveAndContinue();
+      await test.step('Scenario: requires a port before continuing', async () => {
+        await accountPage.addPortLink().click();
+        await addPortPage.clickSaveAndContinue();
 
-      await expect(addPortPage.errorSummary()).toContainText('Select a port from the list');
+        await expect(addPortPage.errorSummary()).toContainText('Select a port from the list');
+      });
     });
 
     test('does not create a duplicate when an existing favourite port is added again', async ({
       accountPage,
       addPortPage
     }) => {
-      const [existing] = await accountPage.getPortsUsed();
-      if (!existing) throw new Error('Expected at least one saved port');
-      await accountPage.addPortLink().click();
-      await addPortPage.searchAndSelectPort(existing);
-      await addPortPage.clickSaveAndContinue();
+      await test.step('Scenario: does not create a duplicate when an existing favourite port is added again', async () => {
+        const [existing] = await accountPage.getPortsUsed();
+        if (!existing) throw new Error('Expected at least one saved port');
+        await accountPage.addPortLink().click();
+        await addPortPage.searchAndSelectPort(existing);
+        await addPortPage.clickSaveAndContinue();
 
-      await accountPage.goto('/account');
-      expect((await accountPage.getPortsUsed()).filter((p) => p === existing)).toHaveLength(1);
+        await accountPage.goto('/account');
+        expect((await accountPage.getPortsUsed()).filter((p) => p === existing)).toHaveLength(1);
+      });
     });
 
     test('tells the user when the port is already a favourite', async ({ accountPage, addPortPage }) => {
-      const [existing] = await accountPage.getPortsUsed();
-      if (!existing) throw new Error('Expected at least one saved port');
-      await accountPage.addPortLink().click();
-      await addPortPage.searchAndSelectPort(existing);
-      await addPortPage.clickSaveAndContinue();
+      await test.step('Scenario: tells the user when the port is already a favourite', async () => {
+        const [existing] = await accountPage.getPortsUsed();
+        if (!existing) throw new Error('Expected at least one saved port');
+        await accountPage.addPortLink().click();
+        await addPortPage.searchAndSelectPort(existing);
+        await addPortPage.clickSaveAndContinue();
 
-      await expect(addPortPage.errorSummary()).toContainText(`${existing} is already saved in your favourites`);
-      await addPortPage.expectUrl(/\/add-port/);
+        await expect(addPortPage.errorSummary()).toContainText(`${existing} is already saved in your favourites`);
+        await addPortPage.expectUrl(/\/add-port/);
+      });
     });
 
     test('requires a port to be selected before removing', async ({ accountPage, removePortPage }) => {
-      await accountPage.removePortLink().click();
-      await expect(removePortPage.pageHeading()).toBeVisible();
-      await removePortPage.continueButton().click();
+      await test.step('Scenario: requires a port to be selected before removing', async () => {
+        await accountPage.removePortLink().click();
+        await expect(removePortPage.pageHeading()).toBeVisible();
+        await removePortPage.continueButton().click();
 
-      await expect(removePortPage.errorSummary()).toContainText('Select the port you want to remove');
+        await expect(removePortPage.errorSummary()).toContainText('Select the port you want to remove');
+      });
     });
 
     test('removes a favourite port from the account', async ({ accountPage, addPortPage, removePortPage }) => {
-      await accountPage.addPortLink().click();
-      await addPortPage.searchAndSelectPort('Plymouth');
-      await addPortPage.clickSaveAndContinue();
-      await expect(accountPage.portsUsedValue()).toContainText('Plymouth');
+      await test.step('Scenario: removes a favourite port from the account', async () => {
+        await accountPage.addPortLink().click();
+        await addPortPage.searchAndSelectPort('Plymouth');
+        await addPortPage.clickSaveAndContinue();
+        await expect(accountPage.portsUsedValue()).toContainText('Plymouth');
 
-      await accountPage.removePortLink().click();
-      await removePortPage.removePorts('Plymouth');
+        await accountPage.removePortLink().click();
+        await removePortPage.removePorts('Plymouth');
 
-      await accountPage.expectUrl(/\/account$/);
-      await expect(accountPage.portsUsedValue()).not.toContainText('Plymouth');
+        await accountPage.expectUrl(/\/account$/);
+        await expect(accountPage.portsUsedValue()).not.toContainText('Plymouth');
+      });
     });
 
     test('shows favourite ports first when searching for a departure port', async ({ accountPage, addPortPage }) => {
-      test.fail(true, 'Known gap: port results are alphabetical and do not prioritise favourites');
-      await expect(accountPage.portsUsedValue()).toContainText('Hastings');
+      await test.step('Scenario: shows favourite ports first when searching for a departure port', async () => {
+        test.fail(true, 'Known gap: port results are alphabetical and do not prioritise favourites');
+        await expect(accountPage.portsUsedValue()).toContainText('Hastings');
 
-      await addPortPage.goto('/add-port?for=departure&entry=1');
-      await addPortPage.portInput().fill('Ha');
-      await expect(addPortPage.portResultItem('Hastings')).toBeVisible();
-      await expect(addPortPage.portResultsList().locator('li').first()).toHaveText(/Hastings/, { timeout: 5000 });
+        await addPortPage.goto('/add-port?for=departure&entry=1');
+        await addPortPage.portInput().fill('Ha');
+        await expect(addPortPage.portResultItem('Hastings')).toBeVisible();
+        await expect(addPortPage.portResultsList().locator('li').first()).toHaveText(/Hastings/, { timeout: 5000 });
+      });
     });
   });
 });

@@ -7,19 +7,23 @@ test.describe('Statistical Sub Area – Other Selection', () => {
 
   test.describe('Result Display Format', () => {
     test('matching results display the statistical sub area code', async ({ statisticalAreaOtherPage }) => {
-      await statisticalAreaOtherPage.typeInAlternativeArea('27E');
+      await test.step('Scenario: matching results display the statistical sub area code', async () => {
+        await statisticalAreaOtherPage.typeInAlternativeArea('27E');
 
-      await expect(statisticalAreaOtherPage.alternativeAreaResultItems().first()).toContainText(/\d+\.\d+/);
+        await expect(statisticalAreaOtherPage.alternativeAreaResultItems().first()).toContainText(/\d+\.\d+/);
+      });
     });
 
     test('matching results display associated coordinates alongside the area code', async ({
       statisticalAreaOtherPage
     }) => {
-      await statisticalAreaOtherPage.typeInAlternativeArea('27D');
+      await test.step('Scenario: matching results display associated coordinates alongside the area code', async () => {
+        await statisticalAreaOtherPage.typeInAlternativeArea('27D');
 
-      await expect(statisticalAreaOtherPage.alternativeAreaResultItems().first()).toContainText(
-        /\d+\.\d+(\.\w+)?.*\d+/
-      );
+        await expect(statisticalAreaOtherPage.alternativeAreaResultItems().first()).toContainText(
+          /\d+\.\d+(\.\w+)?.*\d+/
+        );
+      });
     });
   });
 });

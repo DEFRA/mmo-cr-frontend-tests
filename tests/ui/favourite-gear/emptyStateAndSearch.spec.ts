@@ -11,15 +11,17 @@ test.describe('Favourite Gear Management (Account Page)', () => {
     });
 
     test('Verify User Can Remove All Favourite Gears', async ({ accountPage, removeGearPage }) => {
-      await accountPage.clickRemoveGear();
-      await removeGearPage.gearCheckboxes().first().waitFor();
-      for (const checkbox of await removeGearPage.gearCheckboxes().all()) {
-        await checkbox.check();
-      }
-      await removeGearPage.clickContinue();
+      await test.step('Scenario: Verify User Can Remove All Favourite Gears', async () => {
+        await accountPage.clickRemoveGear();
+        await removeGearPage.gearCheckboxes().first().waitFor();
+        for (const checkbox of await removeGearPage.gearCheckboxes().all()) {
+          await checkbox.check();
+        }
+        await removeGearPage.clickContinue();
 
-      await expect(accountPage.gearOnboardValue()).not.toContainText('Pots');
-      await expect(accountPage.addGearLink()).toBeVisible();
+        await expect(accountPage.gearOnboardValue()).not.toContainText('Pots');
+        await expect(accountPage.addGearLink()).toBeVisible();
+      });
     });
 
     test('Verify Removed Gear is Available Through Normal Gear Search', async ({
@@ -28,15 +30,17 @@ test.describe('Favourite Gear Management (Account Page)', () => {
       favouritesFlow,
       gearFlow
     }) => {
-      await favouritesFlow.removeGears('Pots');
-      await expect(accountPage.gearOnboardValue()).not.toContainText('Pots');
+      await test.step('Scenario: Verify Removed Gear is Available Through Normal Gear Search', async () => {
+        await favouritesFlow.removeGears('Pots');
+        await expect(accountPage.gearOnboardValue()).not.toContainText('Pots');
 
-      await accountPage.clickAddGear();
-      await expect(addGearPage.pageHeading()).toBeVisible();
+        await accountPage.clickAddGear();
+        await expect(addGearPage.pageHeading()).toBeVisible();
 
-      await gearFlow.saveGearFromAddPage('Pots');
+        await gearFlow.saveGearFromAddPage('Pots');
 
-      await expect(accountPage.gearOnboardValue()).toContainText('Pots');
+        await expect(accountPage.gearOnboardValue()).toContainText('Pots');
+      });
     });
   });
 });

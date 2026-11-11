@@ -15,24 +15,28 @@ test.describe('Favourite Gear Management (Account Page)', () => {
       favouritesFlow,
       gearSelectionPage
     }) => {
-      await favouritesFlow.removeGears('Dredge');
-      await expect(accountPage.gearOnboardValue()).not.toContainText('Dredge');
+      await test.step('Scenario: Verify Removed Gear is Not Displayed in New Catch Record Journey', async () => {
+        await favouritesFlow.removeGears('Dredge');
+        await expect(accountPage.gearOnboardValue()).not.toContainText('Dredge');
 
-      await gearSelectionPage.goto('/gear-selection');
+        await gearSelectionPage.goto('/gear-selection');
 
-      await expect(gearSelectionPage.pageHeading()).toBeVisible();
-      await expect(gearSelectionPage.gearCheckbox('Dredge')).toBeHidden();
+        await expect(gearSelectionPage.pageHeading()).toBeVisible();
+        await expect(gearSelectionPage.gearCheckbox('Dredge')).toBeHidden();
+      });
     });
 
     test('Verify Remaining Favourite Gears Are Usable', async ({ accountPage, favouritesFlow, gearSelectionPage }) => {
-      await favouritesFlow.removeGears('Dredge');
-      await expect(accountPage.gearOnboardValue()).not.toContainText('Dredge');
+      await test.step('Scenario: Verify Remaining Favourite Gears Are Usable', async () => {
+        await favouritesFlow.removeGears('Dredge');
+        await expect(accountPage.gearOnboardValue()).not.toContainText('Dredge');
 
-      await gearSelectionPage.goto('/gear-selection');
+        await gearSelectionPage.goto('/gear-selection');
 
-      await expect(gearSelectionPage.gearCheckbox('Pots')).toBeVisible();
-      await gearSelectionPage.selectGear('Pots');
-      await expect(gearSelectionPage.gearCheckbox('Pots')).toBeChecked();
+        await expect(gearSelectionPage.gearCheckbox('Pots')).toBeVisible();
+        await gearSelectionPage.selectGear('Pots');
+        await expect(gearSelectionPage.gearCheckbox('Pots')).toBeChecked();
+      });
     });
   });
 });

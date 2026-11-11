@@ -9,11 +9,15 @@ test.describe('Statistical Sub Area – Other Selection', () => {
     test('Other radio button is displayed beneath the suggested statistical sub area list', async ({
       statisticalAreaOtherPage
     }) => {
-      await expect(statisticalAreaOtherPage.otherRadio()).toBeVisible();
+      await test.step('Scenario: Other radio button is displayed beneath the suggested statistical sub area list', async () => {
+        await expect(statisticalAreaOtherPage.otherRadio()).toBeVisible();
+      });
     });
 
     test('Other radio button is not pre-selected by default', async ({ statisticalAreaOtherPage }) => {
-      await expect(statisticalAreaOtherPage.otherRadio()).not.toBeChecked();
+      await test.step('Scenario: Other radio button is not pre-selected by default', async () => {
+        await expect(statisticalAreaOtherPage.otherRadio()).not.toBeChecked();
+      });
     });
   });
 });

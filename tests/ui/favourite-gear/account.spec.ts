@@ -6,11 +6,15 @@ test.describe('Favourite Gear Management (Account Page)', () => {
   });
 
   test('Verify Favourite Gear List is Displayed', async ({ accountPage }) => {
-    await expect(accountPage.summaryRow('Gear onboard')).toBeVisible();
-    await expect(accountPage.gearOnboardValue()).toBeVisible();
+    await test.step('Scenario: Verify Favourite Gear List is Displayed', async () => {
+      await expect(accountPage.summaryRow('Gear onboard')).toBeVisible();
+      await expect(accountPage.gearOnboardValue()).toBeVisible();
+    });
   });
 
   test('Verify Remove Option is Available for Favourite Gear', async ({ accountPage }) => {
-    await expect(accountPage.removeGearLink()).toBeVisible();
+    await test.step('Scenario: Verify Remove Option is Available for Favourite Gear', async () => {
+      await expect(accountPage.removeGearLink()).toBeVisible();
+    });
   });
 });

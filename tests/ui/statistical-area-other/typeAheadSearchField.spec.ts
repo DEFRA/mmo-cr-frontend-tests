@@ -7,23 +7,29 @@ test.describe('Statistical Sub Area – Other Selection', () => {
 
   test.describe('Type-Ahead Search Field', () => {
     test('type-ahead search field is hidden before selecting Other', async ({ statisticalAreaOtherPage }) => {
-      await expect(statisticalAreaOtherPage.alternativeAreaInput()).toBeHidden();
+      await test.step('Scenario: type-ahead search field is hidden before selecting Other', async () => {
+        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toBeHidden();
+      });
     });
 
     test('selecting Other reveals the type-ahead search field', async ({ statisticalAreaOtherPage }) => {
-      await statisticalAreaOtherPage.selectAreaRadio('Other');
+      await test.step('Scenario: selecting Other reveals the type-ahead search field', async () => {
+        await statisticalAreaOtherPage.selectAreaRadio('Other');
 
-      await expect(statisticalAreaOtherPage.alternativeAreaInput()).toBeVisible();
+        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toBeVisible();
+      });
     });
 
     test('selecting a suggested area radio after Other hides the type-ahead search field', async ({
       statisticalAreaOtherPage
     }) => {
-      await statisticalAreaOtherPage.selectAreaRadio('Other');
-      await expect(statisticalAreaOtherPage.alternativeAreaInput()).toBeVisible();
+      await test.step('Scenario: selecting a suggested area radio after Other hides the type-ahead search field', async () => {
+        await statisticalAreaOtherPage.selectAreaRadio('Other');
+        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toBeVisible();
 
-      await statisticalAreaOtherPage.suggestedAreaRadios().first().check();
-      await expect(statisticalAreaOtherPage.alternativeAreaInput()).toBeHidden();
+        await statisticalAreaOtherPage.suggestedAreaRadios().first().check();
+        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toBeHidden();
+      });
     });
   });
 });

@@ -7,17 +7,21 @@ test.describe('Remove Species', () => {
 
   test.describe('Minimum Species Requirement', () => {
     test('Save and continue is blocked when no species are selected', async ({ speciesSelectionPage }) => {
-      await speciesSelectionPage.clickSaveAndContinue();
+      await test.step('Scenario: Save and continue is blocked when no species are selected', async () => {
+        await speciesSelectionPage.clickSaveAndContinue();
 
-      await expect(speciesSelectionPage.pageHeading()).toBeVisible();
+        await expect(speciesSelectionPage.pageHeading()).toBeVisible();
+      });
     });
 
     test('catch record proceeds when at least one species is selected', async ({ speciesSelectionPage }) => {
-      await speciesSelectionPage.selectSpecies('Cod (COD)');
-      await speciesSelectionPage.enterSpeciesWeights('COD', '100');
-      await speciesSelectionPage.clickSaveAndContinue();
+      await test.step('Scenario: catch record proceeds when at least one species is selected', async () => {
+        await speciesSelectionPage.selectSpecies('Cod (COD)');
+        await speciesSelectionPage.enterSpeciesWeights('COD', '100');
+        await speciesSelectionPage.clickSaveAndContinue();
 
-      await expect(speciesSelectionPage.pageHeading()).toBeHidden();
+        await expect(speciesSelectionPage.pageHeading()).toBeHidden();
+      });
     });
 
     test('removing species down to zero prevents continuation from species selection', async ({
@@ -25,11 +29,13 @@ test.describe('Remove Species', () => {
       removeSpeciesPage,
       addSpeciesPage
     }) => {
-      await speciesSelectionPage.clickRemoveSpecies();
-      await removeSpeciesPage.selectSpeciesToRemove('Cod (COD)');
-      await removeSpeciesPage.clickSaveAndContinue();
+      await test.step('Scenario: removing species down to zero prevents continuation from species selection', async () => {
+        await speciesSelectionPage.clickRemoveSpecies();
+        await removeSpeciesPage.selectSpeciesToRemove('Cod (COD)');
+        await removeSpeciesPage.clickSaveAndContinue();
 
-      await expect(addSpeciesPage.pageHeading()).toBeVisible();
+        await expect(addSpeciesPage.pageHeading()).toBeVisible();
+      });
     });
   });
 });

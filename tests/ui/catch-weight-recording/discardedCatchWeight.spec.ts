@@ -7,27 +7,33 @@ test.describe('Catch Weight Recording', () => {
 
   test.describe('Discarded Catch Weight', () => {
     test('discarded weight is optional and can be left empty', async ({ speciesSelectionPage }) => {
-      await speciesSelectionPage.selectSpecies('Cod (COD)');
-      await speciesSelectionPage.enterSpeciesWeights('COD', '100');
-      await speciesSelectionPage.clickSaveAndContinue();
+      await test.step('Scenario: discarded weight is optional and can be left empty', async () => {
+        await speciesSelectionPage.selectSpecies('Cod (COD)');
+        await speciesSelectionPage.enterSpeciesWeights('COD', '100');
+        await speciesSelectionPage.clickSaveAndContinue();
 
-      await expect(speciesSelectionPage.errorSummary()).toBeHidden();
+        await expect(speciesSelectionPage.errorSummary()).toBeHidden();
+      });
     });
 
     test('discarded weight can be recorded alongside above-minimum', async ({ speciesSelectionPage }) => {
-      await speciesSelectionPage.selectSpecies('Cod (COD)');
-      await speciesSelectionPage.enterSpeciesWeights('COD', '100', undefined, '5');
-      await speciesSelectionPage.clickSaveAndContinue();
+      await test.step('Scenario: discarded weight can be recorded alongside above-minimum', async () => {
+        await speciesSelectionPage.selectSpecies('Cod (COD)');
+        await speciesSelectionPage.enterSpeciesWeights('COD', '100', undefined, '5');
+        await speciesSelectionPage.clickSaveAndContinue();
 
-      await expect(speciesSelectionPage.errorSummary()).toBeHidden();
+        await expect(speciesSelectionPage.errorSummary()).toBeHidden();
+      });
     });
 
     test('all three weight types can be entered together', async ({ speciesSelectionPage }) => {
-      await speciesSelectionPage.selectSpecies('Cod (COD)');
-      await speciesSelectionPage.enterSpeciesWeights('COD', '100', '10', '5');
-      await speciesSelectionPage.clickSaveAndContinue();
+      await test.step('Scenario: all three weight types can be entered together', async () => {
+        await speciesSelectionPage.selectSpecies('Cod (COD)');
+        await speciesSelectionPage.enterSpeciesWeights('COD', '100', '10', '5');
+        await speciesSelectionPage.clickSaveAndContinue();
 
-      await expect(speciesSelectionPage.errorSummary()).toBeHidden();
+        await expect(speciesSelectionPage.errorSummary()).toBeHidden();
+      });
     });
   });
 });
