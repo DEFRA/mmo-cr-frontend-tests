@@ -3,7 +3,7 @@ import { expect, test } from '../../fixtures/commonfixture';
 const email = process.env.CATCH_RECORDING_EMAIL;
 const password = process.env.CATCH_RECORDING_PASSWORD;
 test.describe('Sign in', () => {
-  test('sign-in page displays the required controls', async ({ signInPage }) => {
+  test('sign-in page displays the required controls', { tag: ['@ui', '@smoke', '@signIn'] }, async ({ signInPage }) => {
     await test.step('Scenario: sign-in page displays the required controls', async () => {
       await signInPage.goto('/sign-in');
 
@@ -17,34 +17,42 @@ test.describe('Sign in', () => {
     });
   });
 
-  test('forgotten password link navigates to the forgotten password page', async ({ signInPage }) => {
-    await test.step('Scenario: forgotten password link navigates to the forgotten password page', async () => {
-      await signInPage.goto('/sign-in');
+  test(
+    'forgotten password link navigates to the forgotten password page',
+    { tag: ['@ui', '@regression', '@signIn'] },
+    async ({ signInPage }) => {
+      await test.step('Scenario: forgotten password link navigates to the forgotten password page', async () => {
+        await signInPage.goto('/sign-in');
 
-      await signInPage.forgotPasswordLink().click();
+        await signInPage.forgotPasswordLink().click();
 
-      await signInPage.expectUrl('/forgotten-password');
-    });
-  });
+        await signInPage.expectUrl('/forgotten-password');
+      });
+    }
+  );
 
-  test('create an account guidance can be collapsed and expanded', async ({ signInPage }) => {
-    await test.step('Scenario: create an account guidance can be collapsed and expanded', async () => {
-      await signInPage.goto('/sign-in');
+  test(
+    'create an account guidance can be collapsed and expanded',
+    { tag: ['@ui', '@regression', '@signIn'] },
+    async ({ signInPage }) => {
+      await test.step('Scenario: create an account guidance can be collapsed and expanded', async () => {
+        await signInPage.goto('/sign-in');
 
-      // Guidance is expanded by default
-      await expect(signInPage.registrationGuidance()).toBeVisible();
-      await expect(signInPage.registrationGuidance()).toContainText(
-        'You will receive an email invitation to register when your vessel is added to the system.'
-      );
-      await expect(signInPage.registrationGuidance()).toContainText(
-        'Ask your vessel owner to add you. They can do this from their account.'
-      );
+        // Guidance is expanded by default
+        await expect(signInPage.registrationGuidance()).toBeVisible();
+        await expect(signInPage.registrationGuidance()).toContainText(
+          'You will receive an email invitation to register when your vessel is added to the system.'
+        );
+        await expect(signInPage.registrationGuidance()).toContainText(
+          'Ask your vessel owner to add you. They can do this from their account.'
+        );
 
-      await signInPage.registerLink().click();
-      await expect(signInPage.registrationGuidance()).toBeHidden();
+        await signInPage.registerLink().click();
+        await expect(signInPage.registrationGuidance()).toBeHidden();
 
-      await signInPage.registerLink().click();
-      await expect(signInPage.registrationGuidance()).toBeVisible();
-    });
-  });
+        await signInPage.registerLink().click();
+        await expect(signInPage.registrationGuidance()).toBeVisible();
+      });
+    }
+  );
 });

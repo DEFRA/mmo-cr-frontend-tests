@@ -1,7 +1,7 @@
 import { expect, test } from '../../fixtures/commonfixture';
 
 test.describe('Home page', () => {
-  test('displays the required controls and content', async ({ homePage }) => {
+  test('displays the required controls and content', { tag: ['@ui', '@smoke', '@homePage'] }, async ({ homePage }) => {
     await test.step('Scenario: displays the required controls and content', async () => {
       await homePage.goto('/');
 
@@ -45,51 +45,59 @@ test.describe('Home page', () => {
     });
   });
 
-  test('guidance links navigate to the corresponding section', async ({ homePage }) => {
-    await test.step('Scenario: guidance links navigate to the corresponding section', async () => {
-      await homePage.goto('/');
+  test(
+    'guidance links navigate to the corresponding section',
+    { tag: ['@ui', '@regression', '@homePage'] },
+    async ({ homePage }) => {
+      await test.step('Scenario: guidance links navigate to the corresponding section', async () => {
+        await homePage.goto('/');
 
-      const testCases = [
-        {
-          link: homePage.guidanceContents.whatWeNeedFromYouLink(),
-          heading: homePage.guidanceHeadings.whatWeNeedFromYouHeading(),
-          hash: '#what-we-need-from-you'
-        },
-        {
-          link: homePage.guidanceContents.whenToCreateYourRecordLink(),
-          heading: homePage.guidanceHeadings.whenToCreateYourRecordHeading(),
-          hash: '#when-to-create-your-record'
-        },
-        {
-          link: homePage.guidanceContents.specialCasesLink(),
-          heading: homePage.guidanceHeadings.specialCasesHeading(),
-          hash: '#special-cases-ices-areas'
-        },
-        {
-          link: homePage.guidanceContents.howToCreateARecordLink(),
-          heading: homePage.guidanceHeadings.howToCreateARecordHeading(),
-          hash: '#how-to-create-a-record'
-        },
-        {
-          link: homePage.guidanceContents.getHelpLink(),
-          heading: homePage.guidanceHeadings.getHelpWithYourRecordHeading(),
-          hash: '#get-help-with-your-record'
+        const testCases = [
+          {
+            link: homePage.guidanceContents.whatWeNeedFromYouLink(),
+            heading: homePage.guidanceHeadings.whatWeNeedFromYouHeading(),
+            hash: '#what-we-need-from-you'
+          },
+          {
+            link: homePage.guidanceContents.whenToCreateYourRecordLink(),
+            heading: homePage.guidanceHeadings.whenToCreateYourRecordHeading(),
+            hash: '#when-to-create-your-record'
+          },
+          {
+            link: homePage.guidanceContents.specialCasesLink(),
+            heading: homePage.guidanceHeadings.specialCasesHeading(),
+            hash: '#special-cases-ices-areas'
+          },
+          {
+            link: homePage.guidanceContents.howToCreateARecordLink(),
+            heading: homePage.guidanceHeadings.howToCreateARecordHeading(),
+            hash: '#how-to-create-a-record'
+          },
+          {
+            link: homePage.guidanceContents.getHelpLink(),
+            heading: homePage.guidanceHeadings.getHelpWithYourRecordHeading(),
+            hash: '#get-help-with-your-record'
+          }
+        ];
+
+        for (const testCase of testCases) {
+          await testCase.link.click();
+          await expect(homePage.page).toHaveURL(new RegExp(`.*${testCase.hash}$`));
+          await expect(testCase.heading).toBeInViewport();
         }
-      ];
+      });
+    }
+  );
 
-      for (const testCase of testCases) {
-        await testCase.link.click();
-        await expect(homePage.page).toHaveURL(new RegExp(`.*${testCase.hash}$`));
-        await expect(testCase.heading).toBeInViewport();
-      }
-    });
-  });
-
-  test('clicking Start now button navigates to sign-in page', async ({ homePage }) => {
-    await test.step('Scenario: clicking Start now button navigates to sign-in page', async () => {
-      await homePage.goto('/');
-      await homePage.startNowButton().click();
-      await expect(homePage.page).toHaveURL(/.*\/sign-in/);
-    });
-  });
+  test(
+    'clicking Start now button navigates to sign-in page',
+    { tag: ['@ui', '@smoke', '@homePage'] },
+    async ({ homePage }) => {
+      await test.step('Scenario: clicking Start now button navigates to sign-in page', async () => {
+        await homePage.goto('/');
+        await homePage.startNowButton().click();
+        await expect(homePage.page).toHaveURL(/.*\/sign-in/);
+      });
+    }
+  );
 });

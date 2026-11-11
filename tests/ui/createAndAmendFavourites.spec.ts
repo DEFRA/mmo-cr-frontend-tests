@@ -12,226 +12,288 @@ test.describe('Create and amend favourites', () => {
     });
   });
 
-  test('Display favourites grouped by species, ports, and gear', async ({ accountPage }) => {
-    await test.step('Scenario: Display favourites grouped by species, ports, and gear', async () => {
-      await expect(accountPage.summaryRow('Species caught')).toBeVisible();
-      await expect(accountPage.summaryRow('Ports used')).toBeVisible();
-      await expect(accountPage.summaryRow('Gear onboard')).toBeVisible();
-    });
-  });
+  test(
+    'Display favourites grouped by species, ports, and gear',
+    { tag: ['@ui', '@regression', '@favouriteSpecies'] },
+    async ({ accountPage }) => {
+      await test.step('Scenario: Display favourites grouped by species, ports, and gear', async () => {
+        await expect(accountPage.summaryRow('Species caught')).toBeVisible();
+        await expect(accountPage.summaryRow('Ports used')).toBeVisible();
+        await expect(accountPage.summaryRow('Gear onboard')).toBeVisible();
+      });
+    }
+  );
 
-  test('Add an approved species favourite', async ({ favouritesFlow, accountPage }) => {
-    await test.step('Scenario: Add an approved species favourite', async () => {
-      await favouritesFlow.removeSpeciesFromAccount(favouriteSpecies);
-      await favouritesFlow.addSpeciesToAccount(favouriteSpecies);
+  test(
+    'Add an approved species favourite',
+    { tag: ['@ui', '@smoke', '@favouriteSpecies'] },
+    async ({ favouritesFlow, accountPage }) => {
+      await test.step('Scenario: Add an approved species favourite', async () => {
+        await favouritesFlow.removeSpeciesFromAccount(favouriteSpecies);
+        await favouritesFlow.addSpeciesToAccount(favouriteSpecies);
 
-      await expect(accountPage.speciesCaughtValue()).toContainText(favouriteSpecies);
-    });
-  });
+        await expect(accountPage.speciesCaughtValue()).toContainText(favouriteSpecies);
+      });
+    }
+  );
 
-  test('Reject a duplicate species favourite', async ({ favouritesFlow, accountPage, addSpeciesPage }) => {
-    await test.step('Scenario: Reject a duplicate species favourite', async () => {
-      await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
-      await accountPage.addSpeciesLink().click();
-      await addSpeciesPage.speciesInput().fill(favouriteSpecies);
-      const duplicateOption = addSpeciesPage.suggestionOption(favouriteSpecies);
-      await expect(duplicateOption.or(addSpeciesPage.noResultsMessage())).toBeVisible();
-      if (await duplicateOption.isVisible()) {
-        await duplicateOption.click();
-      } else {
+  test(
+    'Reject a duplicate species favourite',
+    { tag: ['@ui', '@regression', '@favouriteSpecies'] },
+    async ({ favouritesFlow, accountPage, addSpeciesPage }) => {
+      await test.step('Scenario: Reject a duplicate species favourite', async () => {
+        await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
+        await accountPage.addSpeciesLink().click();
+        await addSpeciesPage.speciesInput().fill(favouriteSpecies);
+        const duplicateOption = addSpeciesPage.suggestionOption(favouriteSpecies);
+        await expect(duplicateOption.or(addSpeciesPage.noResultsMessage())).toBeVisible();
+        if (await duplicateOption.isVisible()) {
+          await duplicateOption.click();
+        } else {
+          await addSpeciesPage.speciesInput().press('Tab');
+        }
+        await addSpeciesPage.clickSaveAndContinue();
+
+        await expect(addSpeciesPage.errorSummary()).toContainText(/already/i);
+        await addSpeciesPage.expectUrl(/\/add-species/);
+      });
+    }
+  );
+
+  test(
+    'Add an approved gear favourite',
+    { tag: ['@ui', '@smoke', '@favouriteGear'] },
+    async ({ favouritesFlow, accountPage }) => {
+      await test.step('Scenario: Add an approved gear favourite', async () => {
+        await favouritesFlow.removeGearFromAccount(favouriteGear);
+        await favouritesFlow.addGearToAccount(favouriteGear);
+
+        await expect(accountPage.gearOnboardValue()).toContainText(favouriteGear);
+      });
+    }
+  );
+
+  test(
+    'Add an approved port favourite',
+    { tag: ['@ui', '@smoke', '@favouritePorts'] },
+    async ({ favouritesFlow, accountPage }) => {
+      await test.step('Scenario: Add an approved port favourite', async () => {
+        await favouritesFlow.ensurePortAdded(favouritePort);
+        await expect(accountPage.portsUsedValue()).toContainText(favouritePort);
+      });
+    }
+  );
+
+  test(
+    'Reject a duplicate gear favourite with an informative message',
+    { tag: ['@ui', '@regression', '@favouriteGear'] },
+    async ({ favouritesFlow, accountPage, addGearPage }) => {
+      await test.step('Scenario: Reject a duplicate gear favourite with an informative message', async () => {
+        await favouritesFlow.ensureGearAdded(favouriteGear);
+        await accountPage.clickAddGear();
+        await addGearPage.gearInput().fill(favouriteGear);
+        await addGearPage.clickSaveAndContinue();
+
+        await expect(addGearPage.errorSummary()).toContainText(`${favouriteGear} has already been added to your gear`);
+        await addGearPage.expectUrl(/\/add-gear/);
+      });
+    }
+  );
+
+  test(
+    'Reject a duplicate port favourite with an informative message',
+    { tag: ['@ui', '@regression', '@favouritePorts'] },
+    async ({ favouritesFlow, accountPage, addPortPage }) => {
+      await test.step('Scenario: Reject a duplicate port favourite with an informative message', async () => {
+        await favouritesFlow.ensurePortAdded(favouritePort);
+        await accountPage.addPortLink().click();
+        await addPortPage.searchAndSelectPort(favouritePort);
+        await addPortPage.clickSaveAndContinue();
+
+        await expect(addPortPage.errorSummary()).toBeVisible();
+        await expect(addPortPage.errorSummary()).toContainText(/already/i);
+        await addPortPage.expectUrl(/\/add-port/);
+      });
+    }
+  );
+
+  test(
+    'Remove a species favourite',
+    { tag: ['@ui', '@regression', '@favouriteSpecies'] },
+    async ({ favouritesFlow, accountPage }) => {
+      await test.step('Scenario: Remove a species favourite', async () => {
+        await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
+        await favouritesFlow.removeSpeciesFromAccount(favouriteSpecies);
+
+        await expect(accountPage.speciesCaughtValue()).not.toContainText(favouriteSpecies);
+      });
+    }
+  );
+
+  test(
+    'Remove a gear favourite',
+    { tag: ['@ui', '@regression', '@favouriteGear'] },
+    async ({ favouritesFlow, accountPage }) => {
+      await test.step('Scenario: Remove a gear favourite', async () => {
+        await favouritesFlow.ensureGearAdded(favouriteGear);
+        await favouritesFlow.removeGearFromAccount(favouriteGear);
+
+        await expect(accountPage.gearOnboardValue()).not.toContainText(favouriteGear);
+      });
+    }
+  );
+
+  test(
+    'Remove a port favourite',
+    { tag: ['@ui', '@regression', '@favouritePorts'] },
+    async ({ favouritesFlow, accountPage }) => {
+      await test.step('Scenario: Remove a port favourite', async () => {
+        await favouritesFlow.ensurePortAdded(favouritePort);
+        await favouritesFlow.removePortFromAccount(favouritePort);
+
+        await expect(accountPage.portsUsedValue()).not.toContainText(favouritePort);
+      });
+    }
+  );
+
+  test(
+    'Amend a port favourite by replacing it with another saved port',
+    { tag: ['@ui', '@regression', '@favouritePorts'] },
+    async ({ favouritesFlow, accountPage }) => {
+      await test.step('Scenario: Amend a port favourite by replacing it with another saved port', async () => {
+        const replacementPort = 'Lowestoft';
+        await favouritesFlow.ensurePortAdded(favouritePort);
+        await favouritesFlow.removePortFromAccount(favouritePort);
+        await favouritesFlow.ensurePortAdded(replacementPort);
+
+        await expect(accountPage.portsUsedValue()).not.toContainText(favouritePort);
+        await expect(accountPage.portsUsedValue()).toContainText(replacementPort);
+      });
+    }
+  );
+
+  test(
+    'Favourite gear is available during catch recording',
+    { tag: ['@ui', '@smoke', '@favouriteGear'] },
+    async ({ favouritesFlow, gearSelectionPage }) => {
+      await test.step('Scenario: Favourite gear is available during catch recording', async () => {
+        await favouritesFlow.ensureGearAdded(favouriteGear);
+        await gearSelectionPage.goto('/gear-selection');
+        await expect(gearSelectionPage.gearCheckbox(favouriteGear)).toBeVisible();
+      });
+    }
+  );
+
+  test(
+    'Favourite species is available during catch recording',
+    { tag: ['@ui', '@smoke', '@favouriteSpecies'] },
+    async ({ favouritesFlow, speciesSelectionPage }) => {
+      await test.step('Scenario: Favourite species is available during catch recording', async () => {
+        await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
+        await speciesSelectionPage.goto('/species-selection');
+
+        await expect(speciesSelectionPage.speciesCheckbox(favouriteSpecies)).toBeVisible();
+      });
+    }
+  );
+
+  test(
+    'Favourite port is suggested during departure-port entry',
+    { tag: ['@ui', '@smoke', '@favouritePorts'] },
+    async ({ favouritesFlow, addPortPage, recordsPage, selectVesselPage, tripDatePage }) => {
+      await test.step('Scenario: Favourite port is suggested during departure-port entry', async () => {
+        await favouritesFlow.ensurePortAdded(favouritePort);
+        await recordsPage.goto('/records');
+        await recordsPage.createNewRecordButton().click();
+        await expect(selectVesselPage.pageHeading()).toBeVisible();
+        await selectVesselPage.firstVesselRadio().check();
+        await selectVesselPage.clickSaveAndContinue();
+        await tripDatePage.expectUrl(/\/trip-date$/);
+        await tripDatePage.yesRadio().check();
+        await tripDatePage.clickSaveAndContinue();
+        await addPortPage.expectUrl(/\/add-port\?for=departure/);
+
+        await addPortPage.searchPorts(favouritePort);
+        await expect(addPortPage.portResultItem(favouritePort).getByRole('option')).toBeVisible();
+      });
+    }
+  );
+
+  test(
+    'Port type-ahead search suggests a matching reference-data entry',
+    { tag: ['@ui', '@regression', '@favouritePorts'] },
+    async ({ accountPage, addPortPage }) => {
+      await test.step('Scenario: Port type-ahead search suggests a matching reference-data entry', async () => {
+        await accountPage.addPortLink().click();
+        await addPortPage.searchPorts(favouritePort.slice(0, 2));
+
+        await expect(addPortPage.portResultItem(favouritePort).getByRole('option')).toBeVisible();
+      });
+    }
+  );
+
+  test(
+    'Reject free-text gear outside the approved catalogue',
+    { tag: ['@ui', '@regression', '@favouriteGear'] },
+    async ({ accountPage, addGearPage }) => {
+      await test.step('Scenario: Reject free-text gear outside the approved catalogue', async () => {
+        await accountPage.clickAddGear();
+        await addGearPage.gearInput().fill('Not a catalogue gear');
+        await addGearPage.clickSaveAndContinue();
+
+        await expect(addGearPage.errorSummary()).toContainText('Select a gear type from the list');
+        await addGearPage.expectUrl(/\/add-gear/);
+      });
+    }
+  );
+
+  test(
+    'Reject free-text species outside the approved catalogue',
+    { tag: ['@ui', '@regression', '@favouriteSpecies'] },
+    async ({ accountPage, addSpeciesPage }) => {
+      await test.step('Scenario: Reject free-text species outside the approved catalogue', async () => {
+        await accountPage.addSpeciesLink().click();
+        await addSpeciesPage.speciesInput().fill(`Not an approved species ${Date.now()}`);
+        await expect(addSpeciesPage.noResultsMessage()).toBeVisible();
         await addSpeciesPage.speciesInput().press('Tab');
-      }
-      await addSpeciesPage.clickSaveAndContinue();
+        await addSpeciesPage.clickSaveAndContinue();
 
-      await expect(addSpeciesPage.errorSummary()).toContainText(/already/i);
-      await addSpeciesPage.expectUrl(/\/add-species/);
-    });
-  });
+        await expect(addSpeciesPage.errorSummary()).toContainText('Enter the species you want to add');
+        await addSpeciesPage.expectUrl(/\/add-species/);
+      });
+    }
+  );
 
-  test('Add an approved gear favourite', async ({ favouritesFlow, accountPage }) => {
-    await test.step('Scenario: Add an approved gear favourite', async () => {
-      await favouritesFlow.removeGearFromAccount(favouriteGear);
-      await favouritesFlow.addGearToAccount(favouriteGear);
+  test(
+    'Reject free-text port outside the approved catalogue',
+    { tag: ['@ui', '@regression', '@favouritePorts'] },
+    async ({ accountPage, addPortPage }) => {
+      await test.step('Scenario: Reject free-text port outside the approved catalogue', async () => {
+        await accountPage.addPortLink().click();
+        await addPortPage.portInput().fill(`Not a port ${Date.now()}`);
+        await addPortPage.clickSaveAndContinue();
 
-      await expect(accountPage.gearOnboardValue()).toContainText(favouriteGear);
-    });
-  });
+        await expect(addPortPage.errorSummary()).toContainText('Select a port from the list');
+        await addPortPage.expectUrl(/\/add-port/);
+      });
+    }
+  );
 
-  test('Add an approved port favourite', async ({ favouritesFlow, accountPage }) => {
-    await test.step('Scenario: Add an approved port favourite', async () => {
-      await favouritesFlow.ensurePortAdded(favouritePort);
-      await expect(accountPage.portsUsedValue()).toContainText(favouritePort);
-    });
-  });
+  test(
+    'Favourites persist against the user account after reload',
+    { tag: ['@ui', '@regression', '@favourites'] },
+    async ({ favouritesFlow, accountPage }) => {
+      await test.step('Scenario: Favourites persist against the user account after reload', async () => {
+        await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
+        await favouritesFlow.ensureGearAdded(favouriteGear);
+        await favouritesFlow.ensurePortAdded(favouritePort);
+        await accountPage.reload();
 
-  test('Reject a duplicate gear favourite with an informative message', async ({
-    favouritesFlow,
-    accountPage,
-    addGearPage
-  }) => {
-    await test.step('Scenario: Reject a duplicate gear favourite with an informative message', async () => {
-      await favouritesFlow.ensureGearAdded(favouriteGear);
-      await accountPage.clickAddGear();
-      await addGearPage.gearInput().fill(favouriteGear);
-      await addGearPage.clickSaveAndContinue();
-
-      await expect(addGearPage.errorSummary()).toContainText(`${favouriteGear} has already been added to your gear`);
-      await addGearPage.expectUrl(/\/add-gear/);
-    });
-  });
-
-  test('Reject a duplicate port favourite with an informative message', async ({
-    favouritesFlow,
-    accountPage,
-    addPortPage
-  }) => {
-    await test.step('Scenario: Reject a duplicate port favourite with an informative message', async () => {
-      await favouritesFlow.ensurePortAdded(favouritePort);
-      await accountPage.addPortLink().click();
-      await addPortPage.searchAndSelectPort(favouritePort);
-      await addPortPage.clickSaveAndContinue();
-
-      await expect(addPortPage.errorSummary()).toBeVisible();
-      await expect(addPortPage.errorSummary()).toContainText(/already/i);
-      await addPortPage.expectUrl(/\/add-port/);
-    });
-  });
-
-  test('Remove a species favourite', async ({ favouritesFlow, accountPage }) => {
-    await test.step('Scenario: Remove a species favourite', async () => {
-      await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
-      await favouritesFlow.removeSpeciesFromAccount(favouriteSpecies);
-
-      await expect(accountPage.speciesCaughtValue()).not.toContainText(favouriteSpecies);
-    });
-  });
-
-  test('Remove a gear favourite', async ({ favouritesFlow, accountPage }) => {
-    await test.step('Scenario: Remove a gear favourite', async () => {
-      await favouritesFlow.ensureGearAdded(favouriteGear);
-      await favouritesFlow.removeGearFromAccount(favouriteGear);
-
-      await expect(accountPage.gearOnboardValue()).not.toContainText(favouriteGear);
-    });
-  });
-
-  test('Remove a port favourite', async ({ favouritesFlow, accountPage }) => {
-    await test.step('Scenario: Remove a port favourite', async () => {
-      await favouritesFlow.ensurePortAdded(favouritePort);
-      await favouritesFlow.removePortFromAccount(favouritePort);
-
-      await expect(accountPage.portsUsedValue()).not.toContainText(favouritePort);
-    });
-  });
-
-  test('Amend a port favourite by replacing it with another saved port', async ({ favouritesFlow, accountPage }) => {
-    await test.step('Scenario: Amend a port favourite by replacing it with another saved port', async () => {
-      const replacementPort = 'Lowestoft';
-      await favouritesFlow.ensurePortAdded(favouritePort);
-      await favouritesFlow.removePortFromAccount(favouritePort);
-      await favouritesFlow.ensurePortAdded(replacementPort);
-
-      await expect(accountPage.portsUsedValue()).not.toContainText(favouritePort);
-      await expect(accountPage.portsUsedValue()).toContainText(replacementPort);
-    });
-  });
-
-  test('Favourite gear is available during catch recording', async ({ favouritesFlow, gearSelectionPage }) => {
-    await test.step('Scenario: Favourite gear is available during catch recording', async () => {
-      await favouritesFlow.ensureGearAdded(favouriteGear);
-      await gearSelectionPage.goto('/gear-selection');
-      await expect(gearSelectionPage.gearCheckbox(favouriteGear)).toBeVisible();
-    });
-  });
-
-  test('Favourite species is available during catch recording', async ({ favouritesFlow, speciesSelectionPage }) => {
-    await test.step('Scenario: Favourite species is available during catch recording', async () => {
-      await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
-      await speciesSelectionPage.goto('/species-selection');
-
-      await expect(speciesSelectionPage.speciesCheckbox(favouriteSpecies)).toBeVisible();
-    });
-  });
-
-  test('Favourite port is suggested during departure-port entry', async ({
-    favouritesFlow,
-    addPortPage,
-    recordsPage,
-    selectVesselPage,
-    tripDatePage
-  }) => {
-    await test.step('Scenario: Favourite port is suggested during departure-port entry', async () => {
-      await favouritesFlow.ensurePortAdded(favouritePort);
-      await recordsPage.goto('/records');
-      await recordsPage.createNewRecordButton().click();
-      await expect(selectVesselPage.pageHeading()).toBeVisible();
-      await selectVesselPage.firstVesselRadio().check();
-      await selectVesselPage.clickSaveAndContinue();
-      await tripDatePage.expectUrl(/\/trip-date$/);
-      await tripDatePage.yesRadio().check();
-      await tripDatePage.clickSaveAndContinue();
-      await addPortPage.expectUrl(/\/add-port\?for=departure/);
-
-      await addPortPage.searchPorts(favouritePort);
-      await expect(addPortPage.portResultItem(favouritePort).getByRole('option')).toBeVisible();
-    });
-  });
-
-  test('Port type-ahead search suggests a matching reference-data entry', async ({ accountPage, addPortPage }) => {
-    await test.step('Scenario: Port type-ahead search suggests a matching reference-data entry', async () => {
-      await accountPage.addPortLink().click();
-      await addPortPage.searchPorts(favouritePort.slice(0, 2));
-
-      await expect(addPortPage.portResultItem(favouritePort).getByRole('option')).toBeVisible();
-    });
-  });
-
-  test('Reject free-text gear outside the approved catalogue', async ({ accountPage, addGearPage }) => {
-    await test.step('Scenario: Reject free-text gear outside the approved catalogue', async () => {
-      await accountPage.clickAddGear();
-      await addGearPage.gearInput().fill('Not a catalogue gear');
-      await addGearPage.clickSaveAndContinue();
-
-      await expect(addGearPage.errorSummary()).toContainText('Select a gear type from the list');
-      await addGearPage.expectUrl(/\/add-gear/);
-    });
-  });
-
-  test('Reject free-text species outside the approved catalogue', async ({ accountPage, addSpeciesPage }) => {
-    await test.step('Scenario: Reject free-text species outside the approved catalogue', async () => {
-      await accountPage.addSpeciesLink().click();
-      await addSpeciesPage.speciesInput().fill(`Not an approved species ${Date.now()}`);
-      await expect(addSpeciesPage.noResultsMessage()).toBeVisible();
-      await addSpeciesPage.speciesInput().press('Tab');
-      await addSpeciesPage.clickSaveAndContinue();
-
-      await expect(addSpeciesPage.errorSummary()).toContainText('Enter the species you want to add');
-      await addSpeciesPage.expectUrl(/\/add-species/);
-    });
-  });
-
-  test('Reject free-text port outside the approved catalogue', async ({ accountPage, addPortPage }) => {
-    await test.step('Scenario: Reject free-text port outside the approved catalogue', async () => {
-      await accountPage.addPortLink().click();
-      await addPortPage.portInput().fill(`Not a port ${Date.now()}`);
-      await addPortPage.clickSaveAndContinue();
-
-      await expect(addPortPage.errorSummary()).toContainText('Select a port from the list');
-      await addPortPage.expectUrl(/\/add-port/);
-    });
-  });
-
-  test('Favourites persist against the user account after reload', async ({ favouritesFlow, accountPage }) => {
-    await test.step('Scenario: Favourites persist against the user account after reload', async () => {
-      await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
-      await favouritesFlow.ensureGearAdded(favouriteGear);
-      await favouritesFlow.ensurePortAdded(favouritePort);
-      await accountPage.reload();
-
-      await expect(accountPage.speciesCaughtValue()).toContainText(favouriteSpecies);
-      await expect(accountPage.gearOnboardValue()).toContainText(favouriteGear);
-      await expect(accountPage.portsUsedValue()).toContainText(favouritePort);
-      await favouritesFlow.removeGearFromAccount(favouriteGear);
-    });
-  });
+        await expect(accountPage.speciesCaughtValue()).toContainText(favouriteSpecies);
+        await expect(accountPage.gearOnboardValue()).toContainText(favouriteGear);
+        await expect(accountPage.portsUsedValue()).toContainText(favouritePort);
+        await favouritesFlow.removeGearFromAccount(favouriteGear);
+      });
+    }
+  );
 });

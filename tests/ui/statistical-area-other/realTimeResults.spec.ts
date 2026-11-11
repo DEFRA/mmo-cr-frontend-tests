@@ -6,27 +6,33 @@ test.describe('Statistical Sub Area – Other Selection', () => {
   });
 
   test.describe('Real-Time Results', () => {
-    test('matching results appear in real time without requiring a submit action', async ({
-      statisticalAreaOtherPage
-    }) => {
-      await test.step('Scenario: matching results appear in real time without requiring a submit action', async () => {
-        await statisticalAreaOtherPage.selectAreaRadio('Other');
+    test(
+      'matching results appear in real time without requiring a submit action',
+      { tag: ['@ui', '@regression', '@statiscaAreaManualEntry'] },
+      async ({ statisticalAreaOtherPage }) => {
+        await test.step('Scenario: matching results appear in real time without requiring a submit action', async () => {
+          await statisticalAreaOtherPage.selectAreaRadio('Other');
 
-        await statisticalAreaOtherPage.alternativeAreaInput().pressSequentially('27', { delay: 100 });
+          await statisticalAreaOtherPage.alternativeAreaInput().pressSequentially('27', { delay: 100 });
 
-        await expect(statisticalAreaOtherPage.alternativeAreaResultItems().first()).toBeVisible();
-      });
-    });
+          await expect(statisticalAreaOtherPage.alternativeAreaResultItems().first()).toBeVisible();
+        });
+      }
+    );
 
-    test('results update dynamically as the search term changes', async ({ statisticalAreaOtherPage }) => {
-      await test.step('Scenario: results update dynamically as the search term changes', async () => {
-        const firstItem = statisticalAreaOtherPage.alternativeAreaResultItems().first();
-        await statisticalAreaOtherPage.typeInAlternativeArea('27');
-        await expect(firstItem).toContainText('27');
+    test(
+      'results update dynamically as the search term changes',
+      { tag: ['@ui', '@regression', '@statiscaAreaManualEntry'] },
+      async ({ statisticalAreaOtherPage }) => {
+        await test.step('Scenario: results update dynamically as the search term changes', async () => {
+          const firstItem = statisticalAreaOtherPage.alternativeAreaResultItems().first();
+          await statisticalAreaOtherPage.typeInAlternativeArea('27');
+          await expect(firstItem).toContainText('27');
 
-        await statisticalAreaOtherPage.alternativeAreaInput().fill('27E');
-        await expect(firstItem).toContainText('27E');
-      });
-    });
+          await statisticalAreaOtherPage.alternativeAreaInput().fill('27E');
+          await expect(firstItem).toContainText('27E');
+        });
+      }
+    );
   });
 });

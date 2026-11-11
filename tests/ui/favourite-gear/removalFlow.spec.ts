@@ -12,43 +12,59 @@ test.describe('Favourite Gear Management (Account Page)', () => {
       await favouritesFlow.setupFavouriteGears(['Pots', traps]);
     });
 
-    test('Verify Remove Gear Page Lists Saved Gears', async ({ accountPage, removeGearPage }) => {
-      await test.step('Scenario: Verify Remove Gear Page Lists Saved Gears', async () => {
-        await accountPage.clickRemoveGear();
+    test(
+      'Verify Remove Gear Page Lists Saved Gears',
+      { tag: ['@ui', '@regression', '@favouriteGear'] },
+      async ({ accountPage, removeGearPage }) => {
+        await test.step('Scenario: Verify Remove Gear Page Lists Saved Gears', async () => {
+          await accountPage.clickRemoveGear();
 
-        await expect(removeGearPage.pageHeading()).toBeVisible();
-        await expect(removeGearPage.gearCheckbox('Pots')).not.toBeChecked();
-        await expect(removeGearPage.gearCheckbox(traps)).not.toBeChecked();
-      });
-    });
+          await expect(removeGearPage.pageHeading()).toBeVisible();
+          await expect(removeGearPage.gearCheckbox('Pots')).not.toBeChecked();
+          await expect(removeGearPage.gearCheckbox(traps)).not.toBeChecked();
+        });
+      }
+    );
 
-    test('Verify Successful Removal of Single Favourite Gear', async ({ accountPage, favouritesFlow }) => {
-      await test.step('Scenario: Verify Successful Removal of Single Favourite Gear', async () => {
-        await favouritesFlow.removeGears('Pots');
+    test(
+      'Verify Successful Removal of Single Favourite Gear',
+      { tag: ['@ui', '@regression', '@favouriteGear'] },
+      async ({ accountPage, favouritesFlow }) => {
+        await test.step('Scenario: Verify Successful Removal of Single Favourite Gear', async () => {
+          await favouritesFlow.removeGears('Pots');
 
-        await expect(accountPage.pageHeading()).toBeVisible();
-        await expect(accountPage.gearOnboardValue()).not.toContainText('Pots');
-      });
-    });
+          await expect(accountPage.pageHeading()).toBeVisible();
+          await expect(accountPage.gearOnboardValue()).not.toContainText('Pots');
+        });
+      }
+    );
 
-    test('Verify One Favourite Removal from Multiple Saved Gears', async ({ accountPage, favouritesFlow }) => {
-      await test.step('Scenario: Verify One Favourite Removal from Multiple Saved Gears', async () => {
-        await favouritesFlow.removeGears('Pots');
+    test(
+      'Verify One Favourite Removal from Multiple Saved Gears',
+      { tag: ['@ui', '@regression', '@favouriteGear'] },
+      async ({ accountPage, favouritesFlow }) => {
+        await test.step('Scenario: Verify One Favourite Removal from Multiple Saved Gears', async () => {
+          await favouritesFlow.removeGears('Pots');
 
-        await expect(accountPage.gearOnboardValue()).not.toContainText('Pots');
-        await expect(accountPage.gearOnboardValue()).toContainText(traps);
-      });
-    });
+          await expect(accountPage.gearOnboardValue()).not.toContainText('Pots');
+          await expect(accountPage.gearOnboardValue()).toContainText(traps);
+        });
+      }
+    );
 
-    test('Verify Removed Gear Does Not Reappear After Page Refresh', async ({ accountPage, favouritesFlow }) => {
-      await test.step('Scenario: Verify Removed Gear Does Not Reappear After Page Refresh', async () => {
-        await favouritesFlow.removeGears('Pots');
-        await expect(accountPage.gearOnboardValue()).not.toContainText('Pots');
+    test(
+      'Verify Removed Gear Does Not Reappear After Page Refresh',
+      { tag: ['@ui', '@regression', '@favouriteGear'] },
+      async ({ accountPage, favouritesFlow }) => {
+        await test.step('Scenario: Verify Removed Gear Does Not Reappear After Page Refresh', async () => {
+          await favouritesFlow.removeGears('Pots');
+          await expect(accountPage.gearOnboardValue()).not.toContainText('Pots');
 
-        await accountPage.reload();
+          await accountPage.reload();
 
-        await expect(accountPage.gearOnboardValue()).not.toContainText('Pots');
-      });
-    });
+          await expect(accountPage.gearOnboardValue()).not.toContainText('Pots');
+        });
+      }
+    );
   });
 });

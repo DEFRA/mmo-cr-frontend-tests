@@ -6,50 +6,52 @@ test.describe('Remove Species', () => {
   });
 
   test.describe('Species Removal', () => {
-    test('removing a species removes its associated catch-weight information', async ({
-      speciesSelectionPage,
-      removeSpeciesPage
-    }) => {
-      await test.step('Scenario: removing a species removes its associated catch-weight information', async () => {
-        await speciesSelectionPage.selectSpecies('Cod (COD)');
-        await speciesSelectionPage.enterSpeciesWeights('COD', '100');
-        await speciesSelectionPage.selectSpecies('Haddock (HAD)');
-        await speciesSelectionPage.enterSpeciesWeights('HAD', '50');
-        await speciesSelectionPage.saveAndReturn();
+    test(
+      'removing a species removes its associated catch-weight information',
+      { tag: ['@ui', '@regression', '@removeSpecies'] },
+      async ({ speciesSelectionPage, removeSpeciesPage }) => {
+        await test.step('Scenario: removing a species removes its associated catch-weight information', async () => {
+          await speciesSelectionPage.selectSpecies('Cod (COD)');
+          await speciesSelectionPage.enterSpeciesWeights('COD', '100');
+          await speciesSelectionPage.selectSpecies('Haddock (HAD)');
+          await speciesSelectionPage.enterSpeciesWeights('HAD', '50');
+          await speciesSelectionPage.saveAndReturn();
 
-        await expect(speciesSelectionPage.weightAboveMinimumInput('COD')).toBeVisible();
-        await expect(speciesSelectionPage.weightAboveMinimumInput('HAD')).toBeVisible();
+          await expect(speciesSelectionPage.weightAboveMinimumInput('COD')).toBeVisible();
+          await expect(speciesSelectionPage.weightAboveMinimumInput('HAD')).toBeVisible();
 
-        await speciesSelectionPage.clickRemoveSpecies();
-        await removeSpeciesPage.selectSpeciesToRemove('Cod (COD)');
-        await removeSpeciesPage.clickSaveAndContinue();
+          await speciesSelectionPage.clickRemoveSpecies();
+          await removeSpeciesPage.selectSpeciesToRemove('Cod (COD)');
+          await removeSpeciesPage.clickSaveAndContinue();
 
-        await expect(speciesSelectionPage.speciesCheckbox('Cod (COD)')).toBeHidden();
-        await expect(speciesSelectionPage.weightAboveMinimumInput('COD')).toBeHidden();
-      });
-    });
+          await expect(speciesSelectionPage.speciesCheckbox('Cod (COD)')).toBeHidden();
+          await expect(speciesSelectionPage.weightAboveMinimumInput('COD')).toBeHidden();
+        });
+      }
+    );
 
-    test('removing a species clears below-minimum and discarded weights too', async ({
-      speciesSelectionPage,
-      removeSpeciesPage
-    }) => {
-      await test.step('Scenario: removing a species clears below-minimum and discarded weights too', async () => {
-        await speciesSelectionPage.selectSpecies('Cod (COD)');
-        await speciesSelectionPage.enterSpeciesWeights('COD', '100', '10', '5');
-        await speciesSelectionPage.saveAndReturn();
+    test(
+      'removing a species clears below-minimum and discarded weights too',
+      { tag: ['@ui', '@regression', '@removeSpecies'] },
+      async ({ speciesSelectionPage, removeSpeciesPage }) => {
+        await test.step('Scenario: removing a species clears below-minimum and discarded weights too', async () => {
+          await speciesSelectionPage.selectSpecies('Cod (COD)');
+          await speciesSelectionPage.enterSpeciesWeights('COD', '100', '10', '5');
+          await speciesSelectionPage.saveAndReturn();
 
-        await expect(speciesSelectionPage.weightAboveMinimumInput('COD')).toBeVisible();
-        await expect(speciesSelectionPage.weightBelowMinimumInput('COD')).toBeVisible();
-        await expect(speciesSelectionPage.weightDiscardedInput('COD')).toBeVisible();
+          await expect(speciesSelectionPage.weightAboveMinimumInput('COD')).toBeVisible();
+          await expect(speciesSelectionPage.weightBelowMinimumInput('COD')).toBeVisible();
+          await expect(speciesSelectionPage.weightDiscardedInput('COD')).toBeVisible();
 
-        await speciesSelectionPage.clickRemoveSpecies();
-        await removeSpeciesPage.selectSpeciesToRemove('Cod (COD)');
-        await removeSpeciesPage.clickSaveAndContinue();
+          await speciesSelectionPage.clickRemoveSpecies();
+          await removeSpeciesPage.selectSpeciesToRemove('Cod (COD)');
+          await removeSpeciesPage.clickSaveAndContinue();
 
-        await expect(speciesSelectionPage.weightAboveMinimumInput('COD')).toBeHidden();
-        await expect(speciesSelectionPage.weightBelowMinimumInput('COD')).toBeHidden();
-        await expect(speciesSelectionPage.weightDiscardedInput('COD')).toBeHidden();
-      });
-    });
+          await expect(speciesSelectionPage.weightAboveMinimumInput('COD')).toBeHidden();
+          await expect(speciesSelectionPage.weightBelowMinimumInput('COD')).toBeHidden();
+          await expect(speciesSelectionPage.weightDiscardedInput('COD')).toBeHidden();
+        });
+      }
+    );
   });
 });
