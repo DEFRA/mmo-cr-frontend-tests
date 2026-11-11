@@ -97,6 +97,7 @@ test.describe('Favourite ports', () => {
 Mapping rules:
 
 - `Feature` -> outer `test.describe` using the feature title; `Rule` or logical grouping -> nested `test.describe`.
+- New spec files start with a short JSDoc header: a 1–3 line summary of the story description, `@author <git config user.name>`, and `@since <current date in YYYY-MM-DD when the spec is created>`.
 - `Scenario` statement -> the `test` name, copied verbatim from the scenario title (without the `Scenario:` prefix or any acceptance-criteria label such as `AC1:`).
 - Each `Given` / `When` / `Then` / `And` / `But` statement -> one `test.step`, titled with the statement text without the Gherkin keyword (capitalise the first word, e.g. `And the user confirms` -> `The user confirms`). Keep the original order and do not merge or split statements.
 - `Background` -> `test.beforeEach`, with each Background statement as its own `test.step`.
@@ -113,7 +114,7 @@ Mapping rules:
    - The complete proposed spec in a fenced `ts` block, formatted per `.prettierrc.json` (120 print width, 2-space indent, single quotes, semicolons, no trailing commas).
    - A mapping table: `Gherkin statement` | `test.step title` | `page-object / flow calls` (flag new or unverified methods).
    - Any page-object, flow-helper, or fixture additions as code blocks with file paths.
-   Then stop. Only write files after the user confirms; if they request changes, revise and preview again.
+     Then stop. Only write files after the user confirms; if they request changes, revise and preview again.
 4. **Write.** Apply exactly the approved changes. New locators/actions go in the relevant page object; a new page goes in `pages/`, extends `BasePage`, and is registered as a fixture; a journey reused across specs becomes a flow-helper method.
 5. **Verify.** Run `npm run typecheck` and `npm run format:check` (fix with `npx prettier --write <changed files>`). If the environment and credentials are available, run `npx playwright test <path-to-spec> --project=Chromium`.
 

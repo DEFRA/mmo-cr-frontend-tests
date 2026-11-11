@@ -1,3 +1,11 @@
+/**
+ * Remove species from a catch record.
+ * Removing a species also removes its catch-weight data and hides it from the selected list;
+ * removing all species returns the user to Add Species until at least one is selected.
+ *
+ * @author Randhir Patel
+ * @since 2026-11-11
+ */
 import { expect, test } from '../../../fixtures/commonfixture';
 
 type SpeciesData = { name: string; code: string; weight: string };
