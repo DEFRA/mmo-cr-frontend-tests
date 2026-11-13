@@ -14,8 +14,11 @@ export class SigninPage extends BasePage {
   public readonly backLink = (): Locator => this.page.getByRole('link', { name: 'Back' });
   public readonly forgotPasswordLink = (): Locator => this.page.getByRole('link', { name: 'Forgotten your password?' });
   public readonly registerLink = (): Locator => this.page.locator('summary').filter({ hasText: 'Create an account' });
-  public readonly registrationGuidance = (): Locator =>
-    this.page.locator('details').filter({ has: this.registerLink() }).locator('.govuk-details__text');
+  public readonly registrationDetails = (): Locator =>
+    this.page.locator('details').filter({ has: this.registerLink() });
+  public readonly registrationGuidance = (): Locator => this.registrationDetails().locator('.govuk-details__text');
+
+  public readonly appLogo = (): Locator => this.header.govukHeader().locator('.govuk-header__logo');
 
   public readonly englishLabel = (): Locator => this.page.getByText('English', { exact: true });
   public readonly cymraegLink = (): Locator => this.page.getByRole('link', { name: 'Cymraeg' });
