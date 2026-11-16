@@ -20,7 +20,7 @@ const OTHER_OPTION: string = 'Other';
 test.describe('Enter statistical sub area using the Other option', () => {
   test(
     'Displays an editable type-ahead field when the Other option is selected',
-    { tag: ['@ui', '@regression', '@statiscaAreaManualEntry'] },
+    { tag: ['@ui', '@regression', '@statisticalAreaManualEntry'] },
     async ({ navigationFlow, statisticalAreaOtherPage }) => {
       await test.step('The fisher is on the Statistical Sub Area screen', async () => {
         await navigationFlow.openStatisticalAreaOther();
@@ -51,7 +51,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
 
   test(
     'Displays matching area codes and coordinates when a partial code is entered',
-    { tag: ['@ui', '@regression', '@statiscaAreaManualEntry'] },
+    { tag: ['@ui', '@regression', '@statisticalAreaManualEntry'] },
     async ({ navigationFlow, statisticalAreaOtherPage }) => {
       test.info().annotations.push({
         type: 'unverified',
@@ -86,7 +86,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
 
   test(
     'Displays corresponding coordinates as a valid area code is entered',
-    { tag: ['@ui', '@regression', '@statiscaAreaManualEntry'] },
+    { tag: ['@ui', '@regression', '@statisticalAreaManualEntry'] },
     async ({ navigationFlow, statisticalAreaOtherPage }) => {
       let initialCoordinates: string | undefined;
 
@@ -122,7 +122,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
 
   test(
     'Saves the area code when a suggested result is selected',
-    { tag: ['@ui', '@smoke', '@statiscaAreaManualEntry'] },
+    { tag: ['@ui', '@smoke', '@statisticalAreaManualEntry'] },
     async ({ navigationFlow, statisticalAreaOtherPage, checkAnswersPage }) => {
       test.info().annotations.push({
         type: 'unverified',
@@ -155,7 +155,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
 
   test(
     'Displays an error when the statistical sub area code is invalid',
-    { tag: ['@ui', '@regression', '@statiscaAreaManualEntry'] },
+    { tag: ['@ui', '@regression', '@statisticalAreaManualEntry'] },
     async ({ navigationFlow, statisticalAreaOtherPage }) => {
       await test.step('The fisher has entered a statistical sub area code', async () => {
         await navigationFlow.openStatisticalAreaOther();
