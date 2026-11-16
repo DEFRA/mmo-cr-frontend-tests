@@ -5,43 +5,34 @@ const favouriteGear = 'Pots';
 const favouritePort = 'Plymouth';
 
 test.describe('Account details and selections', () => {
-  let originalSelections = {
+  let savedSelections = {
     species: false,
     gear: false,
     port: false
   };
+  let accountReadyForCleanup = false;
 
-  test.beforeEach(async ({ navigationFlow, favouritesFlow, accountPage }) => {
+  test.beforeEach(async ({ navigationFlow, accountPage }) => {
+    accountReadyForCleanup = false;
     await navigationFlow.signInAndOpenAccount({
       requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for account UI tests'
     });
 
-    originalSelections = {
+    savedSelections = {
       species: (await accountPage.getSpeciesCaught()).includes(favouriteSpecies),
       gear: (await accountPage.getGearOnboardText()).includes(favouriteGear),
       port: (await accountPage.getPortsUsed()).includes(favouritePort)
     };
-
-    await favouritesFlow.removeSpeciesFromAccount(favouriteSpecies);
-    await favouritesFlow.removeGearFromAccount(favouriteGear);
-    await favouritesFlow.removePortFromAccount(favouritePort);
+    accountReadyForCleanup = true;
   });
 
   test.afterEach(async ({ navigationFlow, favouritesFlow }) => {
-    await navigationFlow.openAccount();
-    await favouritesFlow.removeSpeciesFromAccount(favouriteSpecies);
-    await favouritesFlow.removeGearFromAccount(favouriteGear);
-    await favouritesFlow.removePortFromAccount(favouritePort);
+    if (!accountReadyForCleanup) return;
 
-    if (originalSelections.species) {
-      await favouritesFlow.addSpeciesToAccount(favouriteSpecies);
-    }
-    if (originalSelections.gear) {
-      await favouritesFlow.addGearToAccount(favouriteGear);
-    }
-    if (originalSelections.port) {
-      await favouritesFlow.addPortToAccount(favouritePort);
-    }
+    await navigationFlow.openAccount();
+    if (!savedSelections.species) await favouritesFlow.removeSpeciesFromAccount(favouriteSpecies);
+    if (!savedSelections.gear) await favouritesFlow.removeGearFromAccount(favouriteGear);
+    if (!savedSelections.port) await favouritesFlow.removePortFromAccount(favouritePort);
   });
 
   test(
@@ -87,13 +78,13 @@ test.describe('Account details and selections', () => {
       });
 
       await test.step('I add species, gear and a port to my account', async () => {
-        await favouritesFlow.addSpeciesToAccount(favouriteSpecies);
+        if (!savedSelections.species) await favouritesFlow.addSpeciesToAccount(favouriteSpecies);
         await expect(accountPage.speciesCaughtValue()).toContainText(favouriteSpecies);
 
-        await favouritesFlow.addGearToAccount(favouriteGear);
+        if (!savedSelections.gear) await favouritesFlow.addGearToAccount(favouriteGear);
         await expect(accountPage.gearOnboardValue()).toContainText(favouriteGear);
 
-        await favouritesFlow.addPortToAccount(favouritePort);
+        if (!savedSelections.port) await favouritesFlow.addPortToAccount(favouritePort);
         await expect(accountPage.portsUsedValue()).toContainText(favouritePort);
       });
 
@@ -124,17 +115,23 @@ test.describe('Account details and selections', () => {
         await expect(speciesSelectionPage.speciesCheckbox(favouriteSpecies)).toBeVisible();
       });
 
-      await test.step('I can remove each selection and return to the updated account page', async () => {
+      await test.step('I can remove selections added during this test', async () => {
         await accountPage.goto('/account');
 
-        await favouritesFlow.removeSpeciesFromAccount(favouriteSpecies);
-        await expect(accountPage.speciesCaughtValue()).not.toContainText(favouriteSpecies);
+        if (!savedSelections.species) {
+          await favouritesFlow.removeSpeciesFromAccount(favouriteSpecies);
+          await expect(accountPage.speciesCaughtValue()).not.toContainText(favouriteSpecies);
+        }
 
-        await favouritesFlow.removeGearFromAccount(favouriteGear);
-        await expect(accountPage.gearOnboardValue()).not.toContainText(favouriteGear);
+        if (!savedSelections.gear) {
+          await favouritesFlow.removeGearFromAccount(favouriteGear);
+          await expect(accountPage.gearOnboardValue()).not.toContainText(favouriteGear);
+        }
 
-        await favouritesFlow.removePortFromAccount(favouritePort);
-        await expect(accountPage.portsUsedValue()).not.toContainText(favouritePort);
+        if (!savedSelections.port) {
+          await favouritesFlow.removePortFromAccount(favouritePort);
+          await expect(accountPage.portsUsedValue()).not.toContainText(favouritePort);
+        }
 
         await expect(accountPage.getSpeciesCaught()).resolves.toEqual(originalSpecies);
         await expect(accountPage.getGearOnboardText()).resolves.toBe(originalGear);
