@@ -1,13 +1,13 @@
-import { expect, test } from '../../fixtures/commonfixture';
+import { expect, test } from '../../../fixtures/commonfixture';
 
-import { MapFlow } from './helpers/mapFlow';
+import { MapFlow } from '../helpers/mapFlow';
 
 test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   test(
     'opens around the declared departure port and displays at least nine relevant sub-rectangles',
     { tag: ['@ui', '@smoke', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
-      await test.step('Scenario: opens around the declared departure port and displays at least nine relevant sub-rectangles', async () => {
+      await test.step('opens around the declared departure port and displays at least nine relevant sub-rectangles', async () => {
         const portName = await mapFlow.openMap();
         await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-departure-port', portName);
 
@@ -20,7 +20,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     'zooming out can display more than nine rectangles when the visible area permits',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
-      await test.step('Scenario: zooming out can display more than nine rectangles when the visible area permits', async () => {
+      await test.step('zooming out can display more than nine rectangles when the visible area permits', async () => {
         await mapFlow.openMap();
         await statisticalAreaPage.zoomOutButton().click();
 
@@ -30,10 +30,10 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   );
 
   test(
-    'NFR2 - map fits a larger browser viewport and retains the minimum display',
+    'map fits a larger browser viewport and retains the minimum display',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
-      await test.step('Scenario: NFR2 - map fits a larger browser viewport and retains the minimum display', async () => {
+      await test.step('map fits a larger browser viewport and retains the minimum display', async () => {
         await mapFlow.openMap();
         await statisticalAreaPage.resizeViewportAndReload(1600, 1000);
         await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
@@ -50,7 +50,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     'zoom controls update the visible map area and sub-rectangles',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
-      await test.step('Scenario: zoom controls update the visible map area and sub-rectangles', async () => {
+      await test.step('zoom controls update the visible map area and sub-rectangles', async () => {
         await mapFlow.openMap();
         const initialImage = await statisticalAreaPage.canvasFingerprint();
         const initialCount = await statisticalAreaPage.readMapSubrectangleCount();
@@ -78,7 +78,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
       `panning ${direction.title} updates the visible map`,
       { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
       async ({ mapFlow, statisticalAreaPage }) => {
-        await test.step('Scenario: pan the map and verify the visible area updates', async () => {
+        await test.step('pan the map and verify the visible area updates', async () => {
           await mapFlow.openMap();
           await statisticalAreaPage.zoomInButton().click();
           await statisticalAreaPage.zoomInButton().click();
@@ -97,7 +97,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     'selecting a visible sea sub-rectangle stores its ICES code',
     { tag: ['@ui', '@smoke', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
-      await test.step('Scenario: selecting a visible sea sub-rectangle stores its ICES code', async () => {
+      await test.step('selecting a visible sea sub-rectangle stores its ICES code', async () => {
         await mapFlow.openMap();
         const labels = await statisticalAreaPage.readMapLabels();
         const selectedLabel = labels[Math.floor(labels.length / 2)];
@@ -120,7 +120,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     'a sub-rectangle containing both land and sea can be selected',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
-      await test.step('Scenario: a sub-rectangle containing both land and sea can be selected', async () => {
+      await test.step('a sub-rectangle containing both land and sea can be selected', async () => {
         await mapFlow.openMap();
         const [subrectangles, land] = await Promise.all([mapFlow.fetchSubrectangles(), mapFlow.fetchLandFeatures()]);
         const visibleLabels = await statisticalAreaPage.readMapLabels();
@@ -150,7 +150,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     'selected sub-rectangle is visibly highlighted after returning to the map',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
-      await test.step('Scenario: selected sub-rectangle is visibly highlighted after returning to the map', async () => {
+      await test.step('selected sub-rectangle is visibly highlighted after returning to the map', async () => {
         await mapFlow.openMap();
         const visibleLabels = await statisticalAreaPage.readMapLabels();
         const label = visibleLabels[Math.floor(visibleLabels.length / 2)];
@@ -171,7 +171,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     'selecting another sub-rectangle replaces the prior selection',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
-      await test.step('Scenario: selecting another sub-rectangle replaces the prior selection', async () => {
+      await test.step('selecting another sub-rectangle replaces the prior selection', async () => {
         await mapFlow.openMap();
         const initialLabels = await statisticalAreaPage.readMapLabels();
         const middleIndex = Math.floor(initialLabels.length / 2);
@@ -206,7 +206,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     'land-only sub-rectangles are excluded from the visible map',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
-      await test.step('Scenario: land-only sub-rectangles are excluded from the visible map', async () => {
+      await test.step('land-only sub-rectangles are excluded from the visible map', async () => {
         await mapFlow.openMap();
         const subrectangles = await mapFlow.fetchSubrectangles();
         const seaCodes = new Set(subrectangles.filter(({ overlapsSea }) => overlapsSea).map(({ subCode }) => subCode));
@@ -224,7 +224,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     'redirects to departure-port selection when no departure port is set',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ navigationFlow, statisticalAreaPage, addPortPage }) => {
-      await test.step('Scenario: redirects to departure-port selection when no departure port is set', async () => {
+      await test.step('redirects to departure-port selection when no departure port is set', async () => {
         await navigationFlow.signIn({
           requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for map UI tests'
         });
@@ -241,7 +241,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     'reports map-data failure and allows retry without enabling map selection',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ navigationFlow, statisticalAreaPage, mapFlow }) => {
-      await test.step('Scenario: reports map-data failure and allows retry without enabling map selection', async () => {
+      await test.step('reports map-data failure and allows retry without enabling map selection', async () => {
         await navigationFlow.signIn({
           requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for map UI tests'
         });
@@ -269,7 +269,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     'map and controls remain usable at a narrow browser width',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
-      await test.step('Scenario: map and controls remain usable at a narrow browser width', async () => {
+      await test.step('map and controls remain usable at a narrow browser width', async () => {
         await mapFlow.openMap();
         await statisticalAreaPage.resizeViewportAndReload(700, 900);
 
@@ -288,7 +288,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     'refreshing the map page reinitializes the map without losing the trip context',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
-      await test.step('Scenario: refreshing the map page reinitializes the map without losing the trip context', async () => {
+      await test.step('refreshing the map page reinitializes the map without losing the trip context', async () => {
         const portName = await mapFlow.openMap();
         await statisticalAreaPage.reload();
 
@@ -301,10 +301,10 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   );
 
   test(
-    'NFR1 - zoom controls are labelled and keyboard operable',
+    'zoom controls are labelled and keyboard operable',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
-      await test.step('Scenario: NFR1 - zoom controls are labelled and keyboard operable', async () => {
+      await test.step('zoom controls are labelled and keyboard operable', async () => {
         await mapFlow.openMap();
         const initialImage = await statisticalAreaPage.canvasFingerprint();
 
