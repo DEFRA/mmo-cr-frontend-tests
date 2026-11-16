@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
+import { defineBddProject } from 'playwright-bdd';
 
 const envFile = resolve(__dirname, '.env');
 
@@ -20,6 +21,12 @@ const baseURL = environmentUrls[environmentName as keyof typeof environmentUrls]
 /* Falls back to the frontend baseURL when the API is served from the same host. */
 const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL || baseURL;
 const apiToken = process.env.CATCH_RECORDING_API_TOKEN;
+const accountPageBddProject = defineBddProject({
+  name: 'Chromium-BDD',
+  features: 'tests/ui/features/account-page.feature',
+  steps: ['tests/ui/features/account-page.steps.ts', 'fixtures/accountPageBddFixture.ts'],
+  outputDir: '.bdd-gen/account-page'
+});
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -72,6 +79,11 @@ export default defineConfig({
       name: 'Safari',
       testDir: './tests/ui',
       use: { ...devices['Desktop Safari'] }
+    },
+    {
+      ...accountPageBddProject,
+      fullyParallel: false,
+      use: { ...devices['Desktop Chrome'] }
     },
     {
       name: 'api',

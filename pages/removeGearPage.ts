@@ -3,7 +3,7 @@ import { BasePage } from './basePage';
 
 export class RemoveGearPage extends BasePage {
   public readonly pageHeading = (): Locator =>
-    this.page.getByRole('heading', { level: 1, name: /Remove gear from vessel/i });
+    this.page.getByRole('heading', { level: 1, name: /Remove gear from your favourites/i });
 
   public readonly hintText = (): Locator => this.page.locator('#gearIds-hint');
 

@@ -4,6 +4,7 @@
 .idea
 .server
 node_modules
+.bdd-gen/
 npm-debug.log
 coverage
 .cache

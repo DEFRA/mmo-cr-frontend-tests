@@ -2,7 +2,8 @@ import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
 export class RemoveSpeciesPage extends BasePage {
-  public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: /Remove species from vessel/ });
+  public readonly pageHeading = (): Locator =>
+    this.page.getByRole('heading', { name: /Remove species from your favourites/ });
 
   public readonly speciesCheckbox = (speciesName: string): Locator => this.page.getByLabel(speciesName);
 

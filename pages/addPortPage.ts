@@ -3,9 +3,9 @@ import { BasePage } from './basePage';
 
 export class AddPortPage extends BasePage {
   public readonly pageHeading = (): Locator =>
-    this.page.getByRole('heading', { name: 'Enter the port or closest port you set off from' });
+    this.page.getByRole('heading', { name: 'Add a port to your favourites' });
 
-  public readonly portInput = (): Locator => this.page.getByLabel('Enter the port or closest port you set off from');
+  public readonly portInput = (): Locator => this.page.getByLabel('Add a port to your favourites');
 
   public readonly portResultsList = (): Locator => this.page.locator('#port-results');
 

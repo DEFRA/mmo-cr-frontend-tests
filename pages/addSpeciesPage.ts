@@ -2,10 +2,11 @@ import { expect, type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
 export class AddSpeciesPage extends BasePage {
-  // Uses a regex because the "New catch record" caption is part of the heading's accessible name
-  public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: /What species did you catch\?/ });
+  public readonly pageHeading = (): Locator =>
+    this.page.getByRole('heading', { name: /Add species to your favourites/ });
 
-  public readonly speciesInput = (): Locator => this.page.locator('#species');
+  public readonly speciesInput = (): Locator =>
+    this.page.getByRole('combobox', { name: 'Add species to your favourites' });
 
   public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
 
