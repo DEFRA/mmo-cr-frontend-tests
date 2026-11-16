@@ -1,4 +1,4 @@
-import { expect, test } from '../../fixtures/commonfixture';
+import { expect, test } from '../../../fixtures/commonfixture';
 
 function occurrences(text: string, value: string): number {
   return text.split(value).length - 1;
