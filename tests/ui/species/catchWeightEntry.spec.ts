@@ -70,7 +70,7 @@ test.describe('Species catch weight entry', () => {
   });
 
   test(
-    'Selecting a species displays editable catch-weight fields',
+    'Displays editable catch-weight fields when a species is selected',
     { tag: ['@ui', '@regression', '@catchWeightRecording'] },
     async ({ speciesSelectionPage }) => {
       await test.step(`The user selects ${cod.name}`, async () => {
@@ -103,7 +103,7 @@ test.describe('Species catch weight entry', () => {
   );
 
   test(
-    'Saving catch weights preserves them when the user returns to the species page',
+    'Preserves saved catch weights when the species page is reopened',
     { tag: ['@ui', '@smoke', '@catchWeightRecording'] },
     async ({ speciesSelectionPage }) => {
       await test.step(`The user selects ${cod.name} and enters all three weights`, async () => {
@@ -135,7 +135,7 @@ test.describe('Species catch weight entry', () => {
   );
 
   test(
-    'Editing all catch weights updates their saved values',
+    'Updates saved values when all catch weights are edited',
     { tag: ['@ui', '@regression', '@catchWeightRecording'] },
     async ({ speciesSelectionPage }) => {
       await test.step('The user has saved all three weights for Cod', async () => {
@@ -170,7 +170,7 @@ test.describe('Species catch weight entry', () => {
   );
 
   test(
-    'Above-minimum weight is required when a species is selected',
+    'Displays an error when a selected species has no above-minimum weight',
     { tag: ['@ui', '@regression', '@catchWeightRecording'] },
     async ({ speciesSelectionPage }) => {
       await test.step(`The user selects ${cod.name} without entering an above-minimum weight`, async () => {
@@ -187,7 +187,7 @@ test.describe('Species catch weight entry', () => {
 
   for (const comparison of weightComparisonCases) {
     test(
-      `Above-minimum weight ${comparison.name} is ${comparison.valid ? 'accepted' : 'rejected'}`,
+      `${comparison.valid ? 'Accepts' : 'Rejects'} above-minimum weight when it is ${comparison.name}`,
       { tag: ['@ui', '@regression', '@catchWeightRecording'] },
       async ({ speciesSelectionPage }) => {
         await test.step('The user enters above-minimum and discarded weights', async () => {
@@ -214,7 +214,7 @@ test.describe('Species catch weight entry', () => {
 
   for (const weightCase of validWeightCases) {
     test(
-      `Above-minimum weight with ${weightCase.name} is accepted`,
+      `Accepts above-minimum weight with ${weightCase.name}`,
       { tag: ['@ui', '@regression', '@catchWeightRecording'] },
       async ({ speciesSelectionPage }) => {
         await test.step('The user enters the weight and saves', async () => {
@@ -232,7 +232,7 @@ test.describe('Species catch weight entry', () => {
 
   for (const weightCase of invalidWeightCases) {
     test(
-      `Above-minimum weight with ${weightCase.name} is rejected`,
+      `Rejects above-minimum weight with ${weightCase.name}`,
       { tag: ['@ui', '@regression', '@catchWeightRecording'] },
       async ({ speciesSelectionPage }) => {
         await test.step('The user enters the weight and saves', async () => {
@@ -251,7 +251,7 @@ test.describe('Species catch weight entry', () => {
 
   for (const optionalWeightCase of invalidOptionalWeightCases) {
     test(
-      `Optional ${optionalWeightCase.name} with two decimal places is rejected`,
+      `Rejects optional ${optionalWeightCase.name} when it has two decimal places`,
       { tag: ['@ui', '@regression', '@catchWeightRecording'] },
       async ({ speciesSelectionPage }) => {
         await test.step('The user enters the optional weight and saves', async () => {

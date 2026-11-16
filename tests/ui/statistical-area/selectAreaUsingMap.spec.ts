@@ -67,9 +67,9 @@ function requireDefined<T>(value: T | undefined, message: string): T {
   return value;
 }
 
-test.describe('Map full story - ICES statistical sub-rectangle map', () => {
+test.describe('ICES statistical sub-rectangle map', () => {
   test(
-    'Initial Map Display',
+    'Displays at least nine sub-rectangles around the declared departure port when the map opens',
     { tag: ['@ui', '@smoke', '@statisticalAreaMap'] },
     async ({ navigationFlow, mapFlow, statisticalAreaPage }) => {
       await test.step('The user has declared a departure port for the trip', async () => {
@@ -97,7 +97,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   );
 
   test(
-    'Larger Web Screen',
+    'Displays more than nine sub-rectangles when zoomed out on a larger screen',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
       await test.step('The map is opened on a larger supported screen', async () => {
@@ -125,65 +125,73 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
     }
   );
 
-  test('Zoom Out', { tag: ['@ui', '@regression', '@statisticalAreaMap'] }, async ({ mapFlow, statisticalAreaPage }) => {
-    let initialImage = '';
-    let initialCount = 0;
+  test(
+    'Displays a larger map area when zooming out',
+    { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
+    async ({ mapFlow, statisticalAreaPage }) => {
+      let initialImage = '';
+      let initialCount = 0;
 
-    await test.step('The map is displaying the initial departure-port area', async () => {
-      await mapFlow.openMap();
-      initialImage = await statisticalAreaPage.canvasFingerprint();
-      initialCount = await statisticalAreaPage.readMapSubrectangleCount();
-    });
+      await test.step('The map is displaying the initial departure-port area', async () => {
+        await mapFlow.openMap();
+        initialImage = await statisticalAreaPage.canvasFingerprint();
+        initialCount = await statisticalAreaPage.readMapSubrectangleCount();
+      });
 
-    await test.step('The user zooms out', async () => {
-      await statisticalAreaPage.zoomOutButton().click();
-    });
+      await test.step('The user zooms out', async () => {
+        await statisticalAreaPage.zoomOutButton().click();
+      });
 
-    await test.step('A larger geographical area is displayed', async () => {
-      await expect.poll(() => statisticalAreaPage.canvasFingerprint()).not.toBe(initialImage);
-    });
+      await test.step('A larger geographical area is displayed', async () => {
+        await expect.poll(() => statisticalAreaPage.canvasFingerprint()).not.toBe(initialImage);
+      });
 
-    await test.step('Additional coastline is shown', async () => {
-      await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
-      expect(await statisticalAreaPage.canvasFingerprint()).not.toBe(initialImage);
-    });
+      await test.step('Additional coastline is shown', async () => {
+        await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
+        expect(await statisticalAreaPage.canvasFingerprint()).not.toBe(initialImage);
+      });
 
-    await test.step('Additional relevant sub-rectangles within the visible area are displayed', async () => {
-      await expect.poll(() => statisticalAreaPage.readMapSubrectangleCount()).toBeGreaterThanOrEqual(initialCount);
-    });
-  });
+      await test.step('Additional relevant sub-rectangles within the visible area are displayed', async () => {
+        await expect.poll(() => statisticalAreaPage.readMapSubrectangleCount()).toBeGreaterThanOrEqual(initialCount);
+      });
+    }
+  );
 
-  test('Zoom In', { tag: ['@ui', '@regression', '@statisticalAreaMap'] }, async ({ mapFlow, statisticalAreaPage }) => {
-    let visibleImage = '';
-    let visibleCount = 0;
+  test(
+    'Displays fewer sub-rectangles when zooming in',
+    { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
+    async ({ mapFlow, statisticalAreaPage }) => {
+      let visibleImage = '';
+      let visibleCount = 0;
 
-    await test.step('Multiple sub-rectangles are visible', async () => {
-      await mapFlow.openMap();
-      const initialImage = await statisticalAreaPage.canvasFingerprint();
-      await statisticalAreaPage.zoomOutButton().click();
-      await expect.poll(() => statisticalAreaPage.canvasFingerprint()).not.toBe(initialImage);
-      visibleImage = await statisticalAreaPage.canvasFingerprint();
-      visibleCount = await statisticalAreaPage.readMapSubrectangleCount();
-    });
+      await test.step('Multiple sub-rectangles are visible', async () => {
+        await mapFlow.openMap();
+        const initialImage = await statisticalAreaPage.canvasFingerprint();
+        await statisticalAreaPage.zoomOutButton().click();
+        await expect.poll(() => statisticalAreaPage.canvasFingerprint()).not.toBe(initialImage);
+        visibleImage = await statisticalAreaPage.canvasFingerprint();
+        visibleCount = await statisticalAreaPage.readMapSubrectangleCount();
+      });
 
-    await test.step('The user zooms in', async () => {
-      for (let zoom = 0; zoom < ZOOM_IN_CLICKS; zoom++) {
-        await statisticalAreaPage.zoomInButton().click();
-      }
-    });
+      await test.step('The user zooms in', async () => {
+        for (let zoom = 0; zoom < ZOOM_IN_CLICKS; zoom++) {
+          await statisticalAreaPage.zoomInButton().click();
+        }
+      });
 
-    await test.step('A smaller geographical area is displayed', async () => {
-      await expect.poll(() => statisticalAreaPage.canvasFingerprint()).not.toBe(visibleImage);
-    });
+      await test.step('A smaller geographical area is displayed', async () => {
+        await expect.poll(() => statisticalAreaPage.canvasFingerprint()).not.toBe(visibleImage);
+      });
 
-    await test.step('The number of visible sub-rectangles may decrease according to the visible area', async () => {
-      await expect.poll(() => statisticalAreaPage.readMapSubrectangleCount()).toBeLessThan(visibleCount);
-    });
-  });
+      await test.step('The number of visible sub-rectangles may decrease according to the visible area', async () => {
+        await expect.poll(() => statisticalAreaPage.readMapSubrectangleCount()).toBeLessThan(visibleCount);
+      });
+    }
+  );
 
   for (const pan of panScenarios) {
     test(
-      `${pan.scenario} - ${pan.direction}`,
+      `Updates the visible map when panned ${pan.direction}`,
       { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
       async ({ mapFlow, statisticalAreaPage }) => {
         let initialImage = '';
@@ -213,7 +221,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   }
 
   test(
-    'Partially Over-Sea Sub-Rectangle',
+    'Displays and saves a selectable sub-rectangle when it partially overlaps the sea',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
       let subrectangles: SubrectangleReference[] = [];
@@ -258,7 +266,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   );
 
   test(
-    'Wholly Over-Sea Sub-Rectangle',
+    'Displays and saves a selectable sub-rectangle when it is wholly over the sea',
     { tag: ['@ui', '@smoke', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
       let subrectangles: SubrectangleReference[] = [];
@@ -303,7 +311,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   );
 
   test(
-    'Land-Only Sub-Rectangle',
+    'Excludes sub-rectangles from selection when they are entirely on land',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
       let seaCodes = new Set<string>();
@@ -337,7 +345,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   );
 
   test(
-    'Select a Sub-Rectangle',
+    'Highlights and retains a sub-rectangle when it is selected',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
       let label: MapLabel | undefined;
@@ -369,7 +377,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   );
 
   test(
-    'Save the Selection',
+    'Stores the selected sub-rectangle against the catch record when continuing',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage, checkAnswersPage }) => {
       let label: MapLabel | undefined;
@@ -400,7 +408,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   );
 
   test(
-    'No Departure Port',
+    'Redirects to port entry when the map opens without a declared departure port',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ navigationFlow, statisticalAreaPage, addPortPage }) => {
       await test.step('No departure port has been declared for the trip', async () => {
@@ -423,7 +431,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   );
 
   test(
-    'Map Data Cannot Be Loaded',
+    'Displays an error and allows retrying when map data cannot be loaded',
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ navigationFlow, statisticalAreaPage, mapFlow }) => {
       await test.step('The user opens the web map', async () => {
@@ -459,7 +467,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   );
 
   test(
-    'Selecting another sub-rectangle replaces the prior selection',
+    'Replaces the prior selection when another sub-rectangle is selected',
     {
       tag: ['@ui', '@regression', '@statisticalAreaMap']
     },
@@ -517,7 +525,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   );
 
   test(
-    'Map and controls remain usable at a narrow browser width',
+    'Keeps the map and controls visible when the browser is resized to a narrow width',
     {
       tag: ['@ui', '@regression', '@statisticalAreaMap']
     },
@@ -551,7 +559,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   );
 
   test(
-    'Refreshing the map page reinitializes the map without losing the trip context',
+    'Reinitialises the map without losing the departure port when the page is refreshed',
     {
       tag: ['@ui', '@regression', '@statisticalAreaMap']
     },
@@ -581,7 +589,7 @@ test.describe('Map full story - ICES statistical sub-rectangle map', () => {
   );
 
   test(
-    'Zoom controls are labelled and keyboard operable',
+    'Displays labelled zoom controls and updates the map when zoom is activated by keyboard',
     {
       tag: ['@ui', '@regression', '@statisticalAreaMap']
     },

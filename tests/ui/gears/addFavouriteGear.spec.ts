@@ -40,7 +40,7 @@ test.describe('Add favourite gear', () => {
   });
 
   test(
-    'Add a gear favourite',
+    'Saves a gear favourite when valid measurements are provided',
     { tag: ['@ui', '@smoke', '@favouriteGear'] },
     async ({ navigationFlow, accountPage, addGearPage, gearSelectionPage }) => {
       await test.step('I am creating or managing a catch record', async () => {
@@ -77,7 +77,7 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'Add multiple favourite gears',
+    'Preserves existing favourites when a different gear is added',
     { tag: ['@ui', '@regression', '@favouriteGear'] },
     async ({ navigationFlow, gearFlow, accountPage }) => {
       await test.step('I already have saved gear', async () => {
@@ -99,7 +99,7 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'Mandatory measurements missing',
+    'Displays errors and does not save gear when mandatory measurements are missing',
     { tag: ['@ui', '@regression', '@favouriteGear'] },
     async ({ navigationFlow, gearFlow, accountPage, addGearPage }) => {
       let gearBefore: string;
@@ -135,7 +135,7 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'Invalid measurement value',
+    'Displays an error and does not save gear when a measurement is fractional',
     { tag: ['@ui', '@regression', '@favouriteGear'] },
     async ({ navigationFlow, gearFlow, accountPage, addGearPage }) => {
       let gearBefore: string;
@@ -165,7 +165,7 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'Gear available on future trips',
+    'Displays saved favourite gear when a new catch record is started',
     { tag: ['@ui', '@regression', '@favouriteGear'] },
     async ({ navigationFlow, gearFlow, recordsPage, selectVesselPage, gearSelectionPage }) => {
       await test.step('I previously saved a favourite gear', async () => {

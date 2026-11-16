@@ -39,7 +39,7 @@ test.describe('Add species to a catch record', () => {
   });
 
   test(
-    'Add a Species',
+    'Adds a species to the catch record when an approved catalogue entry is selected',
     { tag: ['@ui', '@smoke', '@addSpecies'] },
     async ({ navigationFlow, speciesFlow, addSpeciesPage, speciesSelectionPage }) => {
       let species: string;
@@ -75,7 +75,7 @@ test.describe('Add species to a catch record', () => {
   );
 
   test(
-    'Search for a Species',
+    'Displays matching species when part of a species name is entered',
     { tag: ['@ui', '@regression', '@addSpecies'] },
     async ({ navigationFlow, speciesFlow, addSpeciesPage, speciesSelectionPage }) => {
       let species: string;
@@ -105,7 +105,7 @@ test.describe('Add species to a catch record', () => {
   );
 
   test(
-    'Add Multiple Species',
+    'Preserves existing species when another species is added',
     { tag: ['@ui', '@regression', '@addSpecies'] },
     async ({ navigationFlow, speciesFlow, addSpeciesPage, speciesSelectionPage }) => {
       let firstSpecies: string;
@@ -141,7 +141,7 @@ test.describe('Add species to a catch record', () => {
   );
 
   test(
-    'Duplicate Species',
+    'Displays an error when the same species is added again',
     { tag: ['@ui', '@regression', '@addSpecies'] },
     async ({ navigationFlow, speciesFlow, addSpeciesPage, speciesSelectionPage }) => {
       let species: string;
@@ -173,7 +173,7 @@ test.describe('Add species to a catch record', () => {
   );
 
   test(
-    'Edit Existing Species Selection',
+    'Preserves the saved species selection when another species is added',
     { tag: ['@ui', '@regression', '@addSpecies'] },
     async ({ navigationFlow, speciesFlow, addSpeciesPage, speciesSelectionPage }) => {
       let firstSpecies: string;
@@ -214,25 +214,29 @@ test.describe('Add species to a catch record', () => {
     }
   );
 
-  test('No Species Selected', { tag: ['@ui', '@regression', '@addSpecies'] }, async ({ speciesSelectionPage }) => {
-    await test.step('No species have been selected', async () => {
-      for (const checkbox of await speciesSelectionPage.speciesCheckboxes().all()) {
-        await checkbox.uncheck();
-      }
-    });
+  test(
+    'Displays an error when no species is selected',
+    { tag: ['@ui', '@regression', '@addSpecies'] },
+    async ({ speciesSelectionPage }) => {
+      await test.step('No species have been selected', async () => {
+        for (const checkbox of await speciesSelectionPage.speciesCheckboxes().all()) {
+          await checkbox.uncheck();
+        }
+      });
 
-    await test.step('The user selects Save and Continue', async () => {
-      await speciesSelectionPage.clickSaveAndContinue();
-    });
+      await test.step('The user selects Save and Continue', async () => {
+        await speciesSelectionPage.clickSaveAndContinue();
+      });
 
-    await test.step(`An error message is displayed: "${noSpeciesSelectedError}."`, async () => {
-      await expect(speciesSelectionPage.errorSummary()).toContainText(noSpeciesSelectedError);
-      await speciesSelectionPage.expectUrl(/\/species-selection$/);
-    });
-  });
+      await test.step(`An error message is displayed: "${noSpeciesSelectedError}."`, async () => {
+        await expect(speciesSelectionPage.errorSummary()).toContainText(noSpeciesSelectedError);
+        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+      });
+    }
+  );
 
   test(
-    'Changing the search term allows another matching catalogue species to be selected',
+    'Adds a matching species when the search term is changed and a new result is selected',
     { tag: ['@ui', '@regression', '@addSpecies'] },
     async ({ navigationFlow, speciesFlow, addSpeciesPage, speciesSelectionPage }) => {
       let firstSpecies: string;
@@ -286,7 +290,7 @@ test.describe('Add species to a catch record', () => {
   );
 
   test(
-    'Arbitrary text that is not an approved species cannot be added',
+    'Rejects species entries when the text is outside the approved catalogue',
     { tag: ['@ui', '@regression', '@addSpecies'] },
     async ({ navigationFlow, addSpeciesPage, speciesSelectionPage }) => {
       let unapprovedSpecies: string;

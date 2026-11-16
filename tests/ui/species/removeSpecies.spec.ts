@@ -15,7 +15,7 @@ const haddock: SpeciesData = { name: 'Haddock (HAD)', code: 'HAD', weight: '50' 
 // Placeholder until a third vessel species is confirmed; only used by the fixme test
 const thirdSpecies: SpeciesData = { name: '<THIRD_SPECIES>', code: '<THIRD_CODE>', weight: '' };
 
-test.describe('Remove Species', () => {
+test.describe('Remove species', () => {
   test.beforeEach(async ({ navigationFlow, speciesSelectionPage }) => {
     await test.step('The user has one or more species displayed', async () => {
       await navigationFlow.openSpeciesSelection();
@@ -28,7 +28,7 @@ test.describe('Remove Species', () => {
   });
 
   test(
-    'Remove Species',
+    'Displays saved species and allows selecting them for removal',
     { tag: ['@ui', '@regression', '@removeSpecies'] },
     async ({ speciesSelectionPage, removeSpeciesPage }) => {
       await test.step('The user selects Remove Species', async () => {
@@ -54,7 +54,7 @@ test.describe('Remove Species', () => {
   );
 
   test(
-    'Remove Multiple Species',
+    'Removes selected species and their catch weights when removal is confirmed',
     { tag: ['@ui', '@regression', '@removeSpecies'] },
     async ({ speciesSelectionPage, removeSpeciesPage }) => {
       test.fixme(true, 'Needs a third species on the vessel so removing two does not remove all (AC5)');
@@ -87,7 +87,7 @@ test.describe('Remove Species', () => {
   );
 
   test(
-    'Cancel Removal',
+    'Preserves species and catch weights when removal is cancelled',
     { tag: ['@ui', '@regression', '@removeSpecies'] },
     async ({ speciesSelectionPage, removeSpeciesPage }) => {
       await test.step('The user has selected Remove Species', async () => {
@@ -112,7 +112,7 @@ test.describe('Remove Species', () => {
   );
 
   test(
-    'Edit Existing Species Selection',
+    'Preserves the remaining species when a previously saved species is removed',
     { tag: ['@ui', '@regression', '@removeSpecies'] },
     async ({ speciesSelectionPage, removeSpeciesPage }) => {
       await test.step('The user has previously selected species', async () => {

@@ -11,10 +11,10 @@ test.describe('Add favourite gear', () => {
   });
 
   test(
-    'shows a matching gear option and the required fields after selection',
+    'Displays matching gear and required measurement fields when a catalogue entry is selected',
     { tag: ['@ui', '@regression', '@addGear'] },
     async ({ navigationFlow, gearFlow, addGearPage }) => {
-      await test.step('Scenario: shows a matching gear option and the required fields after selection', async () => {
+      await test.step('Shows a matching gear option and the required fields after selection', async () => {
         await navigationFlow.openAddGear();
         const gearName = await gearFlow.findGear('lo', (name) => /line/i.test(name));
         await addGearPage.searchAndSelectGear(gearName);
@@ -27,10 +27,10 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'searches approved gear and rejects a value outside the catalogue',
+    'Displays approved gear search results and rejects entries outside the catalogue',
     { tag: ['@ui', '@regression', '@addGear'] },
     async ({ navigationFlow, addGearPage }) => {
-      await test.step('Scenario: searches approved gear and rejects a value outside the catalogue', async () => {
+      await test.step('Searches approved gear and rejects a value outside the catalogue', async () => {
         await navigationFlow.openAddGear();
         await expect(addGearPage.pageHeading()).toBeVisible();
         const [firstGear] = await addGearPage.searchGearOptions('po');
@@ -49,10 +49,10 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'requires a gear type before continuing',
+    'Displays an error when no gear type is selected',
     { tag: ['@ui', '@regression', '@addGear'] },
     async ({ navigationFlow, addGearPage }) => {
-      await test.step('Scenario: requires a gear type before continuing', async () => {
+      await test.step('Requires a gear type before continuing', async () => {
         await navigationFlow.openAddGear();
         await addGearPage.clickSaveAndContinue();
 
@@ -63,10 +63,10 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'saves gear with measurements and makes it available for the next catch record',
+    'Makes favourite gear available for catch recording when saved with measurements',
     { tag: ['@ui', '@smoke', '@addGear'] },
     async ({ navigationFlow, gearFlow, accountPage, gearSelectionPage }) => {
-      await test.step('Scenario: saves gear with measurements and makes it available for the next catch record', async () => {
+      await test.step('Saves gear with measurements and makes it available for the next catch record', async () => {
         await navigationFlow.openAddGear();
         const gearName = await gearFlow.saveLineGear();
 
@@ -78,10 +78,10 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'shows saved pots measurement under the favourite gear on the account page',
+    'Displays the saved pots measurement in account favourites',
     { tag: ['@ui', '@regression', '@addGear'] },
     async ({ navigationFlow, gearFlow, accountPage }) => {
-      await test.step('Scenario: shows saved pots measurement under the favourite gear on the account page', async () => {
+      await test.step('Shows saved pots measurement under the favourite gear on the account page', async () => {
         await navigationFlow.openAddGear();
         await gearFlow.savePots('45');
 
@@ -92,10 +92,10 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'does not offer a gear that is already a favourite in the search list',
+    'Excludes gear from search results when it is already a favourite',
     { tag: ['@ui', '@regression', '@addGear'] },
     async ({ navigationFlow, gearFlow, addGearPage }) => {
-      await test.step('Scenario: does not offer a gear that is already a favourite in the search list', async () => {
+      await test.step('Does not offer a gear that is already a favourite in the search list', async () => {
         await navigationFlow.openAddGear();
         await gearFlow.savePots('45');
 
@@ -107,10 +107,10 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'blocks adding a gear that is already a favourite',
+    'Displays an error and preserves the saved configuration when duplicate gear is submitted',
     { tag: ['@ui', '@regression', '@addGear'] },
     async ({ navigationFlow, gearFlow, addGearPage, accountPage }) => {
-      await test.step('Scenario: blocks adding a gear that is already a favourite', async () => {
+      await test.step('Blocks adding a gear that is already a favourite', async () => {
         await navigationFlow.openAddGear();
         await gearFlow.savePots('45');
 
@@ -130,10 +130,10 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'lists a duplicate-attempted gear only once on the remove gear page',
+    'Lists gear only once for removal after a duplicate addition is attempted',
     { tag: ['@ui', '@regression', '@addGear'] },
     async ({ navigationFlow, gearFlow, addGearPage, accountPage, removeGearPage }) => {
-      await test.step('Scenario: lists a duplicate-attempted gear only once on the remove gear page', async () => {
+      await test.step('Lists a duplicate-attempted gear only once on the remove gear page', async () => {
         await navigationFlow.openAddGear();
         await gearFlow.savePots('45');
         await navigationFlow.openAddGear();
@@ -148,10 +148,10 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'keeps multiple different favourite gears',
+    'Preserves both favourites when different gear types are saved',
     { tag: ['@ui', '@regression', '@addGear'] },
     async ({ navigationFlow, gearFlow, addGearPage, accountPage }) => {
-      await test.step('Scenario: keeps multiple different favourite gears', async () => {
+      await test.step('Keeps multiple different favourite gears', async () => {
         await navigationFlow.openAddGear();
         const lineGear = await gearFlow.saveLineGear();
 
@@ -175,10 +175,10 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'does not save gear when required measurements are missing',
+    'Prevents saving gear when required measurements are missing',
     { tag: ['@ui', '@regression', '@addGear'] },
     async ({ navigationFlow, gearFlow, addGearPage }) => {
-      await test.step('Scenario: does not save gear when required measurements are missing', async () => {
+      await test.step('Does not save gear when required measurements are missing', async () => {
         await navigationFlow.openAddGear();
         await gearFlow.selectLineGear();
         await addGearPage.clickSaveAndContinue();
@@ -190,10 +190,10 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'rejects fractional and negative measurements',
+    'Displays errors when gear measurements are fractional or negative',
     { tag: ['@ui', '@regression', '@addGear'] },
     async ({ navigationFlow, gearFlow, addGearPage }) => {
-      await test.step('Scenario: rejects fractional and negative measurements', async () => {
+      await test.step('Rejects fractional and negative measurements', async () => {
         await navigationFlow.openAddGear();
         await gearFlow.selectLineGear();
         const input = addGearPage.measurementInputs().first();
@@ -212,10 +212,10 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'rejects zero measurements',
+    'Displays an error when a gear measurement is zero',
     { tag: ['@ui', '@regression', '@addGear'] },
     async ({ navigationFlow, gearFlow, addGearPage }) => {
-      await test.step('Scenario: rejects zero measurements', async () => {
+      await test.step('Rejects zero measurements', async () => {
         await navigationFlow.openAddGear();
         await gearFlow.selectLineGear();
         await addGearPage.measurementInputs().first().fill('0');
@@ -228,10 +228,10 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'offers saved gear when starting a new catch record in the same session',
+    'Displays saved gear when a new catch record is started in the same session',
     { tag: ['@ui', '@regression', '@addGear'] },
     async ({ navigationFlow, gearFlow, recordsPage, accountPage, gearSelectionPage, selectVesselPage }) => {
-      await test.step('Scenario: offers saved gear when starting a new catch record in the same session', async () => {
+      await test.step('Offers saved gear when starting a new catch record in the same session', async () => {
         await navigationFlow.openAddGear();
         const gearName = await gearFlow.saveLineGear();
 
@@ -250,10 +250,10 @@ test.describe('Add favourite gear', () => {
   );
 
   test(
-    'can save selected gear by pressing Enter from the input fields',
+    'Saves the selected gear when Enter is pressed in the input fields',
     { tag: ['@ui', '@regression', '@addGear'] },
     async ({ navigationFlow, gearFlow, addGearPage, accountPage }) => {
-      await test.step('Scenario: can save selected gear by pressing Enter from the input fields', async () => {
+      await test.step('Can save selected gear by pressing Enter from the input fields', async () => {
         await navigationFlow.openAddGear();
         const gearName = await gearFlow.findGear('lo', (name) => /line/i.test(name));
         await addGearPage.searchAndSelectGear(gearName);
