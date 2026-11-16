@@ -1,6 +1,13 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * Select or enter a statistical sub-area.
+ * Choose a suggested area or search for an alternative area.
+ *
+ * @author Randhir Patel
+ * @since 2026-09-30
+ */
 export class StatisticalAreaOtherPage extends BasePage {
   public readonly pageHeading = (): Locator =>
     this.page.getByRole('heading', {

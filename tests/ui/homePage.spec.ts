@@ -1,3 +1,10 @@
+/**
+ * Display the home page.
+ * Verify the home page provides the required guidance, controls, language options and links.
+ *
+ * @author Randhir Patel
+ * @since 2026-11-16
+ */
 import { expect, test } from '../../fixtures/commonfixture';
 
 test.describe('Home page', () => {

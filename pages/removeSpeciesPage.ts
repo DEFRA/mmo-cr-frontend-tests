@@ -1,6 +1,13 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * Remove saved favourite species.
+ * Select saved species for removal and handle validation messages.
+ *
+ * @author Randhir Patel
+ * @since 2026-10-05
+ */
 export class RemoveSpeciesPage extends BasePage {
   public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: /Remove species from vessel/ });
 

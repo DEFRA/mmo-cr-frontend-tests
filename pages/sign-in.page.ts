@@ -1,6 +1,13 @@
 import { type Locator, type Page } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * Sign in to the service.
+ * Provide sign-in controls, authentication errors and account-registration guidance.
+ *
+ * @author Randhir Patel
+ * @since 2026-08-27
+ */
 export class SigninPage extends BasePage {
   public readonly emailInput = (): Locator => this.page.getByLabel('Email address');
   public readonly passwordInput = (): Locator => this.page.getByLabel('Password');

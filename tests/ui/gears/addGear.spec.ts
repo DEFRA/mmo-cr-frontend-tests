@@ -1,3 +1,10 @@
+/**
+ * Add favourite gear.
+ * Fishers search the gear catalogue, enter required measurements, and save gear as a favourite for future catch records.
+ *
+ * @author Randhir Patel
+ * @since 2026-11-16
+ */
 import { expect, test } from '../../../fixtures/commonfixture';
 
 function occurrences(text: string, value: string): number {

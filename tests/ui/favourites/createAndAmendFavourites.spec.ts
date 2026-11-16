@@ -1,3 +1,10 @@
+/**
+ * Create and amend favourites.
+ * Fishers save, view and remove favourite species, gear and ports, with validation for duplicate and unapproved entries.
+ *
+ * @author Randhir Patel
+ * @since 2026-11-16
+ */
 import { expect, test } from '../../../fixtures/commonfixture';
 
 const favouriteSpecies = 'Atlantic cod (COD)';

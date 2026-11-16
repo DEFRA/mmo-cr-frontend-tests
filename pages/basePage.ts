@@ -1,5 +1,12 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 
+/**
+ * Provide shared page-object functionality.
+ * Includes common navigation, layout, date-input and port-selection helpers.
+ *
+ * @author Randhir Patel
+ * @since 2026-08-27
+ */
 export abstract class BasePage {
   readonly page: Page;
 

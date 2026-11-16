@@ -1,6 +1,13 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * View account details and saved selections.
+ * Access personal and vessel information and manage favourite species, gear and ports.
+ *
+ * @author Randhir Patel
+ * @since 2026-10-05
+ */
 export class AccountPage extends BasePage {
   public readonly pageHeading = (): Locator => this.page.getByTestId('app-heading-title');
 

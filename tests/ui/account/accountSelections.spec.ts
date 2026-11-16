@@ -1,3 +1,10 @@
+/**
+ * Manage account details and selections.
+ * Fishers view account details, manage saved species, gear and ports, and use those selections in a catch-record journey.
+ *
+ * @author Randhir Patel
+ * @since 2026-11-16
+ */
 import { expect, test } from '../../../fixtures/commonfixture';
 
 const favouriteSpecies = 'Atlantic cod (COD)';

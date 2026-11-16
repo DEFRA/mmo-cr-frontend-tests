@@ -1,3 +1,10 @@
+/**
+ * Check API health.
+ * Verify the service reports a healthy status when available.
+ *
+ * @author Randhir Patel
+ * @since 2026-11-16
+ */
 import { expect, test } from '../../fixtures/commonfixture';
 
 test.describe('API health check', () => {

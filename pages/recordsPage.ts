@@ -1,6 +1,13 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * View and manage catch records.
+ * Display the records list, pagination and actions to create a new record.
+ *
+ * @author Randhir Patel
+ * @since 2026-09-03
+ */
 export class RecordsPage extends BasePage {
   public readonly pageTitle = (): Locator => this.page.getByTestId('app-heading-title');
   public readonly pageCaption = (): Locator => this.page.getByTestId('app-heading-caption');

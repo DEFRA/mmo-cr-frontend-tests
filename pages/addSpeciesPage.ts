@@ -1,6 +1,13 @@
 import { expect, type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * Select a species from the catalogue.
+ * Search approved species and select a result, including handling validation messages.
+ *
+ * @author Randhir Patel
+ * @since 2026-09-30
+ */
 export class AddSpeciesPage extends BasePage {
   // Uses a regex because the "New catch record" caption is part of the heading's accessible name
   public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: /What species did you catch\?/ });
