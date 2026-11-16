@@ -28,7 +28,7 @@ If a precondition fails, do not change any files. Explain what is missing and sa
    - Copy the Proposed spec and the page-object, flow-helper and fixture changes from the plan.
    - Do not open a browser or look up new locators; anything missing from the plan is a deviation.
    - The only changes allowed beyond the plan are formatting and type fixes needed to pass `npm run typecheck` / `npm run format:check`. Record each one in the Implementation record.
-   - For new spec files, set `@author` from `git config user.name` and `@since` to today's date (`date +%F`), and put the CRAR key in the JSDoc header.
+   - Add the required JSDoc header to each new spec or page-object class, following the shared instructions. For an existing target file missing a header, use its original Git addition commit for `@author` and `@since`; do not add documentation to files outside Target files. Put the CRAR key in a spec header when the user supplied one.
 4. **Run checks.** Run `npm run typecheck` and `npm run format:check`, fixing issues with `npx prettier --write <changed files>`. If the environment and `.env` credentials are available, run `npx playwright test <spec path> --project=Chromium`. Never print `.env` contents.
 5. **Verify the spec against the plan.** Re-read the plan file and the written files, and check each item:
 

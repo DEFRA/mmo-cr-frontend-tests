@@ -42,6 +42,7 @@ Before doing anything else, read [playwright-tests.instructions.md](../instructi
 2. **Research (read-only).**
    - Search `tests/ui/` and `tests/api/` for overlapping scenarios; plan to extend an existing spec rather than duplicate coverage.
    - Read the page objects in `pages/`, helpers in `tests/ui/helpers/` and `fixtures/commonfixture.ts` you intend to use, and map every Gherkin statement to an existing method.
+   - Check the JSDoc header on every target spec and page-object class; if an existing target is missing one, include a history-based header update in the plan using the shared conventions.
    - Flag any AC that is ambiguous, contradicts existing specs or the live app, or cannot be tested through the web UI or API.
 3. **Resolve gaps.** For each statement with no existing method, find the locator from repository evidence, then from the live app via the Playwright MCP tools. If it still cannot be verified, mark it `UNVERIFIED` in the plan; never guess.
 4. **Write the plan file** (create it before asking for approval) at `test-cases/CRAR-<number>_<kebab-description>.md`, or `test-cases/<kebab-feature>_<YYYY-MM-DD>.md` if the user confirms there is no ticket. Use the template below with `Status: Draft`, then run `npx prettier --write <plan file>`.

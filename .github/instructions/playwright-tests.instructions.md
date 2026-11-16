@@ -47,6 +47,7 @@ Team rules (non-negotiable):
 - UI specs live in feature folders under `tests/ui/<feature-name>/` (kebab-case folder, camelCase file name, e.g. `tests/ui/species/catchWeightEntry.spec.ts`). Top-level specs exist for older features; prefer a feature folder for new work. When a feature needs more than one `test.describe` group (e.g. form, information panel, error scenarios), create the feature folder and put each group in its own spec file with a single top-level `test.describe`, rather than nesting several groups in one file (e.g. `tests/ui/sign-in/signInForm.spec.ts`, `createAccountPanel.spec.ts`, `signInErrors.spec.ts`).
 - Specs import `test` and `expect` from `fixtures/commonfixture.ts`, never directly from `@playwright/test`.
 - Page objects live in `pages/`, extend `BasePage` (or `DateInputPage` / `PortSelectionPage`) from `pages/basePage.ts`, take a `Page` in the constructor, and expose locators as arrow functions returning `Locator` (e.g. `pageHeading = (): Locator => ...`) plus async action methods. New page objects must be registered as fixtures in `fixtures/commonfixture.ts`.
+- Page-object classes, like spec files, require a short JSDoc header. Follow the header and Git-history metadata rules in Spec structure.
 - Reusable journeys live in `tests/ui/helpers/` (`NavigationFlow`, `GearFlow`, `SpeciesFlow`, `FavouritesFlow`, `MapFlow`) and are injected as fixtures (`navigationFlow`, `gearFlow`, etc.). Only use methods that currently exist; read the helper before calling it.
 - API clients live in `services/` (extend `baseApi.ts`) and are exposed as fixtures (e.g. `healthApi`).
 - `BasePage` already provides shared helpers (`goto`, `clickSaveAndContinue`, `expectTitle`, `expectUrl`, `acceptCookies`, `tabUntilFocused`, `common.backLink()`, `header`, `footer`). Reuse them instead of duplicating.
@@ -121,7 +122,7 @@ test.describe('Favourite ports', () => {
 Mapping rules:
 
 - `Feature` -> outer `test.describe` using the feature title; `Rule` or logical grouping -> nested `test.describe`.
-- New spec files start with a short JSDoc header: a 1–3 line summary of the story description, `@author <git config user.name>`, and `@since <current date in YYYY-MM-DD when the spec is created>`.
+- Spec files and page-object classes start with a short JSDoc header: a 1–3 line summary of their purpose, `@author`, and `@since` in `YYYY-MM-DD` format. For a new file, use `git config user.name` and the creation date. If an existing file is missing a header, use the author and date from its original Git addition commit, not the date the header is added. Include the CRAR key in a spec header when the user provides one.
 - `Scenario` statement -> the `test` name, copied verbatim from the scenario title (without the `Scenario:` prefix or any acceptance-criteria label such as `AC1:`).
 - Each `Given` / `When` / `Then` / `And` / `But` statement -> one `test.step`, titled with the statement text without the Gherkin keyword (capitalise the first word, e.g. `And the user confirms` -> `The user confirms`). Keep the original order and do not merge or split statements.
 - `Background` -> `test.beforeEach`, with each Background statement as its own `test.step`.
