@@ -105,10 +105,15 @@ export class MapFlow {
       const [currentLongitude, currentLatitude] = ring[index]!;
       const [previousLongitude, previousLatitude] = ring[previous]!;
       const crossesLatitude = currentLatitude > latitude !== previousLatitude > latitude;
-      const intersectionLongitude =
-        ((previousLongitude - currentLongitude) * (latitude - currentLatitude)) / (previousLatitude - currentLatitude) +
-        currentLongitude;
-      if (crossesLatitude && longitude < intersectionLongitude) inside = !inside;
+      if (
+        crossesLatitude &&
+        longitude <
+          ((previousLongitude - currentLongitude) * (latitude - currentLatitude)) /
+            (previousLatitude - currentLatitude) +
+            currentLongitude
+      ) {
+        inside = !inside;
+      }
     }
     return inside;
   }
