@@ -10,6 +10,9 @@ on:
       - reopened
       - synchronize
       - ready_for_review
+  merge_group:
+    types:
+      - checks_requested
 
 jobs:
   check-branch-name:
@@ -17,6 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Validate branch name
+        if: github.event_name == 'pull_request'
         env:
           BRANCH_NAME: ${{ github.head_ref }}
         run: |
