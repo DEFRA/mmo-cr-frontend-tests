@@ -12,7 +12,8 @@ export class AddPortPage extends BasePage {
   public readonly pageHeading = (): Locator =>
     this.page.getByRole('heading', { name: 'Enter the port or closest port you set off from' });
 
-  public readonly portInput = (): Locator => this.page.getByLabel('Enter the port or closest port you set off from');
+  public readonly portInput = (): Locator =>
+    this.page.getByLabel(/Enter the port or closest port you (set off from|returned to)/);
 
   public readonly portResultsList = (): Locator => this.page.locator('#port-results');
 

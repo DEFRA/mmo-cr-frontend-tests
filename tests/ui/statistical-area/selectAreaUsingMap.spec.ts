@@ -13,7 +13,7 @@ import { type LandFeature, MapFlow, type SubrectangleReference } from '../helper
 type ViewportSize = { width: number; height: number };
 type PanScenario = { scenario: string; direction: string; dragStep: string; offsetX: number; offsetY: number };
 
-const DEPARTURE_PORT = 'Plymouth';
+const DEPARTURE_PORT = 'Hastings';
 const MAP_SIGN_IN_OPTIONS = {
   requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for map UI tests'
 };
@@ -74,6 +74,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
     async ({ navigationFlow, mapFlow, statisticalAreaPage }) => {
       await test.step('The user has declared a departure port for the trip', async () => {
         await navigationFlow.signIn(MAP_SIGN_IN_OPTIONS);
+        await navigationFlow.startCatchRecord();
         await navigationFlow.selectDeparturePort(DEPARTURE_PORT);
         await mapFlow.installCanvasProbe();
       });
@@ -436,6 +437,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
     async ({ navigationFlow, statisticalAreaPage, mapFlow }) => {
       await test.step('The user opens the web map', async () => {
         await navigationFlow.signIn(MAP_SIGN_IN_OPTIONS);
+        await navigationFlow.startCatchRecord();
         await navigationFlow.selectDeparturePort(DEPARTURE_PORT);
       });
 

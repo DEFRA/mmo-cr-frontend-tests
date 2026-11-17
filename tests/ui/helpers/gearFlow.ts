@@ -16,11 +16,18 @@ export class GearFlow {
     return gearName;
   }
 
+  async selectGear(searchTerm: string, matches: (name: string) => boolean): Promise<string> {
+    const { addGearPage } = this.pages;
+
+    const gearName = await this.findGear(searchTerm, matches);
+    await addGearPage.searchAndSelectGear(gearName);
+    return gearName;
+  }
+
   async selectLineGear(): Promise<string> {
     const { addGearPage } = this.pages;
 
-    const gearName = await this.findGear('lo', (name) => /line/i.test(name));
-    await addGearPage.searchAndSelectGear(gearName);
+    const gearName = await this.selectGear('lin', (name) => /line/i.test(name));
     await addGearPage.clickSaveAndContinue();
     await expect(addGearPage.measurementsHeading()).toBeVisible();
     return gearName;

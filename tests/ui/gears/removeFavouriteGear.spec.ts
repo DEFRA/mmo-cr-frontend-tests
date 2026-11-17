@@ -147,7 +147,7 @@ test.describe('Remove favourite gear', () => {
         await recordsPage.goto('/records');
         await recordsPage.createNewRecordButton().click();
         await expect(selectVesselPage.pageHeading()).toBeVisible();
-        await selectVesselPage.firstVesselRadio().check();
+        await selectVesselPage.selectVessel('ACHILLES');
         await selectVesselPage.clickSaveAndContinue();
         await tripDatePage.expectUrl(/\/trip-date$/);
         await tripDatePage.yesRadio().check();
@@ -164,7 +164,7 @@ test.describe('Remove favourite gear', () => {
       await test.step('The gear remains available through the standard catalogue search', async () => {
         await gearSelectionPage.addGearLink().click();
         await expect(addGearPage.pageHeading()).toBeVisible();
-        await addGearPage.searchGearOptions('po');
+        await addGearPage.searchGearOptions('pot');
         await expect(addGearPage.gearOption(pots.name)).toBeVisible();
       });
     }

@@ -23,8 +23,7 @@ test.describe('Add favourite gear', () => {
     async ({ navigationFlow, gearFlow, addGearPage }) => {
       await test.step('Shows a matching gear option and the required fields after selection', async () => {
         await navigationFlow.openAddGear();
-        const gearName = await gearFlow.findGear('lo', (name) => /line/i.test(name));
-        await addGearPage.searchAndSelectGear(gearName);
+        const gearName = await gearFlow.selectGear('se', (name) => name === 'Seine nets (not specified)');
         await expect(addGearPage.gearInput()).toHaveValue(gearName);
         await addGearPage.clickSaveAndContinue();
         await expect(addGearPage.measurementsHeading()).toBeVisible();
@@ -40,7 +39,7 @@ test.describe('Add favourite gear', () => {
       await test.step('Searches approved gear and rejects a value outside the catalogue', async () => {
         await navigationFlow.openAddGear();
         await expect(addGearPage.pageHeading()).toBeVisible();
-        const [firstGear] = await addGearPage.searchGearOptions('po');
+        const [firstGear] = await addGearPage.searchGearOptions('pot');
         expect(firstGear).toBeTruthy();
         await expect(
           addGearPage.gearResultsList().getByRole('option', { name: firstGear!, exact: true })
@@ -163,7 +162,7 @@ test.describe('Add favourite gear', () => {
         const lineGear = await gearFlow.saveLineGear();
 
         await navigationFlow.openAddGear();
-        const secondGear = await gearFlow.findGear('po', (name) => name !== lineGear);
+        const secondGear = await gearFlow.findGear('pot', (name) => name !== lineGear);
         await addGearPage.searchAndSelectGear(secondGear);
         await addGearPage.clickSaveAndContinue();
         const measurementsHeading = addGearPage.measurementsHeading();
@@ -246,7 +245,7 @@ test.describe('Add favourite gear', () => {
         await recordsPage.goto('/records');
         await recordsPage.createNewRecordButton().click();
         await expect(selectVesselPage.pageHeading()).toBeVisible();
-        await selectVesselPage.firstVesselRadio().check();
+        await selectVesselPage.selectVessel('ACHILLES');
         await selectVesselPage.clickSaveAndContinue();
         await selectVesselPage.expectUrl(/\/trip-date$/);
         await gearSelectionPage.goto('/gear-selection');
@@ -262,7 +261,7 @@ test.describe('Add favourite gear', () => {
     async ({ navigationFlow, gearFlow, addGearPage, accountPage }) => {
       await test.step('Can save selected gear by pressing Enter from the input fields', async () => {
         await navigationFlow.openAddGear();
-        const gearName = await gearFlow.findGear('lo', (name) => /line/i.test(name));
+        const gearName = await gearFlow.findGear('lin', (name) => /line/i.test(name));
         await addGearPage.searchAndSelectGear(gearName);
 
         await addGearPage.gearInput().press('Enter');

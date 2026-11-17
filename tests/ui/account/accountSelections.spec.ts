@@ -99,7 +99,7 @@ test.describe('Account details and selections', () => {
         await recordsPage.goto('/records');
         await recordsPage.createNewRecordButton().click();
         await expect(selectVesselPage.pageHeading()).toBeVisible();
-        await selectVesselPage.firstVesselRadio().check();
+        await selectVesselPage.selectVessel('ACHILLES');
         await selectVesselPage.clickSaveAndContinue();
 
         await tripDatePage.yesRadio().check();

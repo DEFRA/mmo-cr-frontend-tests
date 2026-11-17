@@ -75,7 +75,12 @@ export const test = base.extend<CommonFixtures>({
       addSpeciesPage,
       statisticalAreaOtherPage,
       addPortPage,
-      confirmSamePortPage
+      confirmSamePortPage,
+      selectVesselPage,
+      tripDatePage,
+      departurePortPage,
+      returnPortPage,
+      statisticalAreaPage
     },
     use
   ) => {
@@ -88,7 +93,12 @@ export const test = base.extend<CommonFixtures>({
         addSpeciesPage,
         statisticalAreaOtherPage,
         addPortPage,
-        confirmSamePortPage
+        confirmSamePortPage,
+        selectVesselPage,
+        tripDatePage,
+        departurePortPage,
+        returnPortPage,
+        statisticalAreaPage
       })
     );
   },

@@ -55,14 +55,15 @@ export class MapFlow {
     });
   }
 
-  async openMap(): Promise<string> {
-    await this.navigationFlow.signIn({
-      requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for map UI tests'
-    });
-    const portName = 'Plymouth';
-    await this.navigationFlow.selectDeparturePort(portName);
+  async openMap(portName = 'Plymouth', vesselName = 'ACHILLES'): Promise<string> {
     await this.installCanvasProbe();
-    await this.mapPage.goto('/statistical-area');
+    await this.navigationFlow.openStatisticalAreaMap({
+      portName,
+      vesselName,
+      signInOptions: {
+        requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for map UI tests'
+      }
+    });
     await expect(this.mapPage.pageHeading()).toBeVisible();
     await expect(this.mapPage.mapCanvas()).toBeVisible();
     await expect.poll(() => this.mapPage.readMapSubrectangleCount()).toBeGreaterThanOrEqual(9);

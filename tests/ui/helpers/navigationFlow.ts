@@ -3,10 +3,15 @@ import { type AccountPage } from '../../../pages/accountPage';
 import { type AddPortPage } from '../../../pages/addPortPage';
 import { type AddSpeciesPage } from '../../../pages/addSpeciesPage';
 import { type ConfirmSamePortPage } from '../../../pages/confirmSamePortPage';
+import { type DeparturePortPage } from '../../../pages/departurePortPage';
 import { type RecordsPage } from '../../../pages/recordsPage';
+import { type ReturnPortPage } from '../../../pages/returnPortPage';
+import { type SelectVesselPage } from '../../../pages/selectVesselPage';
 import { type SigninPage } from '../../../pages/sign-in.page';
 import { type SpeciesSelectionPage } from '../../../pages/speciesSelectionPage';
 import { type StatisticalAreaOtherPage } from '../../../pages/statisticalAreaOtherPage';
+import { type StatisticalAreaPage } from '../../../pages/statisticalAreaPage';
+import { type TripDatePage } from '../../../pages/tripDatePage';
 
 export type SignInOptions = {
   email?: string;
@@ -25,6 +30,11 @@ export class NavigationFlow {
       statisticalAreaOtherPage: StatisticalAreaOtherPage;
       addPortPage: AddPortPage;
       confirmSamePortPage: ConfirmSamePortPage;
+      selectVesselPage: SelectVesselPage;
+      tripDatePage: TripDatePage;
+      departurePortPage: DeparturePortPage;
+      returnPortPage: ReturnPortPage;
+      statisticalAreaPage: StatisticalAreaPage;
     }
   ) {}
 
@@ -87,21 +97,61 @@ export class NavigationFlow {
     await expect(addSpeciesPage.speciesInput()).toBeEditable();
   }
 
-  async openStatisticalAreaOther(): Promise<void> {
-    const { statisticalAreaOtherPage: page } = this.pages;
+  async startCatchRecord(vesselName = 'ACHILLES'): Promise<void> {
+    const { recordsPage, selectVesselPage, tripDatePage } = this.pages;
 
-    await page.goto('/statistical-area-other');
+    await recordsPage.goto('/records');
+    await recordsPage.createNewRecordButton().click();
+    await selectVesselPage.selectVessel(vesselName);
+    await selectVesselPage.clickSaveAndContinue();
+    await tripDatePage.yesRadio().check();
+    await tripDatePage.clickSaveAndContinue();
+  }
+
+  async openStatisticalAreaMap(
+    options: { portName?: string; vesselName?: string; signInOptions?: SignInOptions } = {}
+  ): Promise<void> {
+    const { statisticalAreaPage } = this.pages;
+    const { portName = 'Plymouth', vesselName = 'ACHILLES', signInOptions } = options;
+
+    await this.signIn(signInOptions);
+    await this.startCatchRecord(vesselName);
+    await this.selectDeparturePort(portName);
+    await statisticalAreaPage.goto('/statistical-area');
+    await statisticalAreaPage.expectUrl(/\/statistical-area$/);
+  }
+
+  async openStatisticalAreaOther(portName = 'Hamble', vesselName = 'ACHILLES'): Promise<void> {
+    const { statisticalAreaPage } = this.pages;
+
+    await this.openStatisticalAreaMap({
+      portName,
+      vesselName,
+      signInOptions: {
+        requiredCredentialsMessage:
+          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for statistical area UI tests'
+      }
+    });
+    await statisticalAreaPage.clickOther();
   }
 
   async selectDeparturePort(portName: string): Promise<void> {
-    const { addPortPage, confirmSamePortPage } = this.pages;
+    const { addPortPage, confirmSamePortPage, returnPortPage } = this.pages;
 
     await addPortPage.goto('/add-port?for=departure&entry=1');
     await addPortPage.searchAndSelectPort(portName);
     await addPortPage.clickSaveAndContinue();
-    await expect(confirmSamePortPage.pageHeading()).toBeVisible();
-    await confirmSamePortPage.selectSamePort(true);
-    await confirmSamePortPage.clickSaveAndContinue();
+    await expect(confirmSamePortPage.pageHeading().or(returnPortPage.pageHeading())).toBeVisible();
+
+    // Accounts with favourite ports go to the return-port list instead of the same-port confirmation
+    if (await confirmSamePortPage.pageHeading().isVisible()) {
+      await confirmSamePortPage.selectSamePort(true);
+      await confirmSamePortPage.clickSaveAndContinue();
+    } else {
+      await addPortPage.goto('/add-port?for=return&entry=1');
+      await addPortPage.searchAndSelectPort(portName);
+      await addPortPage.clickSaveAndContinue();
+    }
     await addPortPage.expectUrl(/\/gear-selection$/);
   }
 }

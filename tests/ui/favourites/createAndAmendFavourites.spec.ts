@@ -298,7 +298,7 @@ test.describe('Create and amend favourites', () => {
       await test.step('I can still search the wider gear catalogue', async () => {
         await gearSelectionPage.addGearLink().click();
         await expect(addGearPage.gearInput()).toBeEmpty();
-        await addGearPage.searchGearOptions('tr');
+        await addGearPage.searchGearOptions('tra');
         await expect(addGearPage.gearOption('Traps (not specified)')).toBeVisible();
       });
     }
@@ -377,7 +377,7 @@ test.describe('Create and amend favourites', () => {
           await recordsPage.goto('/records');
           await recordsPage.createNewRecordButton().click();
           await expect(selectVesselPage.pageHeading()).toBeVisible();
-          await selectVesselPage.firstVesselRadio().check();
+          await selectVesselPage.selectVessel('ACHILLES');
           await selectVesselPage.clickSaveAndContinue();
           await tripDatePage.expectUrl(/\/trip-date$/);
           await tripDatePage.yesRadio().check();

@@ -14,16 +14,19 @@ const INVALID_AREA_CODE: string = 'ZZZZZ';
 const AREA_CODE_PATTERN: RegExp = /\d{2}[A-Z]\d{2}/;
 const COORDINATES_PATTERN: RegExp = /[-\u2212]?\d+\.\d+,\s*[-\u2212]?\d+\.\d+/;
 const CHECK_ANSWERS_AREA_KEY: string = 'Statistical sub area';
-const INVALID_AREA_MESSAGE: string = 'Enter a valid statistical sub area code.';
+const INVALID_AREA_MESSAGE: string = 'Enter a statistical subrectangle in the correct format, for example 38E84';
 const OTHER_OPTION: string = 'Other';
 
 test.describe('Enter statistical sub area using the Other option', () => {
+  test.beforeEach(async ({ navigationFlow }) => {
+    await navigationFlow.openStatisticalAreaOther();
+  });
+
   test(
     'Displays an editable type-ahead field when the Other option is selected',
     { tag: ['@ui', '@regression', '@statisticalAreaManualEntry'] },
-    async ({ navigationFlow, statisticalAreaOtherPage }) => {
+    async ({ statisticalAreaOtherPage }) => {
       await test.step('The fisher is on the Statistical Sub Area screen', async () => {
-        await navigationFlow.openStatisticalAreaOther();
         await statisticalAreaOtherPage.otherRadio().waitFor({ state: 'visible' });
       });
 
@@ -52,14 +55,13 @@ test.describe('Enter statistical sub area using the Other option', () => {
   test(
     'Displays matching area codes and coordinates when a partial code is entered',
     { tag: ['@ui', '@regression', '@statisticalAreaManualEntry'] },
-    async ({ navigationFlow, statisticalAreaOtherPage }) => {
+    async ({ statisticalAreaOtherPage }) => {
       test.info().annotations.push({
         type: 'unverified',
         description: 'Related ICES rectangle (where applicable) is not asserted: no existing selector or evidence'
       });
 
       await test.step('The fisher has selected "Other"', async () => {
-        await navigationFlow.openStatisticalAreaOther();
         await statisticalAreaOtherPage.selectAreaRadio(OTHER_OPTION);
       });
 
@@ -87,11 +89,10 @@ test.describe('Enter statistical sub area using the Other option', () => {
   test(
     'Displays corresponding coordinates as a valid area code is entered',
     { tag: ['@ui', '@regression', '@statisticalAreaManualEntry'] },
-    async ({ navigationFlow, statisticalAreaOtherPage }) => {
+    async ({ statisticalAreaOtherPage }) => {
       let initialCoordinates: string | undefined;
 
       await test.step('The fisher is entering a statistical sub area code', async () => {
-        await navigationFlow.openStatisticalAreaOther();
         await statisticalAreaOtherPage.selectAreaRadio(OTHER_OPTION);
         await statisticalAreaOtherPage.alternativeAreaInput().focus();
       });
@@ -123,14 +124,13 @@ test.describe('Enter statistical sub area using the Other option', () => {
   test(
     'Saves the area code when a suggested result is selected',
     { tag: ['@ui', '@smoke', '@statisticalAreaManualEntry'] },
-    async ({ navigationFlow, statisticalAreaOtherPage, checkAnswersPage }) => {
+    async ({ statisticalAreaOtherPage, checkAnswersPage }) => {
       test.info().annotations.push({
         type: 'unverified',
         description: 'Check answers evidence covers the area code only; stored coordinates are not asserted'
       });
 
       await test.step('One or more matching statistical sub areas are displayed', async () => {
-        await navigationFlow.openStatisticalAreaOther();
         await statisticalAreaOtherPage.typeInAlternativeArea(SEARCH_TERM);
         await statisticalAreaOtherPage.alternativeAreaResultItem(VALID_AREA_CODE).waitFor({ state: 'visible' });
       });
@@ -156,9 +156,8 @@ test.describe('Enter statistical sub area using the Other option', () => {
   test(
     'Displays an error when the statistical sub area code is invalid',
     { tag: ['@ui', '@regression', '@statisticalAreaManualEntry'] },
-    async ({ navigationFlow, statisticalAreaOtherPage }) => {
+    async ({ statisticalAreaOtherPage }) => {
       await test.step('The fisher has entered a statistical sub area code', async () => {
-        await navigationFlow.openStatisticalAreaOther();
         await statisticalAreaOtherPage.typeInAlternativeArea(INVALID_AREA_CODE);
       });
 
@@ -166,7 +165,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
         await statisticalAreaOtherPage.clickSaveAndContinue();
       });
 
-      await test.step('An error message is displayed stating: "Enter a valid statistical sub area code."', async () => {
+      await test.step(`An error message is displayed stating: "${INVALID_AREA_MESSAGE}"`, async () => {
         await expect(statisticalAreaOtherPage.errorSummary()).toBeVisible();
         await expect(statisticalAreaOtherPage.errorSummary()).toContainText(INVALID_AREA_MESSAGE);
         await expect(statisticalAreaOtherPage.fieldErrorMessage()).toContainText(INVALID_AREA_MESSAGE);

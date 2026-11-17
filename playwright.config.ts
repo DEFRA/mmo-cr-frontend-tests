@@ -21,6 +21,8 @@ const baseURL = environmentUrls[environmentName as keyof typeof environmentUrls]
 const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL || baseURL;
 const apiToken = process.env.CATCH_RECORDING_API_TOKEN;
 
+const hdViewport = { width: 1280, height: 720 };
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -49,27 +51,27 @@ export default defineConfig({
     {
       name: 'Chromium',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Chrome'] }
+      use: { ...devices['Desktop Chrome'], viewport: hdViewport }
     },
     {
       name: 'Chrome',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Chrome'], channel: 'chrome' }
+      use: { ...devices['Desktop Chrome'], channel: 'chrome', viewport: hdViewport }
     },
     {
       name: 'Edge',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Edge'], channel: 'msedge' }
+      use: { ...devices['Desktop Edge'], channel: 'msedge', viewport: hdViewport }
     },
     {
       name: 'Firefox',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Firefox'] }
+      use: { ...devices['Desktop Firefox'], viewport: hdViewport }
     },
     {
       name: 'Safari',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Safari'] }
+      use: { ...devices['Desktop Safari'], viewport: hdViewport }
     },
     {
       name: 'api',

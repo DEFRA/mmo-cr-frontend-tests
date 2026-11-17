@@ -176,7 +176,7 @@ test.describe('Add favourite gear', () => {
       await test.step('I start a new catch record', async () => {
         await recordsPage.goto('/records');
         await recordsPage.createNewRecordButton().click();
-        await selectVesselPage.firstVesselRadio().check();
+        await selectVesselPage.selectVessel('ACHILLES');
         await selectVesselPage.clickSaveAndContinue();
         await selectVesselPage.expectUrl(/\/trip-date$/);
         await gearSelectionPage.goto('/gear-selection');
