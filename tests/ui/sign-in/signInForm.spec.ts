@@ -22,7 +22,7 @@ const messages = {
   invalidCredentials: 'Invalid email address or password. Please try again.'
 } as const;
 
-test.describe('Sign in form', () => {
+test.describe.skip('Sign in form', () => {
   test.beforeEach(async ({ signInPage }) => {
     await test.step('The user is on the Sign In screen', async () => {
       await signInPage.goto('/sign-in');

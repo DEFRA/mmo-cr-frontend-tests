@@ -24,7 +24,7 @@ export class FavouritesFlow {
     const { accountPage, addSpeciesPage } = this.pages;
 
     await accountPage.addSpeciesLink().click();
-    await expect(accountPage.page).toHaveURL(/\/add-species\?return=\/account$/);
+    await expect(accountPage.page).toHaveURL(/\/add-species\?return=\/account(&vesselId=[\w-]+)?$/);
     await addSpeciesPage.searchAndSelectSpecies(speciesName);
     await addSpeciesPage.clickSaveAndContinue();
     await accountPage.expectUrl(/\/account$/);

@@ -10,7 +10,7 @@ import { BasePage } from './basePage';
  */
 export class RemovePortPage extends BasePage {
   public readonly pageHeading = (): Locator =>
-    this.page.getByRole('heading', { level: 1, name: /Remove ports from vessel/i });
+    this.page.getByRole('heading', { level: 1, name: /Remove ports from your favourites/i });
 
   public readonly portCheckbox = (portName: string): Locator =>
     this.page.getByRole('checkbox', { name: portName, exact: true });

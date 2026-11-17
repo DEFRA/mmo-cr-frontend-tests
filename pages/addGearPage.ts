@@ -13,7 +13,10 @@ export class AddGearPage extends BasePage {
 
   public readonly pageCaption = (): Locator => this.page.getByTestId('app-add-gear-caption');
 
-  public readonly gearInput = (): Locator => this.page.getByRole('textbox', { name: 'Add gear to your favourites' });
+  public readonly gearInput = (): Locator =>
+    this.page.getByRole('textbox', {
+      name: /^(Add gear to your favourites|What gear did you use\?)$/
+    });
 
   public readonly gearResultsList = (): Locator => this.page.getByRole('listbox');
 

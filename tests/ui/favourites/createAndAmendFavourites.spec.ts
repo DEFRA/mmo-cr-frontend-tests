@@ -282,12 +282,14 @@ test.describe('Create and amend favourites', () => {
   test(
     'Displays favourite gear before the wider catalogue is searched',
     { tag: ['@ui', '@smoke', '@favouriteGear'] },
-    async ({ favouritesFlow, gearSelectionPage, addGearPage }) => {
+    async ({ favouritesFlow, navigationFlow, gearSelectionPage, addGearPage }) => {
       await test.step('I have previously saved favourite gear', async () => {
         await favouritesFlow.ensureGearAdded(favouriteGear);
       });
 
       await test.step('I open gear selection during catch recording', async () => {
+        // Favourites are saved per vessel, so a record must be started to give gear selection its vessel
+        await navigationFlow.startCatchRecord();
         await gearSelectionPage.goto('/gear-selection');
       });
 
@@ -368,40 +370,34 @@ test.describe('Create and amend favourites', () => {
     test(
       `Suggests favourite ports before searching during ${portType}-port entry`,
       { tag: ['@ui', '@smoke', '@favouritePorts'] },
-      async ({ favouritesFlow, addPortPage, recordsPage, selectVesselPage, tripDatePage, confirmSamePortPage }) => {
+      async ({ favouritesFlow, navigationFlow, addPortPage, departurePortPage, returnPortPage }) => {
+        const portPage = portType === 'departure' ? departurePortPage : returnPortPage;
+
         await test.step('I have a saved favourite port', async () => {
           await favouritesFlow.ensurePortAdded(favouritePort);
         });
 
         await test.step(`I start a new catch record and reach ${portType}-port selection`, async () => {
-          await recordsPage.goto('/records');
-          await recordsPage.createNewRecordButton().click();
-          await expect(selectVesselPage.pageHeading()).toBeVisible();
-          await selectVesselPage.selectVessel('ACHILLES');
-          await selectVesselPage.clickSaveAndContinue();
-          await tripDatePage.expectUrl(/\/trip-date$/);
-          await tripDatePage.yesRadio().check();
-          await tripDatePage.clickSaveAndContinue();
-          await addPortPage.expectUrl(/\/add-port\?for=departure/);
+          await navigationFlow.startCatchRecord();
+          await departurePortPage.expectUrl(/\/departure-port$/);
+          await expect(departurePortPage.pageHeading()).toBeVisible();
 
           if (portType === 'return') {
-            await addPortPage.searchAndSelectPort(favouritePort);
-            await addPortPage.clickSaveAndContinue();
-            await expect(confirmSamePortPage.pageHeading()).toBeVisible();
-            await confirmSamePortPage.selectSamePort(false);
-            await confirmSamePortPage.clickAddAnotherPort();
-            await addPortPage.expectUrl(/\/add-port(?:\?|$)/);
-            await expect(confirmSamePortPage.pageHeading()).toBeHidden();
+            await departurePortPage.selectPort(favouritePort);
+            await departurePortPage.clickSaveAndContinue();
+            await returnPortPage.expectUrl(/\/return-port$/);
+            await expect(returnPortPage.pageHeading()).toBeVisible();
           }
         });
 
         await test.step('My favourite port is displayed before I enter a search', async () => {
-          await expect(addPortPage.portInput()).toBeEmpty();
-          await expect(addPortPage.portResultItem(favouritePort).getByRole('option')).toBeVisible();
+          await expect(portPage.portRadio(favouritePort)).toBeVisible();
         });
 
         await test.step('I can search the wider port catalogue', async () => {
-          await addPortPage.searchPorts('Lo');
+          await addPortPage.goto(`/add-port?for=${portType}&entry=1`);
+          await expect(addPortPage.portInput()).toBeEmpty();
+          await addPortPage.searchPorts('Lowe');
           await expect(addPortPage.portResultItem('Lowestoft').getByRole('option')).toBeVisible();
         });
       }
