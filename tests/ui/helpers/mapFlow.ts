@@ -105,10 +105,15 @@ export class MapFlow {
       const [currentLongitude, currentLatitude] = ring[index]!;
       const [previousLongitude, previousLatitude] = ring[previous]!;
       const crossesLatitude = currentLatitude > latitude !== previousLatitude > latitude;
-      const intersectionLongitude =
-        ((previousLongitude - currentLongitude) * (latitude - currentLatitude)) / (previousLatitude - currentLatitude) +
-        currentLongitude;
-      if (crossesLatitude && longitude < intersectionLongitude) inside = !inside;
+      if (
+        crossesLatitude &&
+        longitude <
+          ((previousLongitude - currentLongitude) * (latitude - currentLatitude)) /
+            (previousLatitude - currentLatitude) +
+            currentLongitude
+      ) {
+        inside = !inside;
+      }
     }
     return inside;
   }
@@ -139,5 +144,25 @@ export class MapFlow {
       }
     }
     return false;
+  }
+
+  static isWhollySeaBased(subrectangle: SubrectangleReference, land: LandFeature[]): boolean {
+    let hasSeaSample = false;
+    const { minLongitude, maxLongitude, minLatitude, maxLatitude } = subrectangle.bounds;
+
+    for (let longitudeStep = 1; longitudeStep < 12; longitudeStep++) {
+      for (let latitudeStep = 1; latitudeStep < 12; latitudeStep++) {
+        const point: Point = [
+          minLongitude + ((maxLongitude - minLongitude) * longitudeStep) / 12,
+          minLatitude + ((maxLatitude - minLatitude) * latitudeStep) / 12
+        ];
+        if (!subrectangle.polygons.some((polygon) => this.pointInPolygon(point, polygon))) continue;
+        if (land.some((feature) => feature.polygons.some((polygon) => this.pointInPolygon(point, polygon))))
+          return false;
+        hasSeaSample = true;
+      }
+    }
+
+    return hasSeaSample;
   }
 }

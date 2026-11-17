@@ -1,6 +1,13 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * Select gear for a catch record.
+ * Enter gear-specific details and access options to add or remove saved gear.
+ *
+ * @author Randhir Patel
+ * @since 2026-09-30
+ */
 export class GearSelectionPage extends BasePage {
   public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: 'What gear did you use?' });
 

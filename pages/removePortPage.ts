@@ -1,6 +1,13 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * Remove saved favourite ports.
+ * Select one or more saved ports for removal and continue.
+ *
+ * @author Hemasrivani07
+ * @since 2026-10-27
+ */
 export class RemovePortPage extends BasePage {
   public readonly pageHeading = (): Locator =>
     this.page.getByRole('heading', { level: 1, name: /Remove ports from vessel/i });

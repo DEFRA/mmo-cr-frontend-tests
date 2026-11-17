@@ -1,6 +1,13 @@
 import { expect, type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * Select a port from the catalogue.
+ * Search approved ports and select a result, including handling validation messages.
+ *
+ * @author Randhir Patel
+ * @since 2026-09-30
+ */
 export class AddPortPage extends BasePage {
   public readonly pageHeading = (): Locator =>
     this.page.getByRole('heading', { name: 'Enter the port or closest port you set off from' });

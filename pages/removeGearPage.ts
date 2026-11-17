@@ -1,6 +1,13 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * Remove saved favourite gear.
+ * Select saved gear configurations for removal and inspect their measurements before confirming.
+ *
+ * @author Randhir Patel
+ * @since 2026-10-05
+ */
 export class RemoveGearPage extends BasePage {
   public readonly pageHeading = (): Locator =>
     this.page.getByRole('heading', { level: 1, name: /Remove gear from vessel/i });

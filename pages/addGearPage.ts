@@ -1,6 +1,13 @@
 import { expect, type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * Add gear from the catalogue.
+ * Search for approved gear, provide required measurements and handle validation.
+ *
+ * @author Randhir Patel
+ * @since 2026-09-30
+ */
 export class AddGearPage extends BasePage {
   public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: 'What gear did you use?' });
 

@@ -1,6 +1,12 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * Select the vessel used for a catch record.
+ *
+ * @author Randhir Patel
+ * @since 2026-09-30
+ */
 export class SelectVesselPage extends BasePage {
   public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: 'Which vessel did you use?' });
   // Allows selecting a specific vessel by its label text (e.g., 'OLGA')

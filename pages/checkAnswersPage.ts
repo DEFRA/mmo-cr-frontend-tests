@@ -1,6 +1,13 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * Review a catch record before submission.
+ * Check summary details, change answers, confirm the declaration and submit the record.
+ *
+ * @author Randhir Patel
+ * @since 2026-09-30
+ */
 export class CheckAnswersPage extends BasePage {
   public readonly pageHeading = (): Locator =>
     this.page.getByRole('heading', { name: 'Check your catch record', exact: true });

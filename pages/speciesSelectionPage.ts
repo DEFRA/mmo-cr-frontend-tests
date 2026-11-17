@@ -1,6 +1,13 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * Select species and enter catch weights.
+ * Manage species selections, weight details and validation for a catch record.
+ *
+ * @author Randhir Patel
+ * @since 2026-09-30
+ */
 export class SpeciesSelectionPage extends BasePage {
   public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: /What species did you catch\?/ });
 

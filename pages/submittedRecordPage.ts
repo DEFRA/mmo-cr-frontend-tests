@@ -1,6 +1,13 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * View a submitted catch record.
+ * Read its reference, status and summary, or edit the record and download its PDF.
+ *
+ * @author Randhir Patel
+ * @since 2026-09-30
+ */
 export class SubmittedRecordPage extends BasePage {
   // Uses a regex because the vessel name is dynamically inserted into the heading
   public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: /Catch record for .*/ });

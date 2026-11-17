@@ -1,6 +1,13 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * Display the service home page.
+ * Provide the start action, language options and catch-record guidance.
+ *
+ * @author Randhir Patel
+ * @since 2026-09-03
+ */
 export class HomePage extends BasePage {
   public readonly startNowButton = (): Locator => this.page.getByRole('button', { name: 'Start now' });
   public readonly privacyPolicyLink = (): Locator => this.page.getByRole('link', { name: 'Privacy policy' });

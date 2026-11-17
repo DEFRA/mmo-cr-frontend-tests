@@ -1,6 +1,13 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+/**
+ * Confirm whether the trip returned to its departure port.
+ * Select whether both ports are the same or add another port.
+ *
+ * @author Randhir Patel
+ * @since 2026-09-30
+ */
 export class ConfirmSamePortPage extends BasePage {
   public readonly pageHeading = (): Locator =>
     this.page.getByRole('heading', {

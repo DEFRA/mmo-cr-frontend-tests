@@ -3,6 +3,13 @@ import { BasePage } from './basePage';
 
 export type MapLabel = { code: string; x: number; y: number };
 
+/**
+ * Select a statistical area on the map.
+ * Use map controls or choose the alternative area-selection route.
+ *
+ * @author Randhir Patel
+ * @since 2026-09-30
+ */
 export class StatisticalAreaPage extends BasePage {
   public readonly pageHeading = (): Locator =>
     this.page.getByRole('heading', { name: 'Where was the majority of your catch caught?', exact: true });
