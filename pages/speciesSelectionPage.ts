@@ -12,6 +12,9 @@ export class SpeciesSelectionPage extends BasePage {
   public readonly pageHeading = (): Locator =>
     this.page.getByRole('heading', { name: /(What|Which) species did you catch\?/ });
 
+  public readonly pageHeadingForGear = (gearName: string): Locator =>
+    this.page.getByRole('heading', { name: `Which species did you catch with ${gearName}?` });
+
   public readonly speciesCheckbox = (speciesName: string): Locator => this.page.getByLabel(speciesName);
 
   public readonly speciesCheckboxes = (): Locator => this.page.getByRole('checkbox');

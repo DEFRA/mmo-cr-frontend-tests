@@ -1,0 +1,125 @@
+/**
+ * Enter permitted departure and return dates for a trip that did not start and finish today.
+ * Traceability: UAT-26 (CRAR ticket TBC).
+ *
+ * @author Randhir Patel
+ * @since 2026-11-17
+ */
+import { expect, test } from '../../../fixtures/commonfixture';
+import { type Favourites, daysAgo, noFavourites } from '../helpers/catchRecordFlow';
+
+const vesselName = 'ACHILLES';
+const plymouth = 'Plymouth';
+const testFavourites: Favourites = { ports: [plymouth], gears: [], species: [] };
+const futureDepartureError = 'Date you left for your trip must be today or in the past';
+const returnBeforeDepartureError = 'Date you returned from your trip must be the same as or after the date you left';
+
+test.describe('Trip Dates', () => {
+  let addedFavourites: Favourites = noFavourites;
+  let createdRecords: string[] = [];
+
+  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
+    createdRecords = [];
+    await test.step('Setup: I am signed in with the test favourites saved', async () => {
+      await navigationFlow.signIn();
+      addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
+    });
+  });
+
+  test.afterEach(async ({ catchRecordFlow }) => {
+    await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
+    await catchRecordFlow.restoreFavourites(addedFavourites);
+  });
+
+  test(
+    'Record valid trip dates',
+    {
+      tag: ['@ui', '@regression', '@tripDates', '@e2e'],
+      annotation: { type: 'UAT', description: 'UAT-26' }
+    },
+    async ({ catchRecordFlow, tripDatePage, tripDepartureDatePage, tripReturnDatePage, departurePortPage }) => {
+      const departureDate = daysAgo(2);
+      const returnDate = daysAgo(1);
+
+      await test.step('My trip did not start and finish today', async () => {
+        createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+        await tripDatePage.selectSameDate(false);
+        await tripDatePage.clickSaveAndContinue();
+      });
+
+      await test.step('I enter the departure and return dates', async () => {
+        await tripDepartureDatePage.enterDateFrom(departureDate);
+        await tripDepartureDatePage.clickSaveAndContinue();
+        await tripReturnDatePage.enterDateFrom(returnDate);
+        await tripReturnDatePage.clickSaveAndContinue();
+      });
+
+      await test.step('Only permitted dates should be accepted', async () => {
+        await departurePortPage.expectUrl(/\/departure-port$/);
+        await expect(departurePortPage.pageHeading()).toBeVisible();
+      });
+    }
+  );
+
+  test(
+    'A future departure date is not accepted',
+    {
+      tag: ['@ui', '@regression', '@tripDates', '@e2e'],
+      annotation: { type: 'UAT', description: 'UAT-26' }
+    },
+    async ({ catchRecordFlow, tripDatePage, tripDepartureDatePage }) => {
+      const tomorrow = daysAgo(-1);
+
+      await test.step('My trip did not start and finish today', async () => {
+        createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+        await tripDatePage.selectSameDate(false);
+        await tripDatePage.clickSaveAndContinue();
+      });
+
+      await test.step('I enter a departure date in the future', async () => {
+        await tripDepartureDatePage.enterDateFrom(tomorrow);
+        await tripDepartureDatePage.clickSaveAndContinue();
+      });
+
+      await test.step('A future date should not be accepted', async () => {
+        await tripDepartureDatePage.expectUrl(/\/trip-departure-date$/);
+        await expect(tripDepartureDatePage.common.errorSummary()).toContainText(futureDepartureError);
+        await expect(tripDepartureDatePage.common.errorMessage()).toContainText(futureDepartureError);
+      });
+    }
+  );
+
+  test(
+    'A return date before the departure date is not accepted',
+    {
+      tag: ['@ui', '@regression', '@tripDates', '@e2e'],
+      annotation: { type: 'UAT', description: 'UAT-26' }
+    },
+    async ({ catchRecordFlow, tripDatePage, tripDepartureDatePage, tripReturnDatePage }) => {
+      const departureDate = daysAgo(2);
+      const earlierReturnDate = daysAgo(3);
+
+      await test.step('My trip did not start and finish today', async () => {
+        createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+        await tripDatePage.selectSameDate(false);
+        await tripDatePage.clickSaveAndContinue();
+      });
+
+      await test.step('I have entered a departure date', async () => {
+        await tripDepartureDatePage.enterDateFrom(departureDate);
+        await tripDepartureDatePage.clickSaveAndContinue();
+      });
+
+      await test.step('I enter a return date before the departure date', async () => {
+        await tripReturnDatePage.enterDateFrom(earlierReturnDate);
+        await tripReturnDatePage.clickSaveAndContinue();
+      });
+
+      await test.step('The return date should not be before the departure date', async () => {
+        await tripReturnDatePage.expectUrl(/\/trip-return-date$/);
+        await expect(tripReturnDatePage.common.errorSummary()).toContainText(returnBeforeDepartureError);
+        await expect(tripReturnDatePage.common.errorMessage()).toContainText(returnBeforeDepartureError);
+      });
+    }
+  );
+});

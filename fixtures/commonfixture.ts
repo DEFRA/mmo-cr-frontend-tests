@@ -30,6 +30,8 @@ import { NavigationFlow } from '../tests/ui/helpers/navigationFlow';
 import { GearFlow } from '../tests/ui/helpers/gearFlow';
 import { SpeciesFlow } from '../tests/ui/helpers/speciesFlow';
 import { FavouritesFlow } from '../tests/ui/helpers/favouritesFlow';
+import { SpeciesNotLandedPage } from '../pages/speciesNotLandedPage';
+import { CatchRecordFlow } from '../tests/ui/helpers/catchRecordFlow';
 
 type CommonFixtures = {
   signInPage: SigninPage;
@@ -63,6 +65,8 @@ type CommonFixtures = {
   gearFlow: GearFlow;
   speciesFlow: SpeciesFlow;
   favouritesFlow: FavouritesFlow;
+  speciesNotLandedPage: SpeciesNotLandedPage;
+  catchRecordFlow: CatchRecordFlow;
 };
 
 export const test = base.extend<CommonFixtures>({
@@ -121,6 +125,57 @@ export const test = base.extend<CommonFixtures>({
   },
   mapFlow: async ({ statisticalAreaPage, navigationFlow }, use) => {
     await use(new MapFlow(statisticalAreaPage, navigationFlow));
+  },
+  catchRecordFlow: async (
+    {
+      accountPage,
+      recordsPage,
+      selectVesselPage,
+      tripDatePage,
+      tripDepartureDatePage,
+      tripReturnDatePage,
+      departurePortPage,
+      returnPortPage,
+      gearSelectionPage,
+      statisticalAreaPage,
+      statisticalAreaOtherPage,
+      speciesSelectionPage,
+      catchNotLandedPage,
+      speciesNotLandedPage,
+      checkAnswersPage,
+      draftRecordPage,
+      navigationFlow,
+      favouritesFlow
+    },
+    use
+  ) => {
+    await use(
+      new CatchRecordFlow(
+        {
+          accountPage,
+          recordsPage,
+          selectVesselPage,
+          tripDatePage,
+          tripDepartureDatePage,
+          tripReturnDatePage,
+          departurePortPage,
+          returnPortPage,
+          gearSelectionPage,
+          statisticalAreaPage,
+          statisticalAreaOtherPage,
+          speciesSelectionPage,
+          catchNotLandedPage,
+          speciesNotLandedPage,
+          checkAnswersPage,
+          draftRecordPage
+        },
+        navigationFlow,
+        favouritesFlow
+      )
+    );
+  },
+  speciesNotLandedPage: async ({ page }: { page: Page }, use) => {
+    await use(new SpeciesNotLandedPage(page));
   },
   signInPage: async ({ page }: { page: Page }, use) => {
     const signInPage = new SigninPage(page);

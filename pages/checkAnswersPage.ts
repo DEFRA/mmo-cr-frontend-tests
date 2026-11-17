@@ -21,6 +21,45 @@ export class CheckAnswersPage extends BasePage {
 
   public readonly changeLink = (key: string): Locator => this.summaryRow(key).locator('.govuk-summary-list__actions a');
 
+  // Accessible names add hidden context, e.g. "Change return date"
+  public readonly changeLinkNamed = (accessibleName: string): Locator =>
+    this.page.getByRole('link', { name: accessibleName });
+
+  public readonly sectionHeading = (name: string): Locator =>
+    this.page.getByRole('heading', { level: 2, name, exact: true });
+
+  public readonly gearSection = (gearName: string): Locator =>
+    this.page.getByRole('region', { name: gearName, exact: true });
+
+  public readonly gearSummaryValue = (gearName: string, key: string): Locator =>
+    this.gearSection(gearName)
+      .locator('.govuk-summary-list__row')
+      .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: key }) })
+      .locator('.govuk-summary-list__value');
+
+  // Species regions share the species name, so narrow them by the gear they were caught with
+  public readonly speciesSection = (speciesName: string, gearName: string): Locator =>
+    this.page.getByRole('region', { name: speciesName, exact: true }).filter({ hasText: `Caught with ${gearName}` });
+
+  public readonly speciesSummaryValue = (speciesName: string, gearName: string, key: string): Locator =>
+    this.speciesSection(speciesName, gearName)
+      .locator('.govuk-summary-list__row')
+      .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: key }) })
+      .locator('.govuk-summary-list__value');
+
+  public readonly notLandedSummary = (): Locator =>
+    this.page
+      .locator('.govuk-summary-list')
+      .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: 'Not landed' }) });
+
+  public readonly notLandedValue = (key: string): Locator =>
+    this.notLandedSummary()
+      .locator('.govuk-summary-list__row')
+      .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: key }) })
+      .locator('.govuk-summary-list__value');
+
+  public readonly declarationWarning = (): Locator => this.page.locator('.govuk-warning-text');
+
   public readonly declarationCheckbox = (): Locator =>
     this.page.getByLabel('I confirm the information is complete and accurate');
 

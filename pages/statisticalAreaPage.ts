@@ -14,6 +14,15 @@ export class StatisticalAreaPage extends BasePage {
   public readonly pageHeading = (): Locator =>
     this.page.getByRole('heading', { name: 'Where was the majority of your catch caught?', exact: true });
 
+  // With gears selected the heading names the gear in lower case; name matching is case-insensitive
+  public readonly pageHeadingForGear = (gearName?: string): Locator =>
+    this.page.getByRole('heading', {
+      level: 1,
+      name: gearName
+        ? `Where was the majority of your catch caught using ${gearName}?`
+        : /Where was the majority of your catch caught using /
+    });
+
   public readonly mapCanvas = (): Locator => this.page.locator('.app-offline-map__canvas');
 
   public readonly mapRegion = (): Locator => this.page.locator('[data-statistical-area-map]');

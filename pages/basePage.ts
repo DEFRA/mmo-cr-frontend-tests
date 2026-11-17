@@ -16,7 +16,10 @@ export abstract class BasePage {
 
   public readonly header = {
     govukHeader: (): Locator => this.page.locator('.govuk-header.app-header'),
-    serviceNavigation: (): Locator => this.page.getByRole('region', { name: 'Service information' })
+    serviceNavigation: (): Locator => this.page.getByRole('region', { name: 'Service information' }),
+    // Shown on journey pages such as /select-vessel; not shown on /records or /check-answers (OQ-7)
+    signOutButton: (): Locator =>
+      this.page.getByRole('region', { name: 'Service information' }).getByRole('button', { name: 'Sign out' })
   };
 
   public readonly common = {
@@ -25,7 +28,9 @@ export abstract class BasePage {
     phaseBanner: (): Locator => this.page.locator('.govuk-phase-banner'),
     workflowPageCaption: (): Locator => this.page.locator('.govuk-caption-l').filter({ hasText: 'New catch record' }),
     languageEnglish: (): Locator => this.page.getByTestId('app-page-navigation-language-current'),
-    languageCymraeg: (): Locator => this.page.getByTestId('app-page-navigation-language-link')
+    languageCymraeg: (): Locator => this.page.getByTestId('app-page-navigation-language-link'),
+    errorSummary: (): Locator => this.page.locator('.govuk-error-summary'),
+    errorMessage: (): Locator => this.page.locator('.govuk-error-message')
   };
 
   public readonly footer = {
@@ -111,6 +116,10 @@ export abstract class DateInputPage extends BasePage {
     await this.dayInput().fill(day);
     await this.monthInput().fill(month);
     await this.yearInput().fill(year);
+  }
+
+  async enterDateFrom(date: Date) {
+    await this.enterDate(String(date.getDate()), String(date.getMonth() + 1), String(date.getFullYear()));
   }
 }
 
