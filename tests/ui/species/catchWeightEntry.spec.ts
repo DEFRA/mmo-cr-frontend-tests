@@ -29,7 +29,7 @@ type OptionalWeightCase = {
   field: 'belowMinimum' | 'discarded';
 };
 
-const cod: Species = { name: 'Cod (COD)', code: 'COD' };
+const cod: Species = { name: 'Atlantic cod (COD)', code: 'COD' };
 
 const initialWeights = { aboveMinimum: '100', belowMinimum: '10', discarded: '5' };
 const editedWeights = { aboveMinimum: '120', belowMinimum: '15', discarded: '6' };

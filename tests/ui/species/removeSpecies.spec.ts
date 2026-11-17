@@ -10,25 +10,36 @@ import { expect, test } from '../../../fixtures/commonfixture';
 
 type SpeciesData = { name: string; code: string; weight: string };
 
-const cod: SpeciesData = { name: 'Cod (COD)', code: 'COD', weight: '100' };
-const haddock: SpeciesData = { name: 'Haddock (HAD)', code: 'HAD', weight: '50' };
+const cod: SpeciesData = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
+const mackerel: SpeciesData = { name: 'Atlantic mackerel (MAC)', code: 'MAC', weight: '50' };
 // Placeholder until a third vessel species is confirmed; only used by the fixme test
 const thirdSpecies: SpeciesData = { name: '<THIRD_SPECIES>', code: '<THIRD_CODE>', weight: '' };
 
 test.describe('Remove species', () => {
-  test.beforeEach(async ({ navigationFlow, speciesSelectionPage }) => {
+  // Removing species here updates the vessel's saved species, so restore them around every test
+  test.beforeEach(async ({ navigationFlow, favouritesFlow, speciesSelectionPage }) => {
     await test.step('The user has one or more species displayed', async () => {
-      await navigationFlow.signIn({
+      await navigationFlow.signInAndOpenAccount({
         requiredCredentialsMessage:
           'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Remove species UI tests'
       });
+      for (const species of [cod, mackerel]) {
+        await favouritesFlow.ensureSpeciesAdded(species.name);
+      }
       await navigationFlow.openSpeciesSelectionForNewRecord();
-      for (const species of [cod, haddock]) {
+      for (const species of [cod, mackerel]) {
         await speciesSelectionPage.selectSpecies(species.name);
         await speciesSelectionPage.enterSpeciesWeights(species.code, species.weight);
       }
       await speciesSelectionPage.saveAndReturn();
     });
+  });
+
+  test.afterEach(async ({ navigationFlow, favouritesFlow }) => {
+    await navigationFlow.openAccount();
+    for (const species of [cod, mackerel]) {
+      await favouritesFlow.ensureSpeciesAdded(species.name);
+    }
   });
 
   test(
@@ -45,14 +56,14 @@ test.describe('Remove species', () => {
 
       await test.step('All selected species are displayed', async () => {
         await expect(removeSpeciesPage.speciesCheckbox(cod.name)).toBeVisible();
-        await expect(removeSpeciesPage.speciesCheckbox(haddock.name)).toBeVisible();
+        await expect(removeSpeciesPage.speciesCheckbox(mackerel.name)).toBeVisible();
       });
 
       await test.step('The user can select one or more species to remove', async () => {
         await removeSpeciesPage.selectSpeciesToRemove(cod.name);
-        await removeSpeciesPage.selectSpeciesToRemove(haddock.name);
+        await removeSpeciesPage.selectSpeciesToRemove(mackerel.name);
         await expect(removeSpeciesPage.speciesCheckbox(cod.name)).toBeChecked();
-        await expect(removeSpeciesPage.speciesCheckbox(haddock.name)).toBeChecked();
+        await expect(removeSpeciesPage.speciesCheckbox(mackerel.name)).toBeChecked();
       });
     }
   );
@@ -65,7 +76,7 @@ test.describe('Remove species', () => {
 
       await test.step('The user has multiple species selected', async () => {
         await expect(speciesSelectionPage.weightAboveMinimumInput(cod.code)).toHaveValue(cod.weight);
-        await expect(speciesSelectionPage.weightAboveMinimumInput(haddock.code)).toHaveValue(haddock.weight);
+        await expect(speciesSelectionPage.weightAboveMinimumInput(mackerel.code)).toHaveValue(mackerel.weight);
       });
 
       await test.step('The user selects more than one species for removal', async () => {
@@ -106,7 +117,7 @@ test.describe('Remove species', () => {
 
       await test.step('No species are removed', async () => {
         await expect(speciesSelectionPage.weightAboveMinimumInput(cod.code)).toHaveValue(cod.weight);
-        await expect(speciesSelectionPage.weightAboveMinimumInput(haddock.code)).toHaveValue(haddock.weight);
+        await expect(speciesSelectionPage.weightAboveMinimumInput(mackerel.code)).toHaveValue(mackerel.weight);
       });
 
       await test.step('The user returns to the previous page', async () => {
@@ -129,7 +140,7 @@ test.describe('Remove species', () => {
 
       await test.step('Previously selected species are displayed', async () => {
         await expect(speciesSelectionPage.weightAboveMinimumInput(cod.code)).toHaveValue(cod.weight);
-        await expect(speciesSelectionPage.weightAboveMinimumInput(haddock.code)).toHaveValue(haddock.weight);
+        await expect(speciesSelectionPage.weightAboveMinimumInput(mackerel.code)).toHaveValue(mackerel.weight);
       });
 
       await test.step('The user can remove existing species', async () => {
@@ -137,7 +148,7 @@ test.describe('Remove species', () => {
         await removeSpeciesPage.selectSpeciesToRemove(cod.name);
         await removeSpeciesPage.clickSaveAndContinue();
         await expect(speciesSelectionPage.speciesCheckbox(cod.name)).toBeHidden();
-        await expect(speciesSelectionPage.speciesCheckbox(haddock.name)).toBeVisible();
+        await expect(speciesSelectionPage.speciesCheckbox(mackerel.name)).toBeVisible();
       });
     }
   );

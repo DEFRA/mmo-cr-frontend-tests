@@ -96,7 +96,10 @@ export class NavigationFlow {
     await this.selectDeparturePort(portName);
     await statisticalAreaPage.installCanvasProbe();
     await statisticalAreaPage.goto('/statistical-area');
-    await expect.poll(async () => (await statisticalAreaPage.readMapLabels()).length).toBeGreaterThan(0);
+    await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
+    await expect
+      .poll(async () => (await statisticalAreaPage.readMapLabels()).length, { timeout: 15_000 })
+      .toBeGreaterThan(0);
 
     const labels = await statisticalAreaPage.readMapLabels();
     await statisticalAreaPage.clickMapLabel(labels[Math.floor(labels.length / 2)]!);
