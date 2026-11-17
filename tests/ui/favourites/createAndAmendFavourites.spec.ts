@@ -313,7 +313,7 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('I open species selection during catch recording', async () => {
-        await speciesSelectionPage.goto('/species-selection');
+        await navigationFlow.openSpeciesSelectionForNewRecord();
       });
 
       await test.step('My favourite is displayed before I search the wider catalogue', async () => {
@@ -338,7 +338,7 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('I open species selection during catch recording', async () => {
-        await navigationFlow.openSpeciesSelection();
+        await navigationFlow.openSpeciesSelectionForNewRecord();
       });
 
       await test.step('My favourite is available without searching the catalogue', async () => {

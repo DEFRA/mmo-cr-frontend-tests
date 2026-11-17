@@ -18,7 +18,11 @@ const thirdSpecies: SpeciesData = { name: '<THIRD_SPECIES>', code: '<THIRD_CODE>
 test.describe('Remove species', () => {
   test.beforeEach(async ({ navigationFlow, speciesSelectionPage }) => {
     await test.step('The user has one or more species displayed', async () => {
-      await navigationFlow.openSpeciesSelection();
+      await navigationFlow.signIn({
+        requiredCredentialsMessage:
+          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Remove species UI tests'
+      });
+      await navigationFlow.openSpeciesSelectionForNewRecord();
       for (const species of [cod, haddock]) {
         await speciesSelectionPage.selectSpecies(species.name);
         await speciesSelectionPage.enterSpeciesWeights(species.code, species.weight);

@@ -14,7 +14,7 @@ const secondSpeciesSearchTerm = 'ha';
 const weightAboveMinimum = '5';
 const unapprovedSpeciesPrefix = 'Not an approved species';
 
-const duplicateSpeciesError = 'This species has already been added.';
+const duplicateSpeciesError = (species: string): string => `${species} has already been added.`;
 const noSpeciesSelectedError = 'Select at least one species';
 const unapprovedSpeciesError = 'Enter the species you want to add';
 
@@ -34,7 +34,7 @@ test.describe('Add species to a catch record', () => {
     });
 
     await test.step('The user is on the species selection page', async () => {
-      await navigationFlow.openSpeciesSelection();
+      await navigationFlow.openSpeciesSelectionForNewRecord();
     });
   });
 
@@ -166,8 +166,8 @@ test.describe('Add species to a catch record', () => {
         await addSpeciesPage.expectUrl(/\/add-species/);
       });
 
-      await test.step(`An error message is shown: "${duplicateSpeciesError}"`, async () => {
-        await expect(addSpeciesPage.errorSummary()).toContainText(duplicateSpeciesError);
+      await test.step('An error message is shown: "<species> has already been added."', async () => {
+        await expect(addSpeciesPage.errorSummary()).toContainText(duplicateSpeciesError(species));
       });
     }
   );

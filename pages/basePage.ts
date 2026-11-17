@@ -38,15 +38,19 @@ export abstract class BasePage {
   };
 
   async goto(url: string) {
-    try {
-      await this.page.goto(url, { waitUntil: 'load' });
-    } catch (error) {
-      if (!(error instanceof Error) || !error.message.includes('ERR_NAME_NOT_RESOLVED')) {
-        throw error;
+    const maxAttempts = 4;
+    for (let attempt = 1; ; attempt++) {
+      try {
+        await this.page.goto(url, { waitUntil: 'load' });
+        return;
+      } catch (error) {
+        // The test environment's DNS intermittently fails to resolve; retry with a growing back-off
+        const isDnsFailure = error instanceof Error && error.message.includes('ERR_NAME_NOT_RESOLVED');
+        if (!isDnsFailure || attempt === maxAttempts) {
+          throw error;
+        }
+        await this.page.waitForTimeout(attempt * 3_000);
       }
-
-      await this.page.waitForTimeout(10_000);
-      await this.page.goto(url, { waitUntil: 'load' });
     }
   }
 

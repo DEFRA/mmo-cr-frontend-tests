@@ -65,7 +65,11 @@ const invalidOptionalWeightCases: OptionalWeightCase[] = [
 test.describe('Species catch weight entry', () => {
   test.beforeEach(async ({ navigationFlow }) => {
     await test.step('The user is on the species selection page', async () => {
-      await navigationFlow.openSpeciesSelection();
+      await navigationFlow.signIn({
+        requiredCredentialsMessage:
+          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for catch weight UI tests'
+      });
+      await navigationFlow.openSpeciesSelectionForNewRecord();
     });
   });
 

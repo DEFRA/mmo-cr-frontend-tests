@@ -88,6 +88,20 @@ export class NavigationFlow {
     await expect(speciesSelectionPage.pageHeading()).toBeVisible();
   }
 
+  // Requires a signed-in user; reaches species selection through a new catch record
+  async openSpeciesSelectionForNewRecord(portName = 'Plymouth', vesselName = 'ACHILLES'): Promise<void> {
+    const { statisticalAreaPage, statisticalAreaOtherPage, speciesSelectionPage } = this.pages;
+
+    await this.startCatchRecord(vesselName);
+    await this.selectDeparturePort(portName);
+    await statisticalAreaPage.goto('/statistical-area');
+    await statisticalAreaPage.clickOther();
+    await statisticalAreaOtherPage.suggestedAreaRadios().first().check();
+    await statisticalAreaOtherPage.clickSaveAndContinue();
+    await speciesSelectionPage.expectUrl(/\/species-selection$/);
+    await expect(speciesSelectionPage.pageHeading()).toBeVisible();
+  }
+
   async openAddSpecies(): Promise<void> {
     const { speciesSelectionPage, addSpeciesPage } = this.pages;
 
