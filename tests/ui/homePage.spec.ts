@@ -15,42 +15,35 @@ test.describe('Home page', () => {
       await test.step('Displays the required controls and content', async () => {
         await homePage.goto('/');
 
-        // Verify main title and caption
         await expect(homePage.pageTitle()).toBeVisible();
         await expect(homePage.pageTitle()).toHaveText('How to record your catch');
         await expect(homePage.pageCaption()).toHaveText('Guidance');
 
-        // Verify phase banner and warning text
         await expect(homePage.phaseBanner()).toBeVisible();
         await expect(homePage.warningText()).toBeVisible();
         await expect(homePage.warningText()).toContainText(
           'You need to create a catch record within 24 hours of landing your catch.'
         );
 
-        // Verify language switcher options
         await expect(homePage.languageSwitcher.container()).toBeVisible();
         await expect(homePage.languageSwitcher.english()).toBeVisible();
         await expect(homePage.languageSwitcher.welsh()).toBeVisible();
 
-        // Verify guidance links
         await expect(homePage.guidanceContents.whatWeNeedFromYouLink()).toBeVisible();
         await expect(homePage.guidanceContents.whenToCreateYourRecordLink()).toBeVisible();
         await expect(homePage.guidanceContents.specialCasesLink()).toBeVisible();
         await expect(homePage.guidanceContents.howToCreateARecordLink()).toBeVisible();
         await expect(homePage.guidanceContents.getHelpLink()).toBeVisible();
 
-        // Verify guidance headings
         await expect(homePage.guidanceHeadings.whatWeNeedFromYouHeading()).toBeVisible();
         await expect(homePage.guidanceHeadings.whenToCreateYourRecordHeading()).toBeVisible();
         await expect(homePage.guidanceHeadings.specialCasesHeading()).toBeVisible();
         await expect(homePage.guidanceHeadings.howToCreateARecordHeading()).toBeVisible();
         await expect(homePage.guidanceHeadings.getHelpWithYourRecordHeading()).toBeVisible();
 
-        // Verify Start Now button
         await expect(homePage.startNowButton()).toBeVisible();
         await expect(homePage.startNowButton()).toHaveAttribute('href', '/sign-in');
 
-        // Verify privacy notice link
         await expect(homePage.privacyNoticeLink()).toBeVisible();
       });
     }
