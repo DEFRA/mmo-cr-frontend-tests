@@ -39,6 +39,43 @@ export class StatisticalAreaPage extends BasePage {
     await this.mapCanvas().click({ position: { x, y } });
   }
 
+  // Records the codes and positions the map draws on its canvas so tests can read and click sub-rectangles
+  async installCanvasProbe(): Promise<void> {
+    await this.page.addInitScript(() => {
+      const clearRect = CanvasRenderingContext2D.prototype.clearRect;
+      const fillText = CanvasRenderingContext2D.prototype.fillText;
+      const stroke = CanvasRenderingContext2D.prototype.stroke;
+
+      CanvasRenderingContext2D.prototype.clearRect = function (x, y, width, height) {
+        this.canvas.dataset.playwrightMapLabels = '[]';
+        this.canvas.dataset.playwrightGridCount = '0';
+        this.canvas.dataset.playwrightSelectedGridCount = '0';
+        return clearRect.call(this, x, y, width, height);
+      };
+
+      CanvasRenderingContext2D.prototype.stroke = function () {
+        if (['#0b6b3a', '#e8a63a'].includes(String(this.strokeStyle).toLowerCase())) {
+          const count = Number(this.canvas.dataset.playwrightGridCount ?? '0') + 1;
+          this.canvas.dataset.playwrightGridCount = String(count);
+          if (String(this.strokeStyle).toLowerCase() === '#e8a63a' || this.lineWidth > 1) {
+            const selectedCount = Number(this.canvas.dataset.playwrightSelectedGridCount ?? '0') + 1;
+            this.canvas.dataset.playwrightSelectedGridCount = String(selectedCount);
+          }
+        }
+        return Reflect.apply(stroke, this, []);
+      };
+
+      CanvasRenderingContext2D.prototype.fillText = function (text, x, y, maxWidth) {
+        if (/^\d{2}[A-Z]\d{2}$/i.test(String(text))) {
+          const labels = JSON.parse(this.canvas.dataset.playwrightMapLabels ?? '[]') as MapLabel[];
+          labels.push({ code: String(text), x, y });
+          this.canvas.dataset.playwrightMapLabels = JSON.stringify(labels);
+        }
+        return maxWidth === undefined ? fillText.call(this, text, x, y) : fillText.call(this, text, x, y, maxWidth);
+      };
+    });
+  }
+
   async readMapLabels(): Promise<MapLabel[]> {
     return this.mapCanvas().evaluate((canvas) => {
       return JSON.parse((canvas as HTMLCanvasElement).dataset.playwrightMapLabels ?? '[]') as MapLabel[];

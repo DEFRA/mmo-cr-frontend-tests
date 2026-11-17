@@ -90,14 +90,16 @@ export class NavigationFlow {
 
   // Requires a signed-in user; reaches species selection through a new catch record
   async openSpeciesSelectionForNewRecord(portName = 'Plymouth', vesselName = 'ACHILLES'): Promise<void> {
-    const { statisticalAreaPage, statisticalAreaOtherPage, speciesSelectionPage } = this.pages;
+    const { statisticalAreaPage, speciesSelectionPage } = this.pages;
 
     await this.startCatchRecord(vesselName);
     await this.selectDeparturePort(portName);
+    await statisticalAreaPage.installCanvasProbe();
     await statisticalAreaPage.goto('/statistical-area');
-    await statisticalAreaPage.clickOther();
-    await statisticalAreaOtherPage.suggestedAreaRadios().first().check();
-    await statisticalAreaOtherPage.clickSaveAndContinue();
+    await expect.poll(async () => (await statisticalAreaPage.readMapLabels()).length).toBeGreaterThan(0);
+
+    const labels = await statisticalAreaPage.readMapLabels();
+    await statisticalAreaPage.clickMapLabel(labels[Math.floor(labels.length / 2)]!);
     await speciesSelectionPage.expectUrl(/\/species-selection$/);
     await expect(speciesSelectionPage.pageHeading()).toBeVisible();
   }
