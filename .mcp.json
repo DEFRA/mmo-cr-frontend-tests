@@ -1,15 +1,10 @@
 {
-	"mcpServers": {
-		"playwright": {
-			"type": "stdio",
-			"command": "npx",
-			"args": [
-				"-y",
-				"@playwright/mcp"
-			],
-			"tools": [
-				"*"
-			]
-		}
-	}
+  "mcpServers": {
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp"],
+      "tools": ["*"]
+    }
+  }
 }
