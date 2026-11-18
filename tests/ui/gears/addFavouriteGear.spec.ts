@@ -77,6 +77,8 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('It is available for future catch records', async () => {
+        // Favourites are saved per vessel, so a record must be started to give gear selection its vessel
+        await navigationFlow.startCatchRecord();
         await gearSelectionPage.goto('/gear-selection');
         await expect(gearSelectionPage.gearCheckbox(pots.name)).toBeVisible();
       });
