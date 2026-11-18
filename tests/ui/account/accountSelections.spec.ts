@@ -33,13 +33,14 @@ test.describe('Account details and selections', () => {
     accountReadyForCleanup = true;
   });
 
-  test.afterEach(async ({ navigationFlow, favouritesFlow }) => {
+  test.afterEach(async ({ navigationFlow, favouritesFlow, catchRecordFlow }) => {
     if (!accountReadyForCleanup) return;
 
     await navigationFlow.openAccount();
     if (!savedSelections.species) await favouritesFlow.removeSpeciesFromAccount(favouriteSpecies);
     if (!savedSelections.gear) await favouritesFlow.removeGearFromAccount(favouriteGear);
     if (!savedSelections.port) await favouritesFlow.removePortFromAccount(favouritePort);
+    await catchRecordFlow.deleteAllDrafts();
   });
 
   test(

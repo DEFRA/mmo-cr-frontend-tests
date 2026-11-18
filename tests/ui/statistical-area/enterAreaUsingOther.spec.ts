@@ -22,6 +22,11 @@ test.describe('Enter statistical sub area using the Other option', () => {
     await navigationFlow.openStatisticalAreaOther();
   });
 
+  // Each test starts a catch record, so its draft is deleted after each test
+  test.afterEach(async ({ catchRecordFlow }) => {
+    await catchRecordFlow.deleteAllDrafts();
+  });
+
   test(
     'Displays an editable type-ahead field when the Other option is selected',
     { tag: ['@ui', '@regression', '@statisticalAreaManualEntry'] },

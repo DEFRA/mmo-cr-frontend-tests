@@ -21,6 +21,8 @@ type TripDates = {
   end: DateParts;
 };
 
+const vesselName = 'ACHILLES';
+
 const dateOffsets = {
   validTrip: { start: -10, end: -5 },
   olderThan365Days: { start: -366, end: -366 },
@@ -61,7 +63,7 @@ test.describe('Trip date validation', () => {
 
     await test.step('The user starts a new catch record', async () => {
       await recordsPage.createNewRecordButton().click();
-      await selectVesselPage.firstVesselRadio().check();
+      await selectVesselPage.selectVessel(vesselName);
       await selectVesselPage.clickSaveAndContinue();
     });
 
@@ -69,6 +71,11 @@ test.describe('Trip date validation', () => {
       await tripDatePage.selectSameDate(false);
       await tripDatePage.clickSaveAndContinue();
     });
+  });
+
+  // Each test starts a catch record, so its draft is deleted after each test
+  test.afterEach(async ({ catchRecordFlow }) => {
+    await catchRecordFlow.deleteAllDrafts();
   });
 
   test(

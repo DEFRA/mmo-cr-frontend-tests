@@ -73,6 +73,11 @@ test.describe('Species catch weight entry', () => {
     });
   });
 
+  // Each test starts a catch record, so its draft is deleted after each test
+  test.afterEach(async ({ catchRecordFlow }) => {
+    await catchRecordFlow.deleteAllDrafts();
+  });
+
   test(
     'Displays editable catch-weight fields when a species is selected',
     { tag: ['@ui', '@regression', '@catchWeightRecording'] },

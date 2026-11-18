@@ -35,7 +35,7 @@ test.describe('Remove species', () => {
     });
   });
 
-  test.afterEach(async ({ navigationFlow, favouritesFlow,catchRecordFlow }) => {
+  test.afterEach(async ({ navigationFlow, favouritesFlow, catchRecordFlow }) => {
     await navigationFlow.openAccount();
     for (const species of [cod, mackerel]) {
       await favouritesFlow.ensureSpeciesAdded(species.name);

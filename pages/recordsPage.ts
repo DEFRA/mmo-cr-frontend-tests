@@ -57,9 +57,6 @@ export class RecordsPage extends BasePage {
     return reference;
   }
 
-  public readonly recordRow = (reference: string): Locator =>
-    this.recordsRows().filter({ has: this.page.getByRole('link', { name: reference, exact: true }) });
-
   public readonly recordStatusTag = (reference: string): Locator => this.recordRow(reference).locator('.govuk-tag');
 
   public readonly statusTags = (): Locator => this.recordsRows().locator('.govuk-tag');
