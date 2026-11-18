@@ -104,13 +104,7 @@ export class NavigationFlow {
     await this.selectDepartureAndReturnPorts(portName, returnPortName);
     await statisticalAreaPage.installCanvasProbe();
     await statisticalAreaPage.goto('/statistical-area');
-    await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
-    await expect
-      .poll(async () => (await statisticalAreaPage.readMapLabels()).length, { timeout: 15_000 })
-      .toBeGreaterThan(0);
-
-    const labels = await statisticalAreaPage.readMapLabels();
-    await statisticalAreaPage.clickMapLabel(labels[Math.floor(labels.length / 2)]!);
+    await statisticalAreaPage.selectMiddleMapArea();
     await speciesSelectionPage.expectUrl(/\/species-selection$/);
     await expect(speciesSelectionPage.pageHeading()).toBeVisible();
   }

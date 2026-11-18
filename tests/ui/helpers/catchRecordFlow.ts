@@ -200,15 +200,9 @@ export class CatchRecordFlow {
   async selectAreaFromMapForCurrentGear(): Promise<string> {
     const { statisticalAreaPage, speciesSelectionPage } = this.pages;
 
-    await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
-    await expect
-      .poll(async () => (await statisticalAreaPage.readMapLabels()).length, { timeout: 15_000 })
-      .toBeGreaterThan(0);
-    const labels = await statisticalAreaPage.readMapLabels();
-    const label = labels[Math.floor(labels.length / 2)]!;
-    await statisticalAreaPage.clickMapLabel(label);
+    const areaCode = await statisticalAreaPage.selectMiddleMapArea();
     await speciesSelectionPage.expectUrl(/\/species-selection\?gearId=/);
-    return label.code;
+    return areaCode;
   }
 
   async enterSpeciesForCurrentGear(species: SpeciesCatch[]): Promise<void> {

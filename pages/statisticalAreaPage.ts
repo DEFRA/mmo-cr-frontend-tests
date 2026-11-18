@@ -1,4 +1,4 @@
-import { type Locator } from '@playwright/test';
+import { expect, type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
 export type MapLabel = { code: string; x: number; y: number };
@@ -106,6 +106,16 @@ export class StatisticalAreaPage extends BasePage {
   async clickMapLabel(label: MapLabel): Promise<void> {
     const pixelRatio = await this.page.evaluate(() => window.devicePixelRatio || 1);
     await this.clickMapAt((label.x - 4) / pixelRatio, (label.y + 4) / pixelRatio);
+  }
+
+  // Needs installCanvasProbe before the page loads; clicks a sub-rectangle near the middle and returns its code
+  async selectMiddleMapArea(): Promise<string> {
+    await expect(this.mapCanvas()).toBeVisible();
+    await expect.poll(async () => (await this.readMapLabels()).length, { timeout: 15_000 }).toBeGreaterThan(0);
+    const labels = await this.readMapLabels();
+    const label = labels[Math.floor(labels.length / 2)]!;
+    await this.clickMapLabel(label);
+    return label.code;
   }
 
   async canvasFingerprint(): Promise<string> {
