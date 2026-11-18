@@ -9,7 +9,11 @@ import { BasePage } from './basePage';
  * @since 2026-09-30
  */
 export class SpeciesSelectionPage extends BasePage {
-  public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: /What species did you catch\?/ });
+  public readonly pageHeading = (): Locator =>
+    this.page.getByRole('heading', { name: /(What|Which) species did you catch\?/ });
+
+  public readonly pageHeadingForGear = (gearName: string): Locator =>
+    this.page.getByRole('heading', { name: `Which species did you catch with ${gearName}?` });
 
   public readonly speciesCheckbox = (speciesName: string): Locator => this.page.getByLabel(speciesName);
 

@@ -10,6 +10,7 @@ import { expect, test } from '../../../fixtures/commonfixture';
 const favouriteSpecies = 'Atlantic cod (COD)';
 const favouriteGear = 'Pots';
 const favouritePort = 'Plymouth';
+const vesselName = 'ACHILLES';
 
 test.describe('Account details and selections', () => {
   let savedSelections = {
@@ -33,13 +34,14 @@ test.describe('Account details and selections', () => {
     accountReadyForCleanup = true;
   });
 
-  test.afterEach(async ({ navigationFlow, favouritesFlow }) => {
+  test.afterEach(async ({ navigationFlow, favouritesFlow, catchRecordFlow }) => {
     if (!accountReadyForCleanup) return;
 
     await navigationFlow.openAccount();
     if (!savedSelections.species) await favouritesFlow.removeSpeciesFromAccount(favouriteSpecies);
     if (!savedSelections.gear) await favouritesFlow.removeGearFromAccount(favouriteGear);
     if (!savedSelections.port) await favouritesFlow.removePortFromAccount(favouritePort);
+    await catchRecordFlow.deleteAllDrafts();
   });
 
   test(
@@ -48,9 +50,7 @@ test.describe('Account details and selections', () => {
     async ({
       accountPage,
       favouritesFlow,
-      recordsPage,
-      selectVesselPage,
-      tripDatePage,
+      navigationFlow,
       addPortPage,
       confirmSamePortPage,
       gearSelectionPage,
@@ -96,14 +96,7 @@ test.describe('Account details and selections', () => {
       });
 
       await test.step('My account selections are available in a new catch-record journey', async () => {
-        await recordsPage.goto('/records');
-        await recordsPage.createNewRecordButton().click();
-        await expect(selectVesselPage.pageHeading()).toBeVisible();
-        await selectVesselPage.firstVesselRadio().check();
-        await selectVesselPage.clickSaveAndContinue();
-
-        await tripDatePage.yesRadio().check();
-        await tripDatePage.clickSaveAndContinue();
+        await navigationFlow.startCatchRecord(vesselName);
         await expect(addPortPage.page).toHaveURL(/\/add-port\?for=departure/);
         await expect(addPortPage.portResultItem(favouritePort).getByRole('option')).toBeVisible();
         await addPortPage.searchAndSelectPort(favouritePort);
@@ -115,7 +108,6 @@ test.describe('Account details and selections', () => {
         await expect(gearSelectionPage.pageHeading()).toBeVisible();
         await expect(gearSelectionPage.gearCheckbox(favouriteGear)).toBeVisible();
         await gearSelectionPage.gearCheckbox(favouriteGear).check();
-        await gearSelectionPage.enterPotsDetails('1', '1');
         await gearSelectionPage.clickSaveAndContinue();
 
         await expect(speciesSelectionPage.pageHeading()).toBeVisible();

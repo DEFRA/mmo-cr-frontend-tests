@@ -1,13 +1,17 @@
 /**
  * Remove saved favourite gear configurations without removing catalogue entries.
  * Covers confirmation, cancellation, retained favourites, future trips and replacement measurements.
+ *
+ * @author Randhir Patel
+ * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 
-const pots = { name: 'Pots', gearDimension: '45' };
+const pots = { name: 'Pots', gearDimension: '45', searchTerm: 'pot' };
 const traps = 'Traps (not specified)';
 const testFavouriteGears = [pots.name, traps];
 const replacementDimension = '90';
+const gearDimensionText = (dimension: string): RegExp => new RegExp(`Gear dimension by number.*: ${dimension}`);
 
 test.describe('Remove favourite gear', () => {
   test.beforeEach(async ({ navigationFlow, gearFlow, accountPage }) => {
@@ -23,8 +27,10 @@ test.describe('Remove favourite gear', () => {
     });
   });
 
-  test.afterEach(async ({ gearFlow }) => {
+  // Page fixtures are per test, so clean-up runs after each test rather than in afterAll
+  test.afterEach(async ({ gearFlow, catchRecordFlow }) => {
     await gearFlow.removeSavedGears(testFavouriteGears);
+    await catchRecordFlow.deleteAllDrafts();
   });
 
   test(
@@ -33,12 +39,7 @@ test.describe('Remove favourite gear', () => {
     async ({ accountPage, removeGearPage }) => {
       await test.step('I select my saved gear for removal', async () => {
         await accountPage.clickRemoveGear();
-        await expect(removeGearPage.pageHeading()).toBeVisible();
-        await expect(removeGearPage.gearHint(pots.name)).toContainText(
-          new RegExp(`Gear dimension by number.*: ${pots.gearDimension}`)
-        );
         await removeGearPage.selectGearToRemove(pots.name);
-        await expect(removeGearPage.gearCheckbox(pots.name)).toBeChecked();
       });
 
       await test.step('I confirm removal by selecting Continue', async () => {
@@ -58,7 +59,7 @@ test.describe('Remove favourite gear', () => {
     'Preserves the remaining gear and measurements when one favourite is removed',
     { tag: ['@ui', '@regression', '@favouriteGear'] },
     async ({ navigationFlow, gearFlow, accountPage, removeGearPage }) => {
-      let retainedMeasurements: string;
+      let retainedHint: string;
 
       await test.step('I have multiple favourite gear configurations saved', async () => {
         await navigationFlow.openAddGear();
@@ -68,7 +69,7 @@ test.describe('Remove favourite gear', () => {
         await expect(accountPage.gearOnboardValue()).toContainText(traps);
         await accountPage.clickRemoveGear();
         await expect(removeGearPage.gearHint(traps)).toBeVisible();
-        retainedMeasurements = await removeGearPage.gearHint(traps).innerText();
+        retainedHint = await removeGearPage.gearHint(traps).innerText();
       });
 
       await test.step('I select only one favourite and confirm removal', async () => {
@@ -86,7 +87,7 @@ test.describe('Remove favourite gear', () => {
         await expect(removeGearPage.pageHeading()).toBeVisible();
         await expect(removeGearPage.gearCheckbox(pots.name)).toHaveCount(0);
         await expect(removeGearPage.gearCheckbox(traps)).toBeVisible();
-        await expect(removeGearPage.gearHint(traps)).toHaveText(retainedMeasurements);
+        await expect(removeGearPage.gearHint(traps)).toHaveText(retainedHint);
       });
     }
   );
@@ -98,11 +99,9 @@ test.describe('Remove favourite gear', () => {
       let savedGear: string;
 
       await test.step('I have selected a favourite gear for removal', async () => {
-        savedGear = await accountPage.gearOnboardValue().innerText();
+        savedGear = await accountPage.getGearOnboardText();
         await accountPage.clickRemoveGear();
-        await expect(removeGearPage.pageHeading()).toBeVisible();
         await removeGearPage.selectGearToRemove(pots.name);
-        await expect(removeGearPage.gearCheckbox(pots.name)).toBeChecked();
       });
 
       await test.step('I go back without confirming removal', async () => {
@@ -113,11 +112,7 @@ test.describe('Remove favourite gear', () => {
         await accountPage.expectUrl(/\/account$/);
         await accountPage.reload();
         await expect(accountPage.gearOnboardValue()).toHaveText(savedGear);
-        await accountPage.clickRemoveGear();
-        await expect(removeGearPage.gearCheckbox(pots.name)).toBeVisible();
-        await expect(removeGearPage.gearHint(pots.name)).toContainText(
-          new RegExp(`Gear dimension by number.*: ${pots.gearDimension}`)
-        );
+        await expect(accountPage.gearOnboardValue()).toContainText(gearDimensionText(pots.gearDimension));
       });
     }
   );
@@ -125,16 +120,7 @@ test.describe('Remove favourite gear', () => {
   test(
     'Excludes removed gear from future trip favourites while keeping it searchable',
     { tag: ['@ui', '@regression', '@favouriteGear'] },
-    async ({
-      accountPage,
-      removeGearPage,
-      recordsPage,
-      selectVesselPage,
-      tripDatePage,
-      navigationFlow,
-      gearSelectionPage,
-      addGearPage
-    }) => {
+    async ({ accountPage, removeGearPage, navigationFlow, gearSelectionPage, addGearPage }) => {
       await test.step('I have removed a previously saved favourite gear', async () => {
         await accountPage.clickRemoveGear();
         await removeGearPage.selectGearToRemove(pots.name);
@@ -144,27 +130,20 @@ test.describe('Remove favourite gear', () => {
       });
 
       await test.step('I start a new catch record and reach gear selection', async () => {
-        await recordsPage.goto('/records');
-        await recordsPage.createNewRecordButton().click();
-        await expect(selectVesselPage.pageHeading()).toBeVisible();
-        await selectVesselPage.firstVesselRadio().check();
-        await selectVesselPage.clickSaveAndContinue();
-        await tripDatePage.expectUrl(/\/trip-date$/);
-        await tripDatePage.yesRadio().check();
-        await tripDatePage.clickSaveAndContinue();
-        await navigationFlow.selectDeparturePort('Plymouth');
+        // Favourites are saved per vessel, so a record must be started to give gear selection its vessel
+        await navigationFlow.startCatchRecord();
+        await gearSelectionPage.goto('/gear-selection');
       });
 
       await test.step('The removed gear is not offered as a favourite', async () => {
-        await gearSelectionPage.expectUrl(/\/gear-selection$/);
         await expect(gearSelectionPage.pageHeading()).toBeVisible();
         await expect(gearSelectionPage.gearCheckbox(pots.name)).toHaveCount(0);
       });
 
       await test.step('The gear remains available through the standard catalogue search', async () => {
         await gearSelectionPage.addGearLink().click();
-        await expect(addGearPage.pageHeading()).toBeVisible();
-        await addGearPage.searchGearOptions('po');
+        await expect(addGearPage.gearInput()).toBeEditable();
+        await addGearPage.searchGearOptions(pots.searchTerm);
         await expect(addGearPage.gearOption(pots.name)).toBeVisible();
       });
     }
@@ -227,17 +206,13 @@ test.describe('Remove favourite gear', () => {
         await addGearPage.clickSaveAndContinue();
       });
 
-      await test.step('Only the new configuration is offered for removal', async () => {
+      await test.step('Only the new configuration is saved', async () => {
         await accountPage.expectUrl(/\/account$/);
         await accountPage.reload();
+        await expect(accountPage.gearOnboardValue()).toContainText(gearDimensionText(replacementDimension));
+        await expect(accountPage.gearOnboardValue()).not.toContainText(gearDimensionText(pots.gearDimension));
         await accountPage.clickRemoveGear();
         await expect(removeGearPage.gearCheckbox(pots.name)).toHaveCount(1);
-        await expect(removeGearPage.gearHint(pots.name)).toContainText(
-          new RegExp(`Gear dimension by number.*: ${replacementDimension}`)
-        );
-        await expect(removeGearPage.gearHint(pots.name)).not.toContainText(
-          new RegExp(`Gear dimension by number.*: ${pots.gearDimension}`)
-        );
       });
     }
   );

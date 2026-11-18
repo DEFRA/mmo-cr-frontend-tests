@@ -16,27 +16,34 @@ type MeasuredGearData = FavouriteGearData & {
   gearDimension: string;
 };
 
-// Gear names, measurements and validation messages confirmed by existing gear specs
+// Gear names and measurements confirmed by existing gear specs; validation messages confirmed on the live app
 const pots: MeasuredGearData = { name: 'Pots', gearDimension: '45' };
 const traps: FavouriteGearData = { name: 'Traps (not specified)' };
 const testFavouriteGears = [pots.name, traps.name];
+const seineNets = 'Seine nets (not specified)';
+const seineNetsSearchTerm = 'se';
+const isSeineNets = (name: string): boolean => name === seineNets;
 
 const invalidMeasurement = '1.5';
-const missingNumberOfLinesError = 'Enter the number of lines';
-const missingGearDimensionError = /Enter the gear dimension by number/i;
+const missingMeshSizeError = 'Enter the mesh size';
+const missingGearDimensionError = 'Enter the gear dimension by length or width of the gear';
 const invalidMeasurementError = 'Enter a whole number';
 
 test.describe('Add favourite gear', () => {
   test.beforeEach(async ({ navigationFlow, gearFlow }) => {
-    await navigationFlow.signIn({
-      requiredCredentialsMessage:
-        'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Add favourite gear UI tests'
+    await test.step('I am signed in without the test gear saved as a favourite', async () => {
+      await navigationFlow.signIn({
+        requiredCredentialsMessage:
+          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Add favourite gear UI tests'
+      });
+      await gearFlow.removeSavedGears(testFavouriteGears);
     });
-    await gearFlow.removeSavedGears(testFavouriteGears);
   });
 
-  test.afterEach(async ({ gearFlow }) => {
+  // Page fixtures are per test, so clean-up runs after each test rather than in afterAll
+  test.afterEach(async ({ gearFlow, catchRecordFlow }) => {
     await gearFlow.removeSavedGears(testFavouriteGears);
+    await catchRecordFlow.deleteAllDrafts();
   });
 
   test(
@@ -70,6 +77,8 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('It is available for future catch records', async () => {
+        // Favourites are saved per vessel, so a record must be started to give gear selection its vessel
+        await navigationFlow.startCatchRecord();
         await gearSelectionPage.goto('/gear-selection');
         await expect(gearSelectionPage.gearCheckbox(pots.name)).toBeVisible();
       });
@@ -108,7 +117,7 @@ test.describe('Add favourite gear', () => {
         await navigationFlow.openAccount();
         gearBefore = await accountPage.getGearOnboardText();
         await accountPage.clickAddGear();
-        await gearFlow.selectLineGear();
+        await gearFlow.selectGearWithMeasurements(seineNetsSearchTerm, isSeineNets);
       });
 
       await test.step('I do not enter the mandatory values', async () => {
@@ -122,7 +131,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('The system displays a validation message', async () => {
-        await expect(addGearPage.errorSummary()).toContainText(missingNumberOfLinesError);
+        await expect(addGearPage.errorSummary()).toContainText(missingMeshSizeError);
         await expect(addGearPage.errorSummary()).toContainText(missingGearDimensionError);
       });
 
@@ -144,7 +153,7 @@ test.describe('Add favourite gear', () => {
         await navigationFlow.openAccount();
         gearBefore = await accountPage.getGearOnboardText();
         await accountPage.clickAddGear();
-        await gearFlow.selectLineGear();
+        await gearFlow.selectGearWithMeasurements(seineNetsSearchTerm, isSeineNets);
       });
 
       await test.step('I enter an invalid measurement value', async () => {
@@ -167,23 +176,18 @@ test.describe('Add favourite gear', () => {
   test(
     'Displays saved favourite gear when a new catch record is started',
     { tag: ['@ui', '@regression', '@favouriteGear'] },
-    async ({ navigationFlow, gearFlow, recordsPage, selectVesselPage, gearSelectionPage }) => {
+    async ({ navigationFlow, gearFlow, gearSelectionPage }) => {
       await test.step('I previously saved a favourite gear', async () => {
         await navigationFlow.openAddGear();
         await gearFlow.savePots(pots.gearDimension);
       });
 
       await test.step('I start a new catch record', async () => {
-        await recordsPage.goto('/records');
-        await recordsPage.createNewRecordButton().click();
-        await selectVesselPage.firstVesselRadio().check();
-        await selectVesselPage.clickSaveAndContinue();
-        await selectVesselPage.expectUrl(/\/trip-date$/);
+        await navigationFlow.startCatchRecord();
         await gearSelectionPage.goto('/gear-selection');
       });
 
       await test.step('The gear appears in my available gear list', async () => {
-        await expect(gearSelectionPage.pageHeading()).toBeVisible();
         await expect(gearSelectionPage.gearCheckbox(pots.name)).toBeVisible();
       });
     }

@@ -9,11 +9,14 @@ import { BasePage } from './basePage';
  * @since 2026-09-30
  */
 export class AddGearPage extends BasePage {
-  public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: 'What gear did you use?' });
+  public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: 'Add gear to your favourites' });
 
   public readonly pageCaption = (): Locator => this.page.getByTestId('app-add-gear-caption');
 
-  public readonly gearInput = (): Locator => this.page.getByLabel('What gear did you use?');
+  public readonly gearInput = (): Locator =>
+    this.page.getByRole('textbox', {
+      name: /^(Add gear to your favourites|What gear did you use\?)$/
+    });
 
   public readonly gearResultsList = (): Locator => this.page.getByRole('listbox');
 

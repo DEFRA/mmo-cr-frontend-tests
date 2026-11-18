@@ -7,14 +7,21 @@ The UI journey suite runs against Chromium, Chrome, Microsoft Edge, Firefox and 
 Internet Explorer 11 is not supported by Playwright and is therefore subject to separate technical confirmation. It is
 not included in the automated browser matrix until an IE11-compatible test approach is agreed.
 
-- [Local](#local)
+- [Local Development](#local-development)
   - [Requirements](#requirements)
     - [Node.js](#nodejs)
   - [Setup](#setup)
   - [Running local tests](#running-local-tests)
   - [Debugging local tests](#debugging-local-tests)
+  - [Reports](#reports)
+  - [Formatting and type checking](#formatting-and-type-checking)
+  - [Add favourite gear UI tests](#add-favourite-gear-ui-tests)
+  - [UI flow helpers](#ui-flow-helpers)
+  - [API tests](#api-tests)
 - [Production](#production)
-  - [Debugging tests](#debugging-tests)
+  - [Running the tests](#running-the-tests)
+- [Requirements of CDP Environment Tests](#requirements-of-cdp-environment-tests)
+- [Running on GitHub](#running-on-github)
 - [Licence](#licence)
   - [About the licence](#about-the-licence)
 
@@ -49,11 +56,16 @@ npx playwright install chromium firefox webkit chrome msedge
 
 ### Running local tests
 
-Set `CATCH_RECORDING_BASE_URL` (or `CATCH_RECORDING_ENV`, see [playwright.config.ts](playwright.config.ts)) to point at the application you are testing, then run:
+Copy `.env.example` to `.env` (loaded automatically by [playwright.config.ts](playwright.config.ts)) and set
+`CATCH_RECORDING_ENV` to `dev`, `test` or `prod` to choose the frontend under test (defaults to `test`). Set
+`CATCH_RECORDING_EMAIL` and `CATCH_RECORDING_PASSWORD` for the test account used by the UI journeys.
 
-```bash
-npm test
-```
+| Command               | Runs                                                       |
+| --------------------- | ---------------------------------------------------------- |
+| `npm test`            | All projects: every browser project plus the `api` project |
+| `npm run test:ui`     | UI tests in Chromium only                                  |
+| `npm run test:ui:all` | UI tests in Chromium, Chrome, Edge, Firefox and Safari     |
+| `npm run test:api`    | API tests only                                             |
 
 UI tests run with one worker because they use the same account and mutate its favourites. Keep browser
 projects sequential; parallel execution requires isolated accounts for each worker.
@@ -61,7 +73,7 @@ projects sequential; parallel execution requires isolated accounts for each work
 To run the favourites scenarios across all configured browsers:
 
 ```bash
-npx playwright test tests/ui/createAndAmendFavourites.spec.ts
+npx playwright test tests/ui/favourites/createAndAmendFavourites.spec.ts
 ```
 
 ### Debugging local tests
@@ -70,12 +82,31 @@ npx playwright test tests/ui/createAndAmendFavourites.spec.ts
 npx playwright test --debug
 ```
 
+### Reports
+
+Tests write Allure results to `allure-results/` and a Playwright HTML report to `playwright-report/`.
+
+```bash
+npm run generate:report   # build and open the Allure report
+npx playwright show-report # open the Playwright HTML report
+```
+
+### Formatting and type checking
+
+```bash
+npm run format        # apply Prettier formatting
+npm run format:check  # check formatting
+npm run lint          # TypeScript type check (tsc --noEmit)
+```
+
+The Husky pre-commit hook runs `format:check` and `lint`.
+
 ### Add favourite gear UI tests
 
 Set `CATCH_RECORDING_EMAIL` and `CATCH_RECORDING_PASSWORD` for a test account (for example in the local `.env` file), then run:
 
 ```bash
-npx playwright test tests/ui/addGear.spec.ts --project=Chromium
+npx playwright test tests/ui/gears/addGear.spec.ts --project=Chromium
 ```
 
 These tests cover catalogue search and selection, required and invalid hook measurements (including zero), saving one or more gears, keyboard-only entry, and availability when starting a new catch record in the same login session. They create favourites in the test environment; use a dedicated test account. The zero-measurement test currently fails because the test environment accepts zero. Native datalist suggestion popups cannot be inspected reliably by Playwright; the search test checks the available matching option and the invalid-gear submission error instead. Offline synchronisation, audit records, mobile-app behavior, and performance targets require separate integration/device checks and are not asserted by this web UI spec.
@@ -83,11 +114,11 @@ These tests cover catalogue search and selection, required and invalid hook meas
 ### UI flow helpers
 
 Shared UI flows are test-scoped fixtures from [fixtures/commonfixture.ts](fixtures/commonfixture.ts).
-Use `navigationFlow`, `favouritesFlow`, `gearFlow`, `speciesFlow`, and `mapFlow` instead of passing page objects
+Use `navigationFlow`, `favouritesFlow`, `gearFlow`, `speciesFlow`, `mapFlow`, and `catchRecordFlow` instead of passing page objects
 to static helper methods. Each flow reuses the current test's page objects; calls take only the data they need.
 
 ```ts
-import { test } from './fixtures/commonfixture';
+import { test } from '../../../fixtures/commonfixture';
 
 test('add a favourite gear', async ({ navigationFlow, favouritesFlow }) => {
   await navigationFlow.signInAndOpenAccount();
@@ -95,7 +126,7 @@ test('add a favourite gear', async ({ navigationFlow, favouritesFlow }) => {
 });
 ```
 
-The import path depends on the spec's location. Request page objects or `page` separately when making assertions
+The import path depends on the spec's location (the example above is for a spec in `tests/ui/<area>/`). Request page objects or `page` separately when making assertions
 or performing direct browser actions.
 
 ### API tests
@@ -106,7 +137,7 @@ Alongside the browser journey tests, this suite supports pure API tests using Pl
   `tests/api/`, and the browser projects only run `tests/ui/`, so each spec runs once.
 - Add API clients under `services/` (mirroring the `pages/` pattern), extending `BaseApi`, and expose them via a fixture in
   [fixtures/commonfixture.ts](fixtures/commonfixture.ts).
-- Configure the target with `CATCH_RECORDING_API_BASE_URL` (falls back to `CATCH_RECORDING_BASE_URL`/`CATCH_RECORDING_ENV`
+- Configure the target with `CATCH_RECORDING_API_BASE_URL` (falls back to the frontend URL selected by `CATCH_RECORDING_ENV`
   if the API is served from the same host) and, if required, `CATCH_RECORDING_API_TOKEN` to send a bearer token on every
   request.
 

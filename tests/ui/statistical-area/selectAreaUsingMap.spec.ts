@@ -13,23 +13,23 @@ import { type LandFeature, MapFlow, type SubrectangleReference } from '../helper
 type ViewportSize = { width: number; height: number };
 type PanScenario = { scenario: string; direction: string; dragStep: string; offsetX: number; offsetY: number };
 
-const DEPARTURE_PORT = 'Plymouth';
-const MAP_SIGN_IN_OPTIONS = {
+const departurePort = 'Hastings';
+const mapSignInOptions = {
   requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for map UI tests'
 };
-const MAP_PATH = '/statistical-area';
-const CHECK_ANSWERS_PATH = '/check-answers';
-const SPECIES_SELECTION_URL = /\/species-selection$/;
-const DEPARTURE_PORT_URL = /\/add-port\?for=departure&entry=1$/;
-const MINIMUM_SUBRECTANGLES = 9;
-const ZOOM_IN_CLICKS = 8;
-const PAN_ZOOM_IN_CLICKS = 2;
-const LARGER_SCREEN: ViewportSize = { width: 1600, height: 1000 };
-const NARROW_SCREEN: ViewportSize = { width: 700, height: 900 };
-const MAP_ERROR_TEXT = 'The map could not be loaded';
-const ZOOM_IN_NAME = 'Zoom in';
-const ZOOM_OUT_NAME = 'Zoom out';
-const STATISTICAL_SUB_AREA_KEY = 'Statistical sub area';
+const mapPath = '/statistical-area';
+const checkAnswersPath = '/check-answers';
+const speciesSelectionUrl = /\/species-selection$/;
+const departurePortUrl = /\/add-port\?for=departure&entry=1$/;
+const minimumSubrectangles = 9;
+const zoomInClicks = 8;
+const panZoomInClicks = 2;
+const largerScreen: ViewportSize = { width: 1600, height: 1000 };
+const narrowScreen: ViewportSize = { width: 700, height: 900 };
+const mapErrorText = 'The map could not be loaded';
+const zoomInName = 'Zoom in';
+const zoomOutName = 'Zoom out';
+const statisticalSubAreaKey = 'Statistical sub area';
 
 const panScenarios: PanScenario[] = [
   {
@@ -68,30 +68,36 @@ function requireDefined<T>(value: T | undefined, message: string): T {
 }
 
 test.describe('ICES statistical sub-rectangle map', () => {
+  // Each test starts a catch record, so its draft is deleted after each test
+  test.afterEach(async ({ catchRecordFlow }) => {
+    await catchRecordFlow.deleteAllDrafts();
+  });
+
   test(
     'Displays at least nine sub-rectangles around the declared departure port when the map opens',
     { tag: ['@ui', '@smoke', '@statisticalAreaMap'] },
     async ({ navigationFlow, mapFlow, statisticalAreaPage }) => {
       await test.step('The user has declared a departure port for the trip', async () => {
-        await navigationFlow.signIn(MAP_SIGN_IN_OPTIONS);
-        await navigationFlow.selectDeparturePort(DEPARTURE_PORT);
+        await navigationFlow.signIn(mapSignInOptions);
+        await navigationFlow.startCatchRecord();
+        await navigationFlow.selectDepartureAndReturnPorts(departurePort);
         await mapFlow.installCanvasProbe();
       });
 
       await test.step('The user opens the ICES Statistical sub-rectangle web map', async () => {
-        await statisticalAreaPage.goto(MAP_PATH);
+        await statisticalAreaPage.goto(mapPath);
       });
 
       await test.step('The map is positioned around the declared departure port', async () => {
         await expect(statisticalAreaPage.pageHeading()).toBeVisible();
         await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
-        await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-departure-port', DEPARTURE_PORT);
+        await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-departure-port', departurePort);
       });
 
       await test.step('At least the 9 nearest relevant sub-rectangles are displayed', async () => {
         await expect
           .poll(() => statisticalAreaPage.readMapSubrectangleCount())
-          .toBeGreaterThanOrEqual(MINIMUM_SUBRECTANGLES);
+          .toBeGreaterThanOrEqual(minimumSubrectangles);
       });
     }
   );
@@ -102,7 +108,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
     async ({ mapFlow, statisticalAreaPage }) => {
       await test.step('The map is opened on a larger supported screen', async () => {
         await mapFlow.openMap();
-        await statisticalAreaPage.resizeViewportAndReload(LARGER_SCREEN.width, LARGER_SCREEN.height);
+        await statisticalAreaPage.resizeViewportAndReload(largerScreen.width, largerScreen.height);
       });
 
       await test.step('The visible map area can accommodate more than 9 sub-rectangles', async () => {
@@ -116,11 +122,11 @@ test.describe('ICES statistical sub-rectangle map', () => {
         expect(resizedBounds?.height).toBeGreaterThan(0);
         await expect
           .poll(() => statisticalAreaPage.readMapSubrectangleCount())
-          .toBeGreaterThanOrEqual(MINIMUM_SUBRECTANGLES);
+          .toBeGreaterThanOrEqual(minimumSubrectangles);
       });
 
       await test.step('The display is not restricted to exactly 9', async () => {
-        await expect.poll(() => statisticalAreaPage.readMapSubrectangleCount()).toBeGreaterThan(MINIMUM_SUBRECTANGLES);
+        await expect.poll(() => statisticalAreaPage.readMapSubrectangleCount()).toBeGreaterThan(minimumSubrectangles);
       });
     }
   );
@@ -174,7 +180,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('The user zooms in', async () => {
-        for (let zoom = 0; zoom < ZOOM_IN_CLICKS; zoom++) {
+        for (let zoom = 0; zoom < zoomInClicks; zoom++) {
           await statisticalAreaPage.zoomInButton().click();
         }
       });
@@ -198,7 +204,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
 
         await test.step('The web map is displayed', async () => {
           await mapFlow.openMap();
-          for (let zoom = 0; zoom < PAN_ZOOM_IN_CLICKS; zoom++) {
+          for (let zoom = 0; zoom < panZoomInClicks; zoom++) {
             await statisticalAreaPage.zoomInButton().click();
           }
           initialImage = await statisticalAreaPage.canvasFingerprint();
@@ -258,8 +264,8 @@ test.describe('ICES statistical sub-rectangle map', () => {
           'The partially sea-based sub-rectangle has no visible map label'
         );
         await statisticalAreaPage.clickMapLabel(label);
-        await statisticalAreaPage.expectUrl(SPECIES_SELECTION_URL);
-        await statisticalAreaPage.goto(MAP_PATH);
+        await statisticalAreaPage.expectUrl(speciesSelectionUrl);
+        await statisticalAreaPage.goto(mapPath);
         await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', subCode);
       });
     }
@@ -303,8 +309,8 @@ test.describe('ICES statistical sub-rectangle map', () => {
           'The wholly sea-based sub-rectangle has no visible map label'
         );
         await statisticalAreaPage.clickMapLabel(label);
-        await statisticalAreaPage.expectUrl(SPECIES_SELECTION_URL);
-        await statisticalAreaPage.goto(MAP_PATH);
+        await statisticalAreaPage.expectUrl(speciesSelectionUrl);
+        await statisticalAreaPage.goto(mapPath);
         await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', subCode);
       });
     }
@@ -330,7 +336,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('The land-only sub-rectangle is not shown', async () => {
-        expect(await statisticalAreaPage.readMapSubrectangleCount()).toBeGreaterThanOrEqual(MINIMUM_SUBRECTANGLES);
+        expect(await statisticalAreaPage.readMapSubrectangleCount()).toBeGreaterThanOrEqual(minimumSubrectangles);
         for (const code of visibleCodes) {
           expect(seaCodes.has(code), `${code} should overlap the sea`).toBeTruthy();
         }
@@ -361,11 +367,11 @@ test.describe('ICES statistical sub-rectangle map', () => {
 
       await test.step('The user selects it', async () => {
         await statisticalAreaPage.clickMapLabel(requireDefined(label, 'No sub-rectangle was chosen'));
-        await statisticalAreaPage.expectUrl(SPECIES_SELECTION_URL);
+        await statisticalAreaPage.expectUrl(speciesSelectionUrl);
       });
 
       await test.step('The selected sub-rectangle is clearly highlighted', async () => {
-        await statisticalAreaPage.goto(MAP_PATH);
+        await statisticalAreaPage.goto(mapPath);
         await expect.poll(() => statisticalAreaPage.readSelectedGridCount()).toBeGreaterThan(0);
       });
 
@@ -393,16 +399,16 @@ test.describe('ICES statistical sub-rectangle map', () => {
 
       await test.step('The user saves or continues', async () => {
         await statisticalAreaPage.clickMapLabel(requireDefined(label, 'No sub-rectangle was chosen'));
-        await statisticalAreaPage.expectUrl(SPECIES_SELECTION_URL);
+        await statisticalAreaPage.expectUrl(speciesSelectionUrl);
       });
 
       await test.step('The selected sub-rectangle is stored against the correct fishing activity or catch record', async () => {
         const { code } = requireDefined(label, 'No sub-rectangle was chosen');
-        await statisticalAreaPage.goto(MAP_PATH);
+        await statisticalAreaPage.goto(mapPath);
         await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', code);
 
-        await checkAnswersPage.goto(CHECK_ANSWERS_PATH);
-        expect(await checkAnswersPage.getSummaryValueText(STATISTICAL_SUB_AREA_KEY)).toContain(code);
+        await checkAnswersPage.goto(checkAnswersPath);
+        expect(await checkAnswersPage.getSummaryValueText(statisticalSubAreaKey)).toContain(code);
       });
     }
   );
@@ -412,11 +418,11 @@ test.describe('ICES statistical sub-rectangle map', () => {
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ navigationFlow, statisticalAreaPage, addPortPage }) => {
       await test.step('No departure port has been declared for the trip', async () => {
-        await navigationFlow.signIn(MAP_SIGN_IN_OPTIONS);
+        await navigationFlow.signIn(mapSignInOptions);
       });
 
       await test.step('The user attempts to open the ICES Statistical sub-rectangle map', async () => {
-        await statisticalAreaPage.goto(MAP_PATH);
+        await statisticalAreaPage.goto(mapPath);
       });
 
       await test.step('The system does not calculate or display the nearest 9 sub-rectangles', async () => {
@@ -424,7 +430,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('The user is directed to provide or select a departure port before continuing', async () => {
-        await addPortPage.expectUrl(DEPARTURE_PORT_URL);
+        await addPortPage.expectUrl(departurePortUrl);
         await expect(addPortPage.pageHeading()).toBeVisible();
       });
     }
@@ -435,19 +441,20 @@ test.describe('ICES statistical sub-rectangle map', () => {
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ navigationFlow, statisticalAreaPage, mapFlow }) => {
       await test.step('The user opens the web map', async () => {
-        await navigationFlow.signIn(MAP_SIGN_IN_OPTIONS);
-        await navigationFlow.selectDeparturePort(DEPARTURE_PORT);
+        await navigationFlow.signIn(mapSignInOptions);
+        await navigationFlow.startCatchRecord();
+        await navigationFlow.selectDepartureAndReturnPorts(departurePort);
       });
 
       await test.step('The required map or reference data cannot be loaded', async () => {
         await mapFlow.failFirstSubrectanglesRequest();
         await mapFlow.installCanvasProbe();
-        await statisticalAreaPage.goto(MAP_PATH);
+        await statisticalAreaPage.goto(mapPath);
       });
 
       await test.step('The system displays a clear error message', async () => {
         await expect(statisticalAreaPage.mapError()).toBeVisible();
-        await expect(statisticalAreaPage.mapError()).toContainText(MAP_ERROR_TEXT);
+        await expect(statisticalAreaPage.mapError()).toContainText(mapErrorText);
       });
 
       await test.step('The user is not allowed to submit an unverified map selection', async () => {
@@ -461,7 +468,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
         await expect(statisticalAreaPage.mapError()).toBeHidden();
         await expect
           .poll(() => statisticalAreaPage.readMapSubrectangleCount())
-          .toBeGreaterThanOrEqual(MINIMUM_SUBRECTANGLES);
+          .toBeGreaterThanOrEqual(minimumSubrectangles);
       });
     }
   );
@@ -485,11 +492,11 @@ test.describe('ICES statistical sub-rectangle map', () => {
           'At least two visible sub-rectangles are required'
         );
         await statisticalAreaPage.clickMapLabel(first);
-        await statisticalAreaPage.expectUrl(SPECIES_SELECTION_URL);
+        await statisticalAreaPage.expectUrl(speciesSelectionUrl);
       });
 
       await test.step('The user returns to the map', async () => {
-        await statisticalAreaPage.goto(MAP_PATH);
+        await statisticalAreaPage.goto(mapPath);
       });
 
       await test.step('The prior selection is shown on the map', async () => {
@@ -497,7 +504,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
         await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', code);
         await expect
           .poll(() => statisticalAreaPage.readMapSubrectangleCount())
-          .toBeGreaterThanOrEqual(MINIMUM_SUBRECTANGLES);
+          .toBeGreaterThanOrEqual(minimumSubrectangles);
       });
 
       await test.step('The user selects a different sub-rectangle', async () => {
@@ -508,12 +515,12 @@ test.describe('ICES statistical sub-rectangle map', () => {
           'The second sub-rectangle is not visible after revisiting the map'
         );
         await statisticalAreaPage.clickMapLabel(replacement);
-        await statisticalAreaPage.expectUrl(SPECIES_SELECTION_URL);
+        await statisticalAreaPage.expectUrl(speciesSelectionUrl);
       });
 
       await test.step('Only the new sub-rectangle is stored as the selection', async () => {
         const { code } = requireDefined(second, 'No second sub-rectangle was chosen');
-        await statisticalAreaPage.goto(MAP_PATH);
+        await statisticalAreaPage.goto(mapPath);
         await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', code);
         await expect(statisticalAreaPage.selectedAreaInput()).toHaveCount(1);
       });
@@ -535,7 +542,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('The user resizes the browser to a narrow width', async () => {
-        await statisticalAreaPage.resizeViewportAndReload(NARROW_SCREEN.width, NARROW_SCREEN.height);
+        await statisticalAreaPage.resizeViewportAndReload(narrowScreen.width, narrowScreen.height);
       });
 
       await test.step('The map is displayed within the narrow viewport', async () => {
@@ -553,7 +560,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('At least 9 sub-rectangles are displayed', async () => {
         await expect
           .poll(() => statisticalAreaPage.readMapSubrectangleCount())
-          .toBeGreaterThanOrEqual(MINIMUM_SUBRECTANGLES);
+          .toBeGreaterThanOrEqual(minimumSubrectangles);
       });
     }
   );
@@ -579,7 +586,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
         await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
         await expect
           .poll(() => statisticalAreaPage.readMapSubrectangleCount())
-          .toBeGreaterThanOrEqual(MINIMUM_SUBRECTANGLES);
+          .toBeGreaterThanOrEqual(minimumSubrectangles);
       });
 
       await test.step('The declared departure port is retained', async () => {
@@ -602,8 +609,8 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('The zoom controls are labelled "Zoom in" and "Zoom out"', async () => {
-        await expect(statisticalAreaPage.zoomInButton()).toHaveAccessibleName(ZOOM_IN_NAME);
-        await expect(statisticalAreaPage.zoomOutButton()).toHaveAccessibleName(ZOOM_OUT_NAME);
+        await expect(statisticalAreaPage.zoomInButton()).toHaveAccessibleName(zoomInName);
+        await expect(statisticalAreaPage.zoomOutButton()).toHaveAccessibleName(zoomOutName);
       });
 
       await test.step('The user activates "Zoom in" using the keyboard', async () => {

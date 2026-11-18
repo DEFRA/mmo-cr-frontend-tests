@@ -18,11 +18,14 @@ export class AccountPage extends BasePage {
   public readonly vesselNameHeading = (): Locator => this.page.getByRole('heading', { level: 3 });
 
   public readonly summaryRow = (key: string): Locator =>
-    this.page.locator('.govuk-summary-list__row').filter({
-      has: this.page.locator('.govuk-summary-list__key', {
-        hasText: new RegExp(`^\\s*${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`)
+    this.page
+      .locator('.govuk-summary-list__row')
+      .filter({
+        has: this.page.locator('.govuk-summary-list__key', {
+          hasText: new RegExp(`^\\s*${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`)
+        })
       })
-    });
+      .first();
 
   public readonly summaryValue = (key: string): Locator => this.summaryRow(key).locator('.govuk-summary-list__value');
 

@@ -29,7 +29,7 @@ type OptionalWeightCase = {
   field: 'belowMinimum' | 'discarded';
 };
 
-const cod: Species = { name: 'Cod (COD)', code: 'COD' };
+const cod: Species = { name: 'Atlantic cod (COD)', code: 'COD' };
 
 const initialWeights = { aboveMinimum: '100', belowMinimum: '10', discarded: '5' };
 const editedWeights = { aboveMinimum: '120', belowMinimum: '15', discarded: '6' };
@@ -65,8 +65,17 @@ const invalidOptionalWeightCases: OptionalWeightCase[] = [
 test.describe('Species catch weight entry', () => {
   test.beforeEach(async ({ navigationFlow }) => {
     await test.step('The user is on the species selection page', async () => {
-      await navigationFlow.openSpeciesSelection();
+      await navigationFlow.signIn({
+        requiredCredentialsMessage:
+          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for catch weight UI tests'
+      });
+      await navigationFlow.openSpeciesSelectionForNewRecord();
     });
+  });
+
+  // Each test starts a catch record, so its draft is deleted after each test
+  test.afterEach(async ({ catchRecordFlow }) => {
+    await catchRecordFlow.deleteAllDrafts();
   });
 
   test(

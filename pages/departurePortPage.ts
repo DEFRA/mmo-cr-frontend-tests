@@ -9,5 +9,5 @@ import { PortSelectionPage } from './basePage';
  */
 export class DeparturePortPage extends PortSelectionPage {
   public readonly pageHeading = (): Locator =>
-    this.page.getByRole('heading', { name: 'Select the port you left from' });
+    this.page.getByRole('heading', { name: 'Select the port you set off from' });
 }

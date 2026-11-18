@@ -16,7 +16,10 @@ export abstract class BasePage {
 
   public readonly header = {
     govukHeader: (): Locator => this.page.locator('.govuk-header.app-header'),
-    serviceNavigation: (): Locator => this.page.getByRole('region', { name: 'Service information' })
+    serviceNavigation: (): Locator => this.page.getByRole('region', { name: 'Service information' }),
+    // Shown on journey pages such as /select-vessel; not shown on /records or /check-answers (OQ-7)
+    signOutButton: (): Locator =>
+      this.page.getByRole('region', { name: 'Service information' }).getByRole('button', { name: 'Sign out' })
   };
 
   public readonly common = {
@@ -25,7 +28,9 @@ export abstract class BasePage {
     phaseBanner: (): Locator => this.page.locator('.govuk-phase-banner'),
     workflowPageCaption: (): Locator => this.page.locator('.govuk-caption-l').filter({ hasText: 'New catch record' }),
     languageEnglish: (): Locator => this.page.getByTestId('app-page-navigation-language-current'),
-    languageCymraeg: (): Locator => this.page.getByTestId('app-page-navigation-language-link')
+    languageCymraeg: (): Locator => this.page.getByTestId('app-page-navigation-language-link'),
+    errorSummary: (): Locator => this.page.locator('.govuk-error-summary'),
+    errorMessage: (): Locator => this.page.locator('.govuk-error-message')
   };
 
   public readonly footer = {
@@ -38,15 +43,19 @@ export abstract class BasePage {
   };
 
   async goto(url: string) {
-    try {
-      await this.page.goto(url, { waitUntil: 'load' });
-    } catch (error) {
-      if (!(error instanceof Error) || !error.message.includes('ERR_NAME_NOT_RESOLVED')) {
-        throw error;
+    const maxAttempts = 4;
+    for (let attempt = 1; ; attempt++) {
+      try {
+        await this.page.goto(url, { waitUntil: 'load' });
+        return;
+      } catch (error) {
+        // The test environment's DNS intermittently fails to resolve; retry with a growing back-off
+        const isDnsFailure = error instanceof Error && error.message.includes('ERR_NAME_NOT_RESOLVED');
+        if (!isDnsFailure || attempt === maxAttempts) {
+          throw error;
+        }
+        await this.page.waitForTimeout(attempt * 3_000);
       }
-
-      await this.page.waitForTimeout(10_000);
-      await this.page.goto(url, { waitUntil: 'load' });
     }
   }
 
@@ -109,6 +118,10 @@ export abstract class DateInputPage extends BasePage {
     await this.dayInput().fill(day);
     await this.monthInput().fill(month);
     await this.yearInput().fill(year);
+  }
+
+  async enterDateFrom(date: Date) {
+    await this.enterDate(String(date.getDate()), String(date.getMonth() + 1), String(date.getFullYear()));
   }
 }
 
