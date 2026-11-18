@@ -275,4 +275,21 @@ export class CatchRecordFlow {
       await recordsPage.expectUrl(/\/records$/);
     }
   }
+
+  async deleteAllDrafts(maxDrafts = 200): Promise<number> {
+    const { recordsPage, draftRecordPage } = this.pages;
+    let deleted = 0;
+
+    await recordsPage.goto('/records');
+    await expect(recordsPage.catchRecordsTable()).toBeVisible();
+    while ((await recordsPage.draftRecordRows().count()) > 0 && deleted < maxDrafts) {
+      const reference = await recordsPage.openFirstDraftRecord();
+      await expect(draftRecordPage.pageHeading()).toBeVisible();
+      await draftRecordPage.deleteDraft();
+      await recordsPage.expectUrl(/\/records$/);
+      await expect(recordsPage.catchRecordsTable().getByRole('link', { name: reference })).toHaveCount(0);
+      deleted++;
+    }
+    return deleted;
+  }
 }
