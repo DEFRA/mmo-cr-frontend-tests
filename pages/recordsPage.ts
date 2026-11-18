@@ -57,6 +57,23 @@ export class RecordsPage extends BasePage {
     return reference;
   }
 
+  public readonly recordRow = (reference: string): Locator =>
+    this.recordsRows().filter({ has: this.page.getByRole('link', { name: reference, exact: true }) });
+
+  public readonly recordStatusTag = (reference: string): Locator => this.recordRow(reference).locator('.govuk-tag');
+
+  public readonly statusTags = (): Locator => this.recordsRows().locator('.govuk-tag');
+
+  async getStatusTexts(): Promise<string[]> {
+    const texts = await this.statusTags().allTextContents();
+    return texts.map((text) => text.trim());
+  }
+
+  async getStatusTagCountsPerRow(): Promise<number[]> {
+    const rows = await this.recordsRows().all();
+    return Promise.all(rows.map((row) => row.locator('.govuk-tag').count()));
+  }
+
   public readonly pagination = (): Locator => this.page.locator('.govuk-pagination');
 
   public readonly createNewRecordButton = (): Locator =>

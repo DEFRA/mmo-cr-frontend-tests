@@ -111,6 +111,8 @@ export abstract class DateInputPage extends BasePage {
   public readonly dayInput = (): Locator => this.page.getByLabel('Day');
   public readonly monthInput = (): Locator => this.page.getByLabel('Month');
   public readonly yearInput = (): Locator => this.page.getByLabel('Year');
+  public readonly errorSummary = (): Locator => this.page.getByRole('alert');
+  public readonly errorSummaryLink = (): Locator => this.errorSummary().getByRole('link');
 
   async enterDate(day: string, month: string, year: string) {
     await this.dayInput().fill(day);
