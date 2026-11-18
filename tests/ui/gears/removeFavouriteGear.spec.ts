@@ -1,6 +1,9 @@
 /**
  * Remove saved favourite gear configurations without removing catalogue entries.
  * Covers confirmation, cancellation, retained favourites, future trips and replacement measurements.
+ *
+ * @author Randhir Patel
+ * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 
