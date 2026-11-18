@@ -13,7 +13,7 @@ const plymouth = 'Plymouth';
 const areaCode = '46D86';
 const pots: GearData = { name: 'Pots' };
 const areaKey = 'Area majority catch caught';
-const statisticalSubAreaKey = `Statistical sub area (${pots.name})`;
+const statisticalSubAreaKey = 'Statistical sub area';
 const testFavourites: Favourites = { ports: [plymouth], gears: [pots.name], species: [] };
 
 test.describe('Catch Location', () => {

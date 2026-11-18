@@ -12,7 +12,8 @@ export class SubmittedRecordPage extends BasePage {
   // Uses a regex because the vessel name is dynamically inserted into the heading
   public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: /Catch record for .*/ });
 
-  public readonly recordReference = (): Locator => this.page.getByTestId('app-record-reference');
+  // The reference is a GOV.UK caption above the heading; the page has no test id or accessible name for it
+  public readonly recordReference = (): Locator => this.page.locator('main .govuk-caption-l');
 
   public readonly recordStatus = (): Locator => this.page.locator('.govuk-tag');
 
