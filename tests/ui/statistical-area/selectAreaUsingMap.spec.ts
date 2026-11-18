@@ -75,7 +75,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('The user has declared a departure port for the trip', async () => {
         await navigationFlow.signIn(MAP_SIGN_IN_OPTIONS);
         await navigationFlow.startCatchRecord();
-        await navigationFlow.selectDeparturePort(DEPARTURE_PORT);
+        await navigationFlow.selectDepartureAndReturnPorts(DEPARTURE_PORT);
         await mapFlow.installCanvasProbe();
       });
 
@@ -438,7 +438,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('The user opens the web map', async () => {
         await navigationFlow.signIn(MAP_SIGN_IN_OPTIONS);
         await navigationFlow.startCatchRecord();
-        await navigationFlow.selectDeparturePort(DEPARTURE_PORT);
+        await navigationFlow.selectDepartureAndReturnPorts(DEPARTURE_PORT);
       });
 
       await test.step('The required map or reference data cannot be loaded', async () => {

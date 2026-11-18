@@ -4,7 +4,7 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 
-const pots = { name: 'Pots', gearDimension: '45' };
+const pots = { name: 'Pots', gearDimension: '45', searchTerm: 'pot' };
 const traps = 'Traps (not specified)';
 const testFavouriteGears = [pots.name, traps];
 const replacementDimension = '90';
@@ -139,8 +139,8 @@ test.describe('Remove favourite gear', () => {
 
       await test.step('The gear remains available through the standard catalogue search', async () => {
         await gearSelectionPage.addGearLink().click();
-        await expect(addGearPage.pageHeading()).toBeVisible();
-        await addGearPage.searchGearOptions('pot');
+        await expect(addGearPage.gearInput()).toBeEditable();
+        await addGearPage.searchGearOptions(pots.searchTerm);
         await expect(addGearPage.gearOption(pots.name)).toBeVisible();
       });
     }

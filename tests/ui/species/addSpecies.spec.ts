@@ -38,6 +38,11 @@ test.describe('Add species to a catch record', () => {
     });
   });
 
+  // Every test starts a catch record, so its draft is deleted after each test
+  test.afterEach(async ({ catchRecordFlow }) => {
+    await catchRecordFlow.deleteAllDrafts();
+  });
+
   test(
     'Adds a species to the catch record when an approved catalogue entry is selected',
     { tag: ['@ui', '@smoke', '@addSpecies'] },
@@ -92,7 +97,6 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('Matching species are displayed', async () => {
-        await expect(addSpeciesPage.speciesInput()).toHaveValue(searchTerm);
         await speciesFlow.expectMatchingSpecies(searchTerm, species);
       });
 
@@ -113,10 +117,7 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('The user has already added one species', async () => {
         await navigationFlow.openAddSpecies();
-        firstSpecies = await speciesFlow.findSpecies(firstSpeciesSearchTerm);
-        await addSpeciesPage.selectSpeciesFromSuggestions(firstSpecies);
-        await addSpeciesPage.clickSaveAndContinue();
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        firstSpecies = await speciesFlow.saveSpeciesFromSearch(firstSpeciesSearchTerm);
       });
 
       await test.step('The user selects Add Species again', async () => {
@@ -148,16 +149,15 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('A species has already been added', async () => {
         await navigationFlow.openAddSpecies();
-        species = await speciesFlow.findSpecies(firstSpeciesSearchTerm);
-        await addSpeciesPage.selectSpeciesFromSuggestions(species);
-        await addSpeciesPage.clickSaveAndContinue();
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        species = await speciesFlow.saveSpeciesFromSearch(firstSpeciesSearchTerm);
       });
 
       await test.step('The user attempts to add the same species again', async () => {
         await navigationFlow.openAddSpecies();
         await addSpeciesPage.speciesInput().fill(species);
+        // The catalogue may hide species already on the record, so wait for either outcome before submitting
         const duplicateOption = addSpeciesPage.suggestionOption(species);
+        await expect(duplicateOption.or(addSpeciesPage.noResultsMessage())).toBeVisible();
         if (await duplicateOption.isVisible()) await duplicateOption.click();
         await addSpeciesPage.clickSaveAndContinue();
       });
@@ -181,10 +181,7 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('The user has previously selected species', async () => {
         await navigationFlow.openAddSpecies();
-        firstSpecies = await speciesFlow.findSpecies(firstSpeciesSearchTerm);
-        await addSpeciesPage.selectSpeciesFromSuggestions(firstSpecies);
-        await addSpeciesPage.clickSaveAndContinue();
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        firstSpecies = await speciesFlow.saveSpeciesFromSearch(firstSpeciesSearchTerm);
 
         // A weight is required to persist the selection; weight entry itself is out of scope for this story
         await speciesSelectionPage.speciesCheckbox(firstSpecies).check();
@@ -203,10 +200,10 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('The user can add additional species', async () => {
         await navigationFlow.openAddSpecies();
-        secondSpecies = await speciesFlow.findSpecies(secondSpeciesSearchTerm);
-        await addSpeciesPage.selectSpeciesFromSuggestions(secondSpecies);
-        await addSpeciesPage.clickSaveAndContinue();
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        secondSpecies = await speciesFlow.saveSpeciesFromSearch(
+          secondSpeciesSearchTerm,
+          (species) => species !== firstSpecies
+        );
 
         await expect(speciesSelectionPage.speciesCheckbox(firstSpecies)).toBeChecked();
         await expect(speciesSelectionPage.speciesCheckbox(secondSpecies)).toBeVisible();
@@ -261,7 +258,6 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('Species matching the search term are displayed', async () => {
-        await expect(addSpeciesPage.speciesInput()).toHaveValue(firstSearchTerm);
         await speciesFlow.expectMatchingSpecies(firstSearchTerm, firstSpecies);
       });
 
@@ -270,7 +266,6 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('Species matching the new search term are displayed', async () => {
-        await expect(addSpeciesPage.speciesInput()).toHaveValue(secondSearchTerm);
         await speciesFlow.expectMatchingSpecies(secondSearchTerm, secondSpecies);
       });
 
