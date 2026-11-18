@@ -21,7 +21,8 @@ import { type NavigationFlow } from './navigationFlow';
 export type SpeciesCatch = { name: string; code: string; weight: string };
 // Gear measurements are saved with the favourite gear, so catch recording only selects the gear
 export type GearData = { name: string };
-export type GearCatch = { gear: GearData; areaCode: string; species: SpeciesCatch[] };
+// Omit areaCode to pick a visible sub-rectangle on the map instead of searching under "Other"
+export type GearCatch = { gear: GearData; areaCode?: string; species: SpeciesCatch[] };
 export type NotLandedCatch = { speciesName: string; weightKeptOnboard: string };
 export type Favourites = { ports: string[]; gears: string[]; species: string[] };
 export type TripDates = { departureDate: Date; returnDate: Date };
@@ -62,6 +63,8 @@ export const recordsListDate = (date: Date): string =>
  * @since 2026-11-17
  */
 export class CatchRecordFlow {
+  private canvasProbeInstalled = false;
+
   constructor(
     private readonly pages: {
       accountPage: AccountPage;
@@ -172,6 +175,11 @@ export class CatchRecordFlow {
   async selectGears(gears: GearData[]): Promise<void> {
     const { gearSelectionPage, statisticalAreaPage } = this.pages;
 
+    // The probe reads map labels from the canvas, so it must be installed before the map page loads
+    if (!this.canvasProbeInstalled) {
+      await statisticalAreaPage.installCanvasProbe();
+      this.canvasProbeInstalled = true;
+    }
     for (const gear of gears) {
       await gearSelectionPage.gearCheckbox(gear.name).check();
     }
@@ -186,6 +194,21 @@ export class CatchRecordFlow {
     await statisticalAreaOtherPage.searchAndSelectAlternativeArea(areaCode);
     await statisticalAreaOtherPage.clickSaveAndContinue();
     await speciesSelectionPage.expectUrl(/\/species-selection\?gearId=/);
+  }
+
+  // Clicks a sub-rectangle near the middle of the map and returns its code
+  async selectAreaFromMapForCurrentGear(): Promise<string> {
+    const { statisticalAreaPage, speciesSelectionPage } = this.pages;
+
+    await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
+    await expect
+      .poll(async () => (await statisticalAreaPage.readMapLabels()).length, { timeout: 15_000 })
+      .toBeGreaterThan(0);
+    const labels = await statisticalAreaPage.readMapLabels();
+    const label = labels[Math.floor(labels.length / 2)]!;
+    await statisticalAreaPage.clickMapLabel(label);
+    await speciesSelectionPage.expectUrl(/\/species-selection\?gearId=/);
+    return label.code;
   }
 
   async enterSpeciesForCurrentGear(species: SpeciesCatch[]): Promise<void> {
@@ -204,7 +227,11 @@ export class CatchRecordFlow {
 
     for (let visited = 0; visited < gearCatches.length; visited++) {
       const gearCatch = await this.currentGearCatch(gearCatches);
-      await this.selectAreaForCurrentGear(gearCatch.areaCode);
+      if (gearCatch.areaCode) {
+        await this.selectAreaForCurrentGear(gearCatch.areaCode);
+      } else {
+        await this.selectAreaFromMapForCurrentGear();
+      }
       await this.enterSpeciesForCurrentGear(gearCatch.species);
     }
     await catchNotLandedPage.expectUrl(/\/catch-not-landed$/);

@@ -7,27 +7,39 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 
-const noRecordsReason = 'The signed-in test account has no catch records';
+const vesselName = 'ACHILLES';
+const draftStatus = 'Draft';
 // Table statuses seen in the test environment plus those listed in the status guidance (OQ-5)
-const recordStatusPattern = /^(Draft|Unsent|Submitted|Amended|Late)$/;
+// The tag text is wrapped in line breaks, so surrounding whitespace is allowed
+const recordStatusPattern = /^\s*(Draft|Unsent|Submitted|Amended|Late)\s*$/;
 const draftRecordHref = /\/draft\?recordId=/;
 
 test.describe('View Catch Records', () => {
+  let draftReference = '';
+
+  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
+    draftReference = '';
+
+    await test.step('I am signed in', async () => {
+      await navigationFlow.signIn();
+    });
+
+    await test.step('I have existing catch records', async () => {
+      draftReference = await catchRecordFlow.startRecord(vesselName);
+    });
+  });
+
+  test.afterEach(async ({ catchRecordFlow }) => {
+    if (draftReference) await catchRecordFlow.deleteDraftsIfPresent([draftReference]);
+  });
+
   test(
     'View existing catch records',
     {
       tag: ['@ui', '@regression', '@catchRecords', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-03' }
     },
-    async ({ navigationFlow, recordsPage }) => {
-      await test.step('I am signed in', async () => {
-        await navigationFlow.signIn();
-      });
-
-      await test.step('I have existing catch records', async () => {
-        test.skip((await recordsPage.recordRows().count()) === 0, noRecordsReason);
-      });
-
+    async ({ recordsPage }) => {
       await test.step('I open my catch records', async () => {
         await recordsPage.goto('/records');
       });
@@ -44,8 +56,8 @@ test.describe('View Catch Records', () => {
         }
       });
 
-      // UNVERIFIED (OQ-6): "requiring action" is assumed to mean Draft records that open the draft page
       await test.step('I should identify records requiring action', async () => {
+        await expect(recordsPage.recordStatus(draftReference)).toHaveText(draftStatus);
         for (const draftLink of await recordsPage.draftRecordLinks().all()) {
           await expect(draftLink).toHaveAttribute('href', draftRecordHref);
         }

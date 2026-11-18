@@ -90,9 +90,9 @@ test.describe('Review Catch Record', () => {
       });
 
       await test.step('I should see gear and catch areas', async () => {
-        for (const { gear, areaCode: gearArea } of reviewRecord.gearCatches) {
+        for (const { gear } of reviewRecord.gearCatches) {
           await expect(checkAnswersPage.gearSection(gear.name)).toBeVisible();
-          await expect(checkAnswersPage.gearSummaryValue(gear.name, areaKey)).toHaveText(gearArea);
+          await expect(checkAnswersPage.gearSummaryValue(gear.name, areaKey)).toHaveText(areaCode);
         }
       });
 

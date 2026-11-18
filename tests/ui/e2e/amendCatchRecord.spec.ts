@@ -93,8 +93,8 @@ test.describe('Amend Catch Record', () => {
         for (const [key, value] of unchangedTripInformation) {
           await expect(checkAnswersPage.summaryValue(key)).toHaveText(value);
         }
-        for (const { gear, areaCode: gearArea, species } of reviewRecord.gearCatches) {
-          await expect(checkAnswersPage.gearSummaryValue(gear.name, areaKey)).toHaveText(gearArea);
+        for (const { gear, species } of reviewRecord.gearCatches) {
+          await expect(checkAnswersPage.gearSummaryValue(gear.name, areaKey)).toHaveText(areaCode);
           for (const caught of species) {
             await expect(checkAnswersPage.speciesSummaryValue(caught.name, gear.name, weightRetainedKey)).toHaveText(
               caught.weight

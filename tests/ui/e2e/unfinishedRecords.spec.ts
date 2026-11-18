@@ -20,7 +20,6 @@ import {
 const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';
 const lowestoft = 'Lowestoft';
-const areaCode = '46D86';
 const pots: GearData = { name: 'Pots' };
 const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
 const draftStatus = 'Draft';
@@ -38,19 +37,21 @@ test.describe('Unfinished Records', () => {
   let secondDraft: CatchRecordData;
 
   test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
+    // Completing one or two drafts to review exceeds the default 30s test timeout
+    test.slow();
     createdRecords = [];
     firstDraft = {
       vesselName,
       tripDates: { departureDate: daysAgo(2), returnDate: daysAgo(1) },
       departurePort: plymouth,
       returnPort: lowestoft,
-      gearCatches: [{ gear: pots, areaCode, species: [cod] }]
+      gearCatches: [{ gear: pots, species: [cod] }]
     };
     secondDraft = {
       vesselName,
       departurePort: plymouth,
       returnPort: plymouth,
-      gearCatches: [{ gear: pots, areaCode, species: [cod] }]
+      gearCatches: [{ gear: pots, species: [cod] }]
     };
     await test.step('Setup: I am signed in with the test favourites saved', async () => {
       await navigationFlow.signIn();
@@ -61,6 +62,7 @@ test.describe('Unfinished Records', () => {
   test.afterEach(async ({ catchRecordFlow }) => {
     await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
     await catchRecordFlow.restoreFavourites(addedFavourites);
+    await catchRecordFlow.deleteAllDrafts();
   });
 
   test(

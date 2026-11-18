@@ -37,9 +37,11 @@ export class CheckAnswersPage extends BasePage {
       .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: key }) })
       .locator('.govuk-summary-list__value');
 
-  // Species regions share the species name, so narrow them by the gear they were caught with
+  // Species regions share the species name, so narrow them by the gear named in their change links
   public readonly speciesSection = (speciesName: string, gearName: string): Locator =>
-    this.page.getByRole('region', { name: speciesName, exact: true }).filter({ hasText: `Caught with ${gearName}` });
+    this.page
+      .getByRole('region', { name: speciesName, exact: true })
+      .filter({ has: this.page.getByRole('link', { name: `${speciesName}, ${gearName}` }) });
 
   public readonly speciesSummaryValue = (speciesName: string, gearName: string, key: string): Locator =>
     this.speciesSection(speciesName, gearName)
