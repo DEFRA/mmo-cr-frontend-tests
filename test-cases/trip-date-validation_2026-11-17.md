@@ -23,85 +23,85 @@ As a catch-recording user, I want the service to validate the trip start date an
 
 ### Scenario 1: Accept a valid trip (AC1)
 
-**Given** the trip start date is not in the future  
-**And** the trip start date is no more than 365 days before the date of entry  
-**And** the trip end date is the same as or later than the trip start date  
-**And** the trip length does not exceed 30 days  
-**When** the user continues  
-**Then** the trip dates are accepted  
-**And** the user is allowed to proceed
+- **Given** the trip start date is not in the future
+- **And** the trip start date is no more than 365 days before the date of entry
+- **And** the trip end date is the same as or later than the trip start date
+- **And** the trip length does not exceed 30 days
+- **When** the user continues
+- **Then** the trip dates are accepted
+- **And** the user is allowed to proceed
 
 **Test data:** Use a start date within the permitted reporting period and a non-future end date on or after the start, no more than 30 days later.
 
 ### Scenario 2: Reject a trip start date more than 365 days ago (AC2)
 
-**Given** the trip start date is more than 365 days before the date of entry  
-**When** the user continues  
-**Then** progression is prevented  
-**And** a validation message explains that the trip start date cannot be more than 365 days in the past
+- **Given** the trip start date is more than 365 days before the date of entry
+- **When** the user continues
+- **Then** progression is prevented
+- **And** a validation message explains that the trip start date cannot be more than 365 days in the past
 
 **Test data:** Set the start date to 366 calendar days before the date of entry; keep the end date on or after the start and within the maximum trip length.
 
 ### Scenario 3: Reject a trip longer than 30 days (AC3)
 
-**Given** the trip length exceeds 30 days  
-**When** the user continues  
-**Then** progression is prevented  
-**And** a validation message explains that the trip cannot exceed 30 days
+- **Given** the trip length exceeds 30 days
+- **When** the user continues
+- **Then** progression is prevented
+- **And** a validation message explains that the trip cannot exceed 30 days
 
 **Test data:** Set start and end dates 31 calendar days apart, with the start date within the 365-day reporting period and the end date not in the future. This must fail the duration rule independently of the backdating rule.
 
 ### Scenario 4: Reject an end date before the start date (AC4)
 
-**Given** the trip end date is earlier than the trip start date  
-**When** the user continues  
-**Then** progression is prevented  
-**And** a validation message explains that the trip end date cannot be before the trip start date
+- **Given** the trip end date is earlier than the trip start date
+- **When** the user continues
+- **Then** progression is prevented
+- **And** a validation message explains that the trip end date cannot be before the trip start date
 
 **Test data:** Use two dates within the permitted reporting period, with the end date one day before the start date.
 
 ### Scenario 5: Reject a future trip start date (AC5)
 
-**Given** the trip start date is in the future  
-**When** the user continues  
-**Then** progression is prevented  
-**And** a validation message explains that the trip start date cannot be in the future
+- **Given** the trip start date is in the future
+- **When** the user continues
+- **Then** progression is prevented
+- **And** a validation message explains that the trip start date cannot be in the future
 
 **Test data:** Set both dates to the same future date so the ordering and duration checks do not obscure the future-start validation.
 
 ### Scenario 6: Accept the 365-day boundary (AC6)
 
-**Given** the trip start date is exactly 365 days before the date of entry  
-**And** all other trip date validations are satisfied  
-**When** the user continues  
-**Then** the trip dates are accepted
+- **Given** the trip start date is exactly 365 days before the date of entry
+- **And** all other trip date validations are satisfied
+- **When** the user continues
+- **Then** the trip dates are accepted
 
 **Test data:** Set the start date to the exact 365-day boundary and use a same-day end date.
 
 ### Scenario 7: Accept the 30-day boundary (AC7)
 
-**Given** the trip length is exactly 30 days  
-**And** all other trip date validations are satisfied  
-**When** the user continues  
-**Then** the trip dates are accepted
+- **Given** the trip length is exactly 30 days
+- **And** all other trip date validations are satisfied
+- **When** the user continues
+- **Then** the trip dates are accepted
 
 **Test data:** Use a start date within the reporting period and an end date exactly 30 days after it, with neither date in the future.
 
 ### Scenario 8: Accept a same-day trip (AC8)
 
-**Given** the trip start date and trip end date are the same date  
-**And** all other trip date validations are satisfied  
-**When** the user continues  
-**Then** the trip dates are accepted
+- **Given** the trip start date and trip end date are the same date
+- **And** all other trip date validations are satisfied
+- **When** the user continues
+- **Then** the trip dates are accepted
 
 **Test data:** Use a date within the permitted reporting period and not in the future for both trip dates.
 
 ### Scenario 9: Reject a future trip end date (AC9)
 
-**Given** the trip end date is in the future  
-**When** the user continues  
-**Then** progression is prevented  
-**And** a validation message explains that the trip end date cannot be in the future
+- **Given** the trip end date is in the future
+- **When** the user continues
+- **Then** progression is prevented
+- **And** a validation message explains that the trip end date cannot be in the future
 
 **Test data:** Use the date of entry as the start date and the next calendar day as the end date. The trip length and start-date checks should otherwise pass.
 
@@ -143,4 +143,6 @@ AC9 explicitly requires rejecting a future end date and is included even though 
 
 ## Conformance check
 
-Pending completion by the Playwright BDD Spec Author after the spec is created.
+The spec covers AC1–AC9 as individual Playwright tests, with each Gherkin statement represented by a `test.step`. It uses runtime date offsets, the existing sign-in and vessel-selection fixtures, and role-based date/error-summary locators. The exact future-date messages were verified in the test environment; AC2–AC4 assert the rule described by the acceptance criteria because their exact wording is unspecified.
+
+**Validation:** `npm run lint`, targeted Prettier check, and Playwright test discovery passed. The full UI journey was not run because the test environment stopped resolving its hostname during inspection.
