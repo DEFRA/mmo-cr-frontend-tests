@@ -11,7 +11,6 @@ const favouriteSpecies = 'Atlantic cod (COD)';
 const favouriteGear = 'Pots';
 const favouritePort = 'Plymouth';
 const vesselName = 'ACHILLES';
-const potsDetails = { hauled: '1', inWater: '1' };
 
 test.describe('Account details and selections', () => {
   let savedSelections = {
@@ -109,7 +108,6 @@ test.describe('Account details and selections', () => {
         await expect(gearSelectionPage.pageHeading()).toBeVisible();
         await expect(gearSelectionPage.gearCheckbox(favouriteGear)).toBeVisible();
         await gearSelectionPage.gearCheckbox(favouriteGear).check();
-        await gearSelectionPage.enterPotsDetails(potsDetails.hauled, potsDetails.inWater);
         await gearSelectionPage.clickSaveAndContinue();
 
         await expect(speciesSelectionPage.pageHeading()).toBeVisible();

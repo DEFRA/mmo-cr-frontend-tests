@@ -11,7 +11,7 @@ import { type Favourites, type GearData, noFavourites } from '../helpers/catchRe
 const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';
 const areaCode = '46D86';
-const pots: GearData = { name: 'Pots', potsDetails: { hauled: '1', inWater: '1' } };
+const pots: GearData = { name: 'Pots' };
 const areaKey = 'Area majority catch caught';
 const statisticalSubAreaKey = `Statistical sub area (${pots.name})`;
 const testFavourites: Favourites = { ports: [plymouth], gears: [pots.name], species: [] };

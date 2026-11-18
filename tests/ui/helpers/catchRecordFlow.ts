@@ -19,7 +19,8 @@ import { type FavouritesFlow } from './favouritesFlow';
 import { type NavigationFlow } from './navigationFlow';
 
 export type SpeciesCatch = { name: string; code: string; weight: string };
-export type GearData = { name: string; potsDetails?: { hauled: string; inWater: string } };
+// Gear measurements are saved with the favourite gear, so catch recording only selects the gear
+export type GearData = { name: string };
 export type GearCatch = { gear: GearData; areaCode: string; species: SpeciesCatch[] };
 export type NotLandedCatch = { speciesName: string; weightKeptOnboard: string };
 export type Favourites = { ports: string[]; gears: string[]; species: string[] };
@@ -173,9 +174,6 @@ export class CatchRecordFlow {
 
     for (const gear of gears) {
       await gearSelectionPage.gearCheckbox(gear.name).check();
-      if (gear.potsDetails) {
-        await gearSelectionPage.enterPotsDetails(gear.potsDetails.hauled, gear.potsDetails.inWater);
-      }
     }
     await gearSelectionPage.clickSaveAndContinue();
     await statisticalAreaPage.expectUrl(/\/statistical-area\?gearId=/);

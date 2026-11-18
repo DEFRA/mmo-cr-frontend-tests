@@ -17,7 +17,7 @@ import {
 const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';
 const areaCode = '46D86';
-const pots: GearData = { name: 'Pots', potsDetails: { hauled: '1', inWater: '1' } };
+const pots: GearData = { name: 'Pots' };
 const trollingLines: GearData = { name: 'Trolling lines' };
 const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
 const codWithTrollingLines: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '50' };

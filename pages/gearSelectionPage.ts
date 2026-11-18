@@ -26,10 +26,6 @@ export class GearSelectionPage extends BasePage {
     handlines: {
       rodsAndLines: (): Locator => this.page.locator('#handlines-pole-lines-rodsAndLines')
     },
-    pots: {
-      hauled: (): Locator => this.page.locator('#potsHauled'),
-      inWater: (): Locator => this.page.locator('#potsInWater')
-    },
     seineNets: {
       meshSize: (): Locator => this.page.locator('#seine-nets-meshSize')
     },
@@ -59,11 +55,6 @@ export class GearSelectionPage extends BasePage {
 
   async enterHandlinesDetails(rods: string) {
     await this.gearInputs.handlines.rodsAndLines().fill(rods);
-  }
-
-  async enterPotsDetails(hauled: string, inWater: string) {
-    await this.gearInputs.pots.hauled().fill(hauled);
-    await this.gearInputs.pots.inWater().fill(inWater);
   }
 
   async enterSeineNetsDetails(mesh: string) {

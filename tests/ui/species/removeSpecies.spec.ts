@@ -12,8 +12,8 @@ type SpeciesData = { name: string; code: string; weight: string };
 
 const cod: SpeciesData = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
 const mackerel: SpeciesData = { name: 'Atlantic mackerel (MAC)', code: 'MAC', weight: '50' };
-// Placeholder until a third vessel species is confirmed; only used by the fixme test
-const thirdSpecies: SpeciesData = { name: '<THIRD_SPECIES>', code: '<THIRD_CODE>', weight: '' };
+// A third vessel species, so removing two species never removes all of them (confirmed in the live catalogue)
+const shads: SpeciesData = { name: 'Allis and twaite shads (SHD)', code: 'SHD', weight: '25' };
 
 test.describe('Remove species', () => {
   // Removing species here updates the vessel's saved species, so restore them around every test
@@ -40,6 +40,7 @@ test.describe('Remove species', () => {
     for (const species of [cod, mackerel]) {
       await favouritesFlow.ensureSpeciesAdded(species.name);
     }
+    await favouritesFlow.removeSpeciesFromAccount(shads.name);
     await catchRecordFlow.deleteAllDrafts();
   });
 
@@ -72,18 +73,24 @@ test.describe('Remove species', () => {
   test(
     'Removes selected species and their catch weights when removal is confirmed',
     { tag: ['@ui', '@regression', '@removeSpecies'] },
-    async ({ speciesSelectionPage, removeSpeciesPage }) => {
-      test.fixme(true, 'Needs a third species on the vessel so removing two does not remove all (AC5)');
-
+    async ({ navigationFlow, favouritesFlow, speciesSelectionPage, removeSpeciesPage }) => {
       await test.step('The user has multiple species selected', async () => {
-        await expect(speciesSelectionPage.weightAboveMinimumInput(cod.code)).toHaveValue(cod.weight);
-        await expect(speciesSelectionPage.weightAboveMinimumInput(mackerel.code)).toHaveValue(mackerel.weight);
+        // The Remove Species page lists the vessel's saved species, so the third species is saved to the account first
+        await navigationFlow.openAccount();
+        await favouritesFlow.ensureSpeciesAdded(shads.name);
+        await navigationFlow.openSpeciesSelection();
+        await speciesSelectionPage.selectSpecies(shads.name);
+        await speciesSelectionPage.enterSpeciesWeights(shads.code, shads.weight);
+        await speciesSelectionPage.saveAndReturn();
+        for (const species of [cod, mackerel, shads]) {
+          await expect(speciesSelectionPage.weightAboveMinimumInput(species.code)).toHaveValue(species.weight);
+        }
       });
 
       await test.step('The user selects more than one species for removal', async () => {
         await speciesSelectionPage.clickRemoveSpecies();
         await removeSpeciesPage.selectSpeciesToRemove(cod.name);
-        await removeSpeciesPage.selectSpeciesToRemove(thirdSpecies.name);
+        await removeSpeciesPage.selectSpeciesToRemove(shads.name);
       });
 
       await test.step('The user confirms removal', async () => {
@@ -92,12 +99,14 @@ test.describe('Remove species', () => {
 
       await test.step('All selected species are removed from the catch record', async () => {
         await expect(speciesSelectionPage.speciesCheckbox(cod.name)).toBeHidden();
-        await expect(speciesSelectionPage.speciesCheckbox(thirdSpecies.name)).toBeHidden();
+        await expect(speciesSelectionPage.speciesCheckbox(shads.name)).toBeHidden();
+        await expect(speciesSelectionPage.speciesCheckbox(mackerel.name)).toBeVisible();
       });
 
       await test.step('Associated catch-weight data is removed', async () => {
         await expect(speciesSelectionPage.weightAboveMinimumInput(cod.code)).toBeHidden();
-        await expect(speciesSelectionPage.weightAboveMinimumInput(thirdSpecies.code)).toBeHidden();
+        await expect(speciesSelectionPage.weightAboveMinimumInput(shads.code)).toBeHidden();
+        await expect(speciesSelectionPage.weightAboveMinimumInput(mackerel.code)).toHaveValue(mackerel.weight);
       });
     }
   );

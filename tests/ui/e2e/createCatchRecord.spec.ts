@@ -22,7 +22,7 @@ const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';
 const lowestoft = 'Lowestoft';
 const areaCode = '46D86';
-const pots: GearData = { name: 'Pots', potsDetails: { hauled: '1', inWater: '1' } };
+const pots: GearData = { name: 'Pots' };
 const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
 const gearCatches: GearCatch[] = [{ gear: pots, areaCode, species: [cod] }];
 const submittedStatus = 'Submitted';
@@ -109,14 +109,13 @@ test.describe('Create Catch Record', () => {
     }
   );
 
-  // Blocked (OQ-1): the reference shown after submission has not been verified
-  test.fixme(
+  test(
     'Submit a multi-day trip',
     {
       tag: ['@ui', '@smoke', '@createCatchRecord', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-05' }
     },
-    async ({ navigationFlow, catchRecordFlow, checkAnswersPage, recordsPage }) => {
+    async ({ navigationFlow, catchRecordFlow, checkAnswersPage, recordsPage, submittedRecordPage }) => {
       const multiDayTrip: TripDates = { departureDate: daysAgo(2), returnDate: daysAgo(1) };
       let reference = '';
 
@@ -156,8 +155,10 @@ test.describe('Create Catch Record', () => {
       });
 
       await test.step('I should receive a catch record reference', async () => {
-        // UNVERIFIED (OQ-1): assert the reference on the post-submit confirmation
+        // The post-submit confirmation is unverified (OQ-1), so the reference is checked on the submitted record
         expect(reference).toMatch(recordReferencePattern);
+        await recordsPage.openRecord(reference);
+        await expect(submittedRecordPage.recordReference()).toHaveText(reference);
       });
     }
   );
