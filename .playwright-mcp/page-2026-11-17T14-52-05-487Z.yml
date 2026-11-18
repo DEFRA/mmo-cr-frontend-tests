@@ -1,0 +1,63 @@
+- generic [active] [ref=f6e1]:
+  - link "Skip to main content" [ref=f6e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=f6e4]:
+    - link [ref=f6e8] [cursor=pointer]:
+      - /url: https://www.gov.uk/
+      - img "GOV.UK" [ref=f6e9]
+    - region "Service information" [ref=f6e22]:
+      - link "Record your catch" [ref=f6e26] [cursor=pointer]:
+        - /url: /
+  - generic [ref=f6e27]:
+    - paragraph [ref=f6e29]:
+      - strong [ref=f6e30]: Beta
+      - generic [ref=f6e31]:
+        - text: This is a new service – your
+        - link "feedback" [ref=f6e32] [cursor=pointer]:
+          - /url: "#"
+        - text: will help us to improve it.
+    - generic [ref=f6e33]:
+      - link "Back" [ref=f6e34] [cursor=pointer]:
+        - /url: /select-vessel
+      - navigation "Language switcher" [ref=f6e35]:
+        - list [ref=f6e36]:
+          - listitem [ref=f6e37]: English
+          - listitem [aria-hidden] [ref=f6e38]: "|"
+          - listitem [ref=f6e39]:
+            - link "Cymraeg" [ref=f6e40] [cursor=pointer]:
+              - /url: /trip-date?lang=cy
+    - main [ref=f6e41]:
+      - generic [ref=f6e44]:
+        - group "GBR-PH1234-171126-145204 Did your trip start and finish today?" [ref=f6e46]:
+          - heading "GBR-PH1234-171126-145204 Did your trip start and finish today?" [level=1] [ref=f6e48]:
+            - generic [ref=f6e49]: GBR-PH1234-171126-145204
+            - text: Did your trip start and finish today?
+          - generic [ref=f6e50]:
+            - generic [ref=f6e51]:
+              - radio "Yes" [ref=f6e52] [cursor=pointer]
+              - generic [ref=f6e53] [cursor=pointer]: "Yes"
+            - generic [ref=f6e54]:
+              - radio "No" [ref=f6e55] [cursor=pointer]
+              - generic [ref=f6e56] [cursor=pointer]: "No"
+        - button "Save and continue" [ref=f6e57] [cursor=pointer]
+  - contentinfo [ref=f6e58]:
+    - generic [ref=f6e61]:
+      - generic [ref=f6e62]:
+        - heading "Support links" [level=2] [ref=f6e63]
+        - list [ref=f6e64]:
+          - listitem [ref=f6e65]:
+            - link "Feedback" [ref=f6e66] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=f6e67]:
+            - link "Privacy policy" [ref=f6e68] [cursor=pointer]:
+              - /url: /privacy-notice
+          - listitem [ref=f6e69]:
+            - link "Accessibility Statement" [ref=f6e70] [cursor=pointer]:
+              - /url: https://www.gov.uk/help/accessibility-statement
+        - generic [ref=f6e73]:
+          - text: All content is available under the
+          - link "Open Government Licence v3.0" [ref=f6e74] [cursor=pointer]:
+            - /url: https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+          - text: ", except where otherwise stated"
+      - link "© Crown copyright" [ref=f6e76] [cursor=pointer]:
+        - /url: https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/

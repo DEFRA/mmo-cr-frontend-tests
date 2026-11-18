@@ -1,0 +1,129 @@
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e4]:
+    - link [ref=e8] [cursor=pointer]:
+      - /url: https://www.gov.uk/
+      - img "GOV.UK" [ref=e9]
+    - region "Service information" [ref=e22]:
+      - generic [ref=e24]:
+        - link "Record your catch" [ref=e26] [cursor=pointer]:
+          - /url: /
+        - navigation "Menu" [ref=e27]:
+          - list [ref=e28]:
+            - listitem [ref=e29]:
+              - link "Home" [ref=e30] [cursor=pointer]:
+                - /url: /records
+            - listitem [ref=e31]:
+              - link "Your account" [ref=e32] [cursor=pointer]:
+                - /url: /account
+            - listitem [ref=e33]:
+              - button "Sign out" [ref=e36] [cursor=pointer]
+  - generic [ref=e37]:
+    - paragraph [ref=e39]:
+      - strong [ref=e40]: Beta
+      - generic [ref=e41]:
+        - text: This is a new service – your
+        - link "feedback" [ref=e42] [cursor=pointer]:
+          - /url: "#"
+        - text: will help us to improve it.
+    - generic [ref=e43]:
+      - link "Back" [ref=e44] [cursor=pointer]:
+        - /url: /records
+      - navigation "Language switcher" [ref=e45]:
+        - list [ref=e46]:
+          - listitem [ref=e47]: English
+          - listitem [aria-hidden] [ref=e48]: "|"
+          - listitem [ref=e49]:
+            - link "Cymraeg" [ref=e50] [cursor=pointer]:
+              - /url: /?lang=cy
+    - main [ref=e51]:
+      - generic [ref=e52]:
+        - generic [ref=e54]:
+          - generic [ref=e55]: Guidance
+          - heading "How to record your catch" [level=1] [ref=e56]
+        - paragraph [ref=e59]: A catch record includes details of the fish caught, including the species, weight, date and location of the catch. You must create a catch record for every fishing trip.
+        - paragraph [ref=e62]:
+          - text: "From:"
+          - link "Department for Environment, Food & Rural Affairs" [ref=e63] [cursor=pointer]:
+            - /url: https://www.gov.uk/government/organisations/department-for-environment-food-rural-affairs
+          - text: and
+          - link "Marine Management Organisation" [ref=e64] [cursor=pointer]:
+            - /url: https://www.gov.uk/government/organisations/marine-management-organisation
+        - generic [ref=e66]:
+          - generic [ref=e67]: Applies to England
+          - paragraph [ref=e68]: Contents
+          - navigation "Contents" [ref=e69]:
+            - list [ref=e70]:
+              - listitem [ref=e71]:
+                - text: —
+                - link "What we need from you" [ref=e72] [cursor=pointer]:
+                  - /url: "#what-we-need-from-you"
+              - listitem [ref=e73]:
+                - text: —
+                - link "When to create your record" [ref=e74] [cursor=pointer]:
+                  - /url: "#when-to-create-your-record"
+              - listitem [ref=e75]:
+                - text: —
+                - link "Special cases" [ref=e76] [cursor=pointer]:
+                  - /url: "#special-cases-ices-areas"
+              - listitem [ref=e77]:
+                - text: —
+                - link "How to create a record" [ref=e78] [cursor=pointer]:
+                  - /url: "#how-to-create-a-record"
+              - listitem [ref=e79]:
+                - text: —
+                - link "Get help" [ref=e80] [cursor=pointer]:
+                  - /url: "#get-help-with-your-record"
+          - button "Print this page" [ref=e81] [cursor=pointer]
+          - heading "What we need from you" [level=2] [ref=e84]
+          - paragraph [ref=e85]: We need your trip details and the estimated live weight of your catch.
+          - paragraph [ref=e86]: We will ask if you caught species subject to catch limits (quota). If you did, all sizes of fish must be recorded unless exemptions apply.
+          - heading "When to create your record" [level=2] [ref=e87]
+          - paragraph [ref=e88]: "Create your record before you move your catch off the boat if:"
+          - list [ref=e89]:
+            - listitem [ref=e90]: You caught any species with catch limits (quota)
+            - listitem [ref=e91]: You crossed an ICES area boundary while fishing animal productivity
+            - listitem [ref=e92]: You caught only non-quota species.
+          - generic [ref=e93]:
+            - generic [aria-hidden] [ref=e94]: "!"
+            - strong [ref=e95]:
+              - generic [ref=e96]: Warning
+              - text: You need to create a catch record within 24 hours of landing your catch.
+          - 'heading "Special cases: ICES areas" [level=2] [ref=e97]'
+          - paragraph [ref=e98]: If you fished in or crossed ICES areas 4c, 7d or 7e, create a separate catch record each time you cross a boundary. You must use the mobile app for offline recording.
+          - heading "How to create a record" [level=2] [ref=e99]
+          - paragraph [ref=e100]:
+            - text: Use the web service or download the
+            - link "Android" [ref=e101] [cursor=pointer]:
+              - /url: https://play.google.com/store/apps/details?id=uk.gov.mmo.rcapp&hl=en&gl=GB
+            - text: or
+            - link "Apple" [ref=e102] [cursor=pointer]:
+              - /url: https://apps.apple.com/gb/app/record-your-catch/id1475243969
+            - text: app.
+          - button "Start now" [ref=e103] [cursor=pointer]
+          - heading "Get help with your record" [level=2] [ref=e106]
+          - paragraph [ref=e107]: Call 0300 020 3788, Monday to Friday, 9am to 5pm.
+          - paragraph [ref=e108]: (Calls to 03 numbers cost the same as 01 or 02 calls.)
+          - paragraph [ref=e109]: Outside these hours, leave a catch record on our automated line.
+  - contentinfo [ref=e110]:
+    - generic [ref=e113]:
+      - generic [ref=e114]:
+        - heading "Support links" [level=2] [ref=e115]
+        - list [ref=e116]:
+          - listitem [ref=e117]:
+            - link "Feedback" [ref=e118] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=e119]:
+            - link "Privacy policy" [ref=e120] [cursor=pointer]:
+              - /url: /privacy-notice
+          - listitem [ref=e121]:
+            - link "Accessibility Statement" [ref=e122] [cursor=pointer]:
+              - /url: https://www.gov.uk/help/accessibility-statement
+        - generic [ref=e125]:
+          - text: All content is available under the
+          - link "Open Government Licence v3.0" [ref=e126] [cursor=pointer]:
+            - /url: https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+          - text: ", except where otherwise stated"
+      - link "© Crown copyright" [ref=e128] [cursor=pointer]:
+        - /url: https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/

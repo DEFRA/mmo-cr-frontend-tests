@@ -1,0 +1,49 @@
+- generic [active] [ref=f3e1]:
+  - link "Skip to main content" [ref=f3e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=f3e4]:
+    - link [ref=f3e8] [cursor=pointer]:
+      - /url: https://www.gov.uk/
+      - img "GOV.UK" [ref=f3e9]
+    - region "Service information" [ref=f3e22]:
+      - link "Record your catch" [ref=f3e26] [cursor=pointer]:
+        - /url: /
+  - generic [ref=f3e27]:
+    - paragraph [ref=f3e29]:
+      - strong [ref=f3e30]: Beta
+      - generic [ref=f3e31]:
+        - text: This is a new service – your
+        - link "feedback" [ref=f3e32] [cursor=pointer]:
+          - /url: "#"
+        - text: will help us to improve it.
+    - navigation "Language switcher" [ref=f3e34]:
+      - list [ref=f3e35]:
+        - listitem [ref=f3e36]: English
+        - listitem [aria-hidden] [ref=f3e37]: "|"
+        - listitem [ref=f3e38]:
+          - link "Cymraeg" [ref=f3e39] [cursor=pointer]:
+            - /url: /trip-date?lang=cy
+    - main [ref=f3e40]:
+      - heading "400" [level=1] [ref=f3e43]
+      - paragraph [ref=f3e46]: Bad Request
+  - contentinfo [ref=f3e47]:
+    - generic [ref=f3e50]:
+      - generic [ref=f3e51]:
+        - heading "Support links" [level=2] [ref=f3e52]
+        - list [ref=f3e53]:
+          - listitem [ref=f3e54]:
+            - link "Feedback" [ref=f3e55] [cursor=pointer]:
+              - /url: "#"
+          - listitem [ref=f3e56]:
+            - link "Privacy policy" [ref=f3e57] [cursor=pointer]:
+              - /url: /privacy-notice
+          - listitem [ref=f3e58]:
+            - link "Accessibility Statement" [ref=f3e59] [cursor=pointer]:
+              - /url: https://www.gov.uk/help/accessibility-statement
+        - generic [ref=f3e62]:
+          - text: All content is available under the
+          - link "Open Government Licence v3.0" [ref=f3e63] [cursor=pointer]:
+            - /url: https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/
+          - text: ", except where otherwise stated"
+      - link "© Crown copyright" [ref=f3e65] [cursor=pointer]:
+        - /url: https://www.nationalarchives.gov.uk/information-management/re-using-public-sector-information/uk-government-licensing-framework/crown-copyright/
