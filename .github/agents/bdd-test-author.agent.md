@@ -29,7 +29,7 @@ If a precondition fails, do not change any files. Explain what is missing and sa
    - Do not open a browser or look up new locators; anything missing from the plan is a deviation.
    - The only changes allowed beyond the plan are formatting and type fixes needed to pass `npm run typecheck` / `npm run format:check`. Record each one in the Implementation record.
    - Add the required JSDoc header to each new spec or page-object class, following the shared instructions. For an existing target file missing a header, use its original Git addition commit for `@author` and `@since`; do not add documentation to files outside Target files. Put the CRAR key in a spec header when the user supplied one.
-4. **Run checks.** Run `npm run typecheck` and `npm run format:check`, fixing issues with `npx prettier --write <changed files>`. If the environment and `.env` credentials are available, run `npx playwright test <spec path> --project=Chromium`. Never print `.env` contents.
+4. **Run checks.** Run `npm run typecheck` and `npm run format:check`, fixing issues with `npx prettier --write <changed files>`. If the environment and `.env` credentials are available, run `npx playwright test <spec path> --project=Chrome`. Never print `.env` contents.
 5. **Verify the spec against the plan.** Re-read the plan file and the written files, and check each item:
 
    | Check                     | Pass when                                                                                                     |
@@ -63,11 +63,11 @@ If a precondition fails, do not change any files. Explain what is missing and sa
 
 ### Checks
 
-| Command                                              | Result                          |
-| ---------------------------------------------------- | ------------------------------- |
-| `npm run typecheck`                                  | Pass / Fail                     |
-| `npm run format:check`                               | Pass / Fail                     |
-| `npx playwright test <spec path> --project=Chromium` | Pass / Fail / Not run: <reason> |
+| Command                                            | Result                          |
+| -------------------------------------------------- | ------------------------------- |
+| `npm run typecheck`                                | Pass / Fail                     |
+| `npm run format:check`                             | Pass / Fail                     |
+| `npx playwright test <spec path> --project=Chrome` | Pass / Fail / Not run: <reason> |
 
 ### Plan conformance
 
@@ -84,5 +84,5 @@ If a precondition fails, do not change any files. Explain what is missing and sa
 - The plan path and its new status, plus the files changed.
 - The conformance table results and any deviations that the Planner must resolve.
 - The checks run, or what blocked them.
-- Run commands: `npx playwright test <spec path> --project=Chromium`, by tag `npx playwright test --project=Chromium --grep @<featureTag>`, cross-browser `npm run test:ui:all`.
+- Run commands: `npx playwright test <spec path> --project=Chrome`, by tag `npx playwright test --project=Chrome --grep @<featureTag>`, cross-browser `npm run test:ui:all`.
 - Do not commit, push or open PRs unless the user explicitly asks.

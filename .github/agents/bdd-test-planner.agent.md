@@ -118,7 +118,7 @@ Status values: `Existing`, `New` (added by this plan), `UNVERIFIED`.
 
 - `npm run typecheck`
 - `npm run format:check`
-- `npx playwright test <spec path> --project=Chromium`
+- `npx playwright test <spec path> --project=Chrome`
 
 ## Open questions
 

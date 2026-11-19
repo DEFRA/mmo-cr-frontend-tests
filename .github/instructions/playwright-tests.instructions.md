@@ -42,7 +42,7 @@ Team rules (non-negotiable):
 ## Stack and repository conventions
 
 - Playwright Test (`@playwright/test`) + TypeScript (CommonJS, `tsc --noEmit` for type checks) + Allure (`allure-playwright`) and the HTML reporter. Prettier formatting enforced via Husky pre-commit.
-- Projects in `playwright.config.ts`: `Chromium`, `Chrome`, `Edge`, `Firefox`, `Safari` (all use `tests/ui`) and `api` (uses `tests/api`). `workers: 1`, `fullyParallel: false`.
+- Projects in `playwright.config.ts`: `Chrome`, `Edge`, `Firefox`, `Safari` (all use `tests/ui`) and `api` (uses `tests/api`). `workers: 1`, `fullyParallel: false`.
 - `baseURL` is derived from `CATCH_RECORDING_ENV` (`dev` | `test` | `prod`, default `test`); always navigate with relative paths (e.g. `goto('/account')`).
 - UI specs live in feature folders under `tests/ui/<feature-name>/` (kebab-case folder, camelCase file name, e.g. `tests/ui/species/catchWeightEntry.spec.ts`). Top-level specs exist for older features; prefer a feature folder for new work. When a feature needs more than one `test.describe` group (e.g. form, information panel, error scenarios), create the feature folder and put each group in its own spec file with a single top-level `test.describe`, rather than nesting several groups in one file (e.g. `tests/ui/sign-in/signInForm.spec.ts`, `createAccountPanel.spec.ts`, `signInErrors.spec.ts`).
 - Specs import `test` and `expect` from `fixtures/commonfixture.ts`, never directly from `@playwright/test`.

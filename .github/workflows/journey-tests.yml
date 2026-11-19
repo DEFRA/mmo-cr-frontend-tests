@@ -24,10 +24,9 @@ on:
       browser:
         description: 'Browser to run UI tests on'
         required: true
-        default: 'Chromium'
+        default: 'Chrome'
         type: choice
         options:
-          - Chromium
           - all
           - Chrome
           - Edge
@@ -44,7 +43,7 @@ on:
         description: 'Browser to run UI tests on'
         required: false
         type: string
-        default: 'Chromium'
+        default: 'Chrome'
     secrets:
       CATCH_RECORDING_EMAIL:
         required: false
