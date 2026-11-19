@@ -10,11 +10,10 @@ import { type Favourites, type GearData, noFavourites } from '../helpers/catchRe
 
 const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';
-const areaCode = '46D86';
-const pots: GearData = { name: 'Pots' };
+const seineNets: GearData = { name: 'Seine nets (not specified)' };
 const areaKey = 'Area majority catch caught';
 const statisticalSubAreaKey = 'Statistical sub area';
-const testFavourites: Favourites = { ports: [plymouth], gears: [pots.name], species: [] };
+const testFavourites: Favourites = { ports: [plymouth], gears: [seineNets.name], species: [] };
 
 test.describe('Catch Location', () => {
   let addedFavourites: Favourites = noFavourites;
@@ -29,7 +28,7 @@ test.describe('Catch Location', () => {
   });
 
   test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
+    await catchRecordFlow.deleteAllDrafts();
     await catchRecordFlow.restoreFavourites(addedFavourites);
   });
 
@@ -40,6 +39,8 @@ test.describe('Catch Location', () => {
       annotation: { type: 'UAT', description: 'UAT-08' }
     },
     async ({ catchRecordFlow, checkAnswersPage, speciesSelectionPage }) => {
+      let areaCode = '';
+
       await test.step('I am creating a catch record', async () => {
         createdRecords.push(await catchRecordFlow.startRecord(vesselName));
         await catchRecordFlow.enterSameDayTrip();
@@ -47,23 +48,23 @@ test.describe('Catch Location', () => {
       });
 
       await test.step('I have selected the fishing gear', async () => {
-        await catchRecordFlow.selectGears([pots]);
+        await catchRecordFlow.selectGears([seineNets]);
       });
 
       await test.step('I select the area where most of my catch was caught', async () => {
-        await catchRecordFlow.selectAreaForCurrentGear(areaCode);
+        areaCode = await catchRecordFlow.selectAreaFromMapForCurrentGear();
       });
 
       await test.step('The selected area should be recorded', async () => {
         await checkAnswersPage.goto('/check-answers');
-        await expect(checkAnswersPage.gearSummaryValue(pots.name, areaKey)).toHaveText(areaCode);
+        await expect(checkAnswersPage.gearSummaryValue(seineNets.name, areaKey)).toHaveText(areaCode);
         await expect(checkAnswersPage.summaryValue(statisticalSubAreaKey)).toContainText(areaCode);
       });
 
       await test.step('I should continue to species selection', async () => {
         await checkAnswersPage.goBack();
         await speciesSelectionPage.expectUrl(/\/species-selection\?gearId=/);
-        await expect(speciesSelectionPage.pageHeadingForGear(pots.name)).toBeVisible();
+        await expect(speciesSelectionPage.pageHeadingForGear(seineNets.name)).toBeVisible();
       });
     }
   );
