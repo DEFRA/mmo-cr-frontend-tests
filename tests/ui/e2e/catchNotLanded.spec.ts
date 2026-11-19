@@ -10,15 +10,14 @@ import { type Favourites, type GearData, type SpeciesCatch, noFavourites } from 
 
 const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';
-const areaCode = '46D86';
-const pots: GearData = { name: 'Pots' };
+const seineNets: GearData = { name: 'Seine nets (not specified)' };
 const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
 const weightKeptOnboard = '10';
 const notLandedKey = 'Not landed';
 const notLandedSpeciesKey = 'Species';
 const weightKeptOnboardKey = 'Weight above minimum size kept onboard or in keep pots (kg)';
 const yesAnswer = 'Yes';
-const testFavourites: Favourites = { ports: [plymouth], gears: [pots.name], species: [cod.name] };
+const testFavourites: Favourites = { ports: [plymouth], gears: [seineNets.name], species: [cod.name] };
 
 test.describe('Catch Not Landed', () => {
   let addedFavourites: Favourites = noFavourites;
@@ -48,8 +47,8 @@ test.describe('Catch Not Landed', () => {
         createdRecords.push(await catchRecordFlow.startRecord(vesselName));
         await catchRecordFlow.enterSameDayTrip();
         await catchRecordFlow.selectPorts(plymouth, plymouth);
-        await catchRecordFlow.selectGears([pots]);
-        await catchRecordFlow.enterCatchDetailsForEachGear([{ gear: pots, areaCode, species: [cod] }]);
+        await catchRecordFlow.selectGears([seineNets]);
+        await catchRecordFlow.enterCatchDetailsForEachGear([{ gear: seineNets, species: [cod] }]);
       });
 
       await test.step('I confirm that some catch will not be landed straight away', async () => {
