@@ -19,14 +19,13 @@ import {
 const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';
 const lowestoft = 'Lowestoft';
-const areaCode = '46D86';
-const pots: GearData = { name: 'Pots' };
+const seineNets: GearData = { name: 'Seine nets (not specified)' };
 const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
 const returnDateKey = 'Return date';
 const changeReturnDateLink = 'Change return date';
 const areaKey = 'Area majority catch caught';
 const weightRetainedKey = 'Weight above minimum size retained (kg)';
-const testFavourites: Favourites = { ports: [plymouth, lowestoft], gears: [pots.name], species: [cod.name] };
+const testFavourites: Favourites = { ports: [plymouth, lowestoft], gears: [seineNets.name], species: [cod.name] };
 
 test.describe('Amend Catch Record', () => {
   let addedFavourites: Favourites = noFavourites;
@@ -40,7 +39,8 @@ test.describe('Amend Catch Record', () => {
       tripDates: { departureDate: daysAgo(2), returnDate: daysAgo(1) },
       departurePort: plymouth,
       returnPort: lowestoft,
-      gearCatches: [{ gear: pots, areaCode, species: [cod] }]
+      // No areaCode, so the area is selected on the map rather than under "Other"
+      gearCatches: [{ gear: seineNets, species: [cod] }]
     };
     await test.step('Setup: I am signed in with the test favourites saved', async () => {
       await navigationFlow.signIn();
@@ -61,9 +61,13 @@ test.describe('Amend Catch Record', () => {
     },
     async ({ catchRecordFlow, checkAnswersPage, tripReturnDatePage }) => {
       const amendedReturnDate = daysAgo(0);
+      const mapAreaByGear = new Map<string, string>();
 
       await test.step('I am reviewing my catch record', async () => {
         createdRecords.push(await catchRecordFlow.completeRecordToReview(reviewRecord));
+        for (const { gear } of reviewRecord.gearCatches) {
+          mapAreaByGear.set(gear.name, (await checkAnswersPage.gearSummaryValue(gear.name, areaKey).innerText()).trim());
+        }
       });
 
       await test.step('I select Change for an answer', async () => {
@@ -94,7 +98,7 @@ test.describe('Amend Catch Record', () => {
           await expect(checkAnswersPage.summaryValue(key)).toHaveText(value);
         }
         for (const { gear, species } of reviewRecord.gearCatches) {
-          await expect(checkAnswersPage.gearSummaryValue(gear.name, areaKey)).toHaveText(areaCode);
+          await expect(checkAnswersPage.gearSummaryValue(gear.name, areaKey)).toHaveText(mapAreaByGear.get(gear.name)!);
           for (const caught of species) {
             await expect(checkAnswersPage.speciesSummaryValue(caught.name, gear.name, weightRetainedKey)).toHaveText(
               caught.weight
