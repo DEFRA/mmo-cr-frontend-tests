@@ -49,15 +49,14 @@ test.describe('Create Catch Record', () => {
   let createdRecords: string[] = [];
 
   test.beforeEach(async () => {
-    // Full sign-in, favourites set-up and submission journey exceeds the default 30s test timeout
     test.slow();
     createdRecords = [];
     addedFavourites = noFavourites;
   });
 
   test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteAllDrafts();
     await catchRecordFlow.restoreFavourites(addedFavourites);
+    await catchRecordFlow.deleteAllDrafts();
   });
 
   for (const { tripType, uat, tripDates, tripStepTitle } of tripScenarios) {
@@ -111,7 +110,6 @@ test.describe('Create Catch Record', () => {
         });
 
         await test.step('I should receive a catch record reference', async () => {
-          // The post-submit confirmation is unverified (OQ-1), so the reference is checked on the submitted record
           expect(reference).toMatch(recordReferencePattern);
           await recordsPage.openRecord(reference);
           await expect(submittedRecordPage.recordReference()).toHaveText(reference);
