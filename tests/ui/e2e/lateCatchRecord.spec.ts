@@ -7,12 +7,11 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import {
-  type CatchRecordData,
   type Favourites,
   type GearData,
+  type MultiDayCatchRecordData,
   type SpeciesCatch,
   daysAgo,
-  noFavourites,
   reviewDate
 } from '../helpers/catchRecordFlow';
 
@@ -26,12 +25,11 @@ const changeReturnDateLink = 'Change return date';
 const testFavourites: Favourites = { ports: [plymouth], gears: [pots.name], species: [cod.name] };
 
 test.describe('Late Catch Record', () => {
-  let addedFavourites: Favourites = noFavourites;
-  let createdRecords: string[] = [];
-  let lateRecord: CatchRecordData;
+  test.use({ testFavourites });
 
-  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
-    createdRecords = [];
+  let lateRecord: MultiDayCatchRecordData;
+
+  test.beforeEach(() => {
     lateRecord = {
       vesselName,
       tripDates: { departureDate: daysAgo(3), returnDate: daysAgo(2) },
@@ -39,15 +37,6 @@ test.describe('Late Catch Record', () => {
       returnPort: plymouth,
       gearCatches: [{ gear: pots, areaCode, species: [cod] }]
     };
-    await test.step('Setup: I am signed in with the test favourites saved', async () => {
-      await navigationFlow.signIn();
-      addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
-    });
-  });
-
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
-    await catchRecordFlow.restoreFavourites(addedFavourites);
   });
 
   // Blocked (OQ-4): no late-submission warning was shown before submission in the test environment
@@ -57,7 +46,7 @@ test.describe('Late Catch Record', () => {
       tag: ['@ui', '@regression', '@lateCatchRecord', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-17' }
     },
-    async ({ catchRecordFlow, checkAnswersPage }) => {
+    async ({ createdRecords, catchRecordFlow, checkAnswersPage }) => {
       await test.step('My trip ended more than 24 hours ago', async () => {
         // The trip dates in lateRecord end two days ago
       });
@@ -72,7 +61,7 @@ test.describe('Late Catch Record', () => {
 
       await test.step('I should be able to check the trip end date', async () => {
         await expect(checkAnswersPage.summaryValue(returnDateKey)).toHaveText(
-          reviewDate(lateRecord.tripDates!.returnDate)
+          reviewDate(lateRecord.tripDates.returnDate)
         );
         await expect(checkAnswersPage.changeLinkNamed(changeReturnDateLink)).toBeVisible();
       });
@@ -90,7 +79,7 @@ test.describe('Late Catch Record', () => {
       tag: ['@ui', '@regression', '@lateCatchRecord', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-18' }
     },
-    async ({ catchRecordFlow, checkAnswersPage, tripReturnDatePage }) => {
+    async ({ createdRecords, catchRecordFlow, checkAnswersPage, tripReturnDatePage }) => {
       const correctedReturnDate = daysAgo(0);
 
       await test.step('I have received a late submission warning', async () => {

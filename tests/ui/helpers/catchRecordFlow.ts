@@ -7,7 +7,6 @@ import { type DraftRecordPage } from '../../../pages/draftRecordPage';
 import { type GearSelectionPage } from '../../../pages/gearSelectionPage';
 import { type RecordsPage } from '../../../pages/recordsPage';
 import { type ReturnPortPage } from '../../../pages/returnPortPage';
-import { type SelectVesselPage } from '../../../pages/selectVesselPage';
 import { type SpeciesNotLandedPage } from '../../../pages/speciesNotLandedPage';
 import { type SpeciesSelectionPage } from '../../../pages/speciesSelectionPage';
 import { type StatisticalAreaOtherPage } from '../../../pages/statisticalAreaOtherPage';
@@ -36,10 +35,11 @@ export type CatchRecordData = {
   notLanded?: NotLandedCatch;
 };
 
+export type MultiDayCatchRecordData = CatchRecordData & { tripDates: TripDates };
+
 export const noFavourites: Favourites = { ports: [], gears: [], species: [] };
 
-// Observed in the test environment, e.g. GBR-PH1234-171126-170520
-export const recordReferencePattern = /GBR-[A-Z0-9]+-\d{6}-\d{6}/;
+export { recordReferencePattern } from '../../../pages/tripDatePage';
 
 export const daysAgo = (days: number): Date => {
   const date = new Date();
@@ -69,7 +69,6 @@ export class CatchRecordFlow {
     private readonly pages: {
       accountPage: AccountPage;
       recordsPage: RecordsPage;
-      selectVesselPage: SelectVesselPage;
       tripDatePage: TripDatePage;
       tripDepartureDatePage: TripDepartureDatePage;
       tripReturnDatePage: TripReturnDatePage;
@@ -119,23 +118,13 @@ export class CatchRecordFlow {
 
   // Creates the draft and returns its reference
   async startRecord(vesselName: string): Promise<string> {
-    const { recordsPage, selectVesselPage, tripDatePage } = this.pages;
-
-    await recordsPage.goto('/records');
-    await recordsPage.createNewRecordButton().click();
-    await selectVesselPage.selectVessel(vesselName);
-    await selectVesselPage.clickSaveAndContinue();
-    await tripDatePage.expectUrl(/\/trip-date$/);
+    await this.navigationFlow.openNewRecord(vesselName);
     return this.readRecordReference();
   }
 
   // Journey headings start with the reference, e.g. "GBR-PH1234-171126-170520 Did your trip start and finish today?"
   async readRecordReference(): Promise<string> {
-    const { tripDatePage } = this.pages;
-
-    const reference = (await tripDatePage.pageHeading().innerText()).match(recordReferencePattern)?.[0];
-    if (!reference) throw new Error('The trip date heading did not include a catch record reference');
-    return reference;
+    return this.pages.tripDatePage.getRecordReference();
   }
 
   async enterSameDayTrip(): Promise<void> {
@@ -286,29 +275,19 @@ export class CatchRecordFlow {
 
     for (const reference of references) {
       await recordsPage.goto('/records');
+      await expect(recordsPage.catchRecordsTable()).toBeVisible();
       if ((await recordsPage.recordRow(reference).count()) === 0) continue;
       if ((await recordsPage.recordStatus(reference).innerText()).trim() !== 'Draft') continue;
 
       await recordsPage.openRecord(reference);
-      await draftRecordPage.deleteDraft();
-      await recordsPage.expectUrl(/\/records$/);
-    }
-  }
-
-  async deleteAllDrafts(maxDrafts = 200): Promise<number> {
-    const { recordsPage, draftRecordPage } = this.pages;
-    let deleted = 0;
-
-    await recordsPage.goto('/records');
-    await expect(recordsPage.catchRecordsTable()).toBeVisible();
-    while ((await recordsPage.draftRecordRows().count()) > 0 && deleted < maxDrafts) {
-      const reference = await recordsPage.openFirstDraftRecord();
       await expect(draftRecordPage.pageHeading()).toBeVisible();
       await draftRecordPage.deleteDraft();
       await recordsPage.expectUrl(/\/records$/);
-      await expect(recordsPage.catchRecordsTable().getByRole('link', { name: reference })).toHaveCount(0);
-      deleted++;
+      await expect(recordsPage.recordRow(reference)).toHaveCount(0);
     }
-    return deleted;
+  }
+
+  async deleteCreatedDrafts(): Promise<void> {
+    await this.deleteDraftsIfPresent([...this.navigationFlow.createdRecordReferences]);
   }
 }

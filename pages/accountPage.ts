@@ -15,7 +15,11 @@ export class AccountPage extends BasePage {
 
   public readonly vesselDetailsHeading = (): Locator => this.page.getByRole('heading', { name: 'Vessel details' });
 
-  public readonly vesselNameHeading = (): Locator => this.page.getByRole('heading', { level: 3 });
+  public readonly vesselNameHeading = (vesselName: string): Locator =>
+    this.page.getByRole('heading', {
+      level: 3,
+      name: new RegExp(`^${vesselName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\(`)
+    });
 
   public readonly summaryRow = (key: string): Locator =>
     this.page

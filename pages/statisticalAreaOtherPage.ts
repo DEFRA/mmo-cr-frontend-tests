@@ -44,7 +44,8 @@ export class StatisticalAreaOtherPage extends BasePage {
   public readonly fieldErrorMessage = (): Locator => this.page.locator('#alternativeStatisticalArea-error');
 
   async selectAreaRadio(areaName: string) {
-    await this.areaRadio(areaName).click();
+    await this.page.waitForLoadState('load');
+    await this.areaRadio(areaName).check();
   }
 
   async searchAndSelectAlternativeArea(areaName: string) {

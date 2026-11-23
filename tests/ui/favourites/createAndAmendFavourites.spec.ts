@@ -37,7 +37,7 @@ test.describe('Create and amend favourites', () => {
     await favouritesFlow.removeGearFromAccount(favouriteGear);
     await favouritesFlow.removePortFromAccount(favouritePort);
     await favouritesFlow.removePortFromAccount(replacementPort);
-    await catchRecordFlow.deleteAllDrafts();
+    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(

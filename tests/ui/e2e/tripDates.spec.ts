@@ -6,7 +6,7 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { type Favourites, daysAgo, noFavourites } from '../helpers/catchRecordFlow';
+import { type Favourites, daysAgo } from '../helpers/catchRecordFlow';
 
 const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';
@@ -15,21 +15,7 @@ const futureDepartureError = 'Date you left for your trip must be today or in th
 const returnBeforeDepartureError = 'Date you returned from your trip must be the same as or after the date you left';
 
 test.describe('Trip Dates', () => {
-  let addedFavourites: Favourites = noFavourites;
-  let createdRecords: string[] = [];
-
-  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
-    createdRecords = [];
-    await test.step('Setup: I am signed in with the test favourites saved', async () => {
-      await navigationFlow.signIn();
-      addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
-    });
-  });
-
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
-    await catchRecordFlow.restoreFavourites(addedFavourites);
-  });
+  test.use({ testFavourites });
 
   test(
     'Record valid trip dates',
@@ -37,7 +23,14 @@ test.describe('Trip Dates', () => {
       tag: ['@ui', '@regression', '@tripDates', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-26' }
     },
-    async ({ catchRecordFlow, tripDatePage, tripDepartureDatePage, tripReturnDatePage, departurePortPage }) => {
+    async ({
+      createdRecords,
+      catchRecordFlow,
+      tripDatePage,
+      tripDepartureDatePage,
+      tripReturnDatePage,
+      departurePortPage
+    }) => {
       const departureDate = daysAgo(2);
       const returnDate = daysAgo(1);
 
@@ -67,7 +60,7 @@ test.describe('Trip Dates', () => {
       tag: ['@ui', '@regression', '@tripDates', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-26' }
     },
-    async ({ catchRecordFlow, tripDatePage, tripDepartureDatePage }) => {
+    async ({ createdRecords, catchRecordFlow, tripDatePage, tripDepartureDatePage }) => {
       const tomorrow = daysAgo(-1);
 
       await test.step('My trip did not start and finish today', async () => {
@@ -95,7 +88,7 @@ test.describe('Trip Dates', () => {
       tag: ['@ui', '@regression', '@tripDates', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-26' }
     },
-    async ({ catchRecordFlow, tripDatePage, tripDepartureDatePage, tripReturnDatePage }) => {
+    async ({ createdRecords, catchRecordFlow, tripDatePage, tripDepartureDatePage, tripReturnDatePage }) => {
       const departureDate = daysAgo(2);
       const earlierReturnDate = daysAgo(3);
 

@@ -1,3 +1,9 @@
+/**
+ * Base class for API clients, wrapping the Playwright request context.
+ *
+ * @author Randhir Patel
+ * @since 2026-08-27
+ */
 import { type APIRequestContext, type APIResponse } from '@playwright/test';
 
 export abstract class BaseApi {

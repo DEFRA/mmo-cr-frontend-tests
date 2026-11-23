@@ -75,7 +75,7 @@ test.describe('Trip date validation', () => {
 
   // Each test starts a catch record, so its draft is deleted after each test
   test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteAllDrafts();
+    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(

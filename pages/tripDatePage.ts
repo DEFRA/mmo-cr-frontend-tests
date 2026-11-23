@@ -1,6 +1,8 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
 
+export const recordReferencePattern = /GBR-[A-Z0-9]+-\d{6}-\d{6}/;
+
 /**
  * Confirm whether the trip started and finished today.
  *
@@ -14,15 +16,9 @@ export class TripDatePage extends BasePage {
   public readonly yesRadio = (): Locator => this.page.getByLabel('Yes');
   public readonly noRadio = (): Locator => this.page.getByLabel('No');
 
-  // The record reference (e.g. GBR-PH1234-171126-145204) is shown in the heading once a vessel is selected
-  private readonly recordReferencePattern = /GBR-[A-Z0-9]+-\d{6}-\d{6}/;
-
   async getRecordReference(): Promise<string> {
-    const headingText = (await this.pageHeading().textContent()) ?? '';
-    const reference = headingText.match(this.recordReferencePattern)?.[0];
-    if (!reference) {
-      throw new Error(`No catch record reference found in the trip date heading: "${headingText.trim()}"`);
-    }
+    const reference = (await this.pageHeading().innerText()).match(recordReferencePattern)?.[0];
+    if (!reference) throw new Error('The trip date heading did not include a catch record reference');
     return reference;
   }
 

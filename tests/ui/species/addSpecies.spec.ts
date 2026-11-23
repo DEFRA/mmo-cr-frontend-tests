@@ -40,7 +40,7 @@ test.describe('Add species to a catch record', () => {
 
   // Every test starts a catch record, so its draft is deleted after each test
   test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteAllDrafts();
+    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(

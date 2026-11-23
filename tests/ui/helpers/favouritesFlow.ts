@@ -1,3 +1,9 @@
+/**
+ * Reusable journeys for adding and removing favourite ports, gear and species on the account page.
+ *
+ * @author Randhir Patel
+ * @since 2026-10-28
+ */
 import { expect } from '@playwright/test';
 import { type AccountPage } from '../../../pages/accountPage';
 import { type AddPortPage } from '../../../pages/addPortPage';

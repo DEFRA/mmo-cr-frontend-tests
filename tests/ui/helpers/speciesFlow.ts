@@ -1,3 +1,9 @@
+/**
+ * Reusable journeys for searching for and selecting species.
+ *
+ * @author Randhir Patel
+ * @since 2026-10-28
+ */
 import { expect } from '@playwright/test';
 import { type AddSpeciesPage } from '../../../pages/addSpeciesPage';
 

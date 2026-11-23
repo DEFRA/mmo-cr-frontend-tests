@@ -5,6 +5,7 @@
  * @since 2026-11-16
  */
 import { expect, test } from '../../../fixtures/commonfixture';
+import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
 
 type Species = {
   name: string;
@@ -63,19 +64,24 @@ const invalidOptionalWeightCases: OptionalWeightCase[] = [
 ];
 
 test.describe('Species catch weight entry', () => {
-  test.beforeEach(async ({ navigationFlow }) => {
+  let addedFavourites: Favourites = noFavourites;
+
+  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
+    addedFavourites = noFavourites;
     await test.step('The user is on the species selection page', async () => {
       await navigationFlow.signIn({
         requiredCredentialsMessage:
           'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for catch weight UI tests'
       });
+      addedFavourites = await catchRecordFlow.ensureFavourites({ ports: [], gears: [], species: [cod.name] });
       await navigationFlow.openSpeciesSelectionForNewRecord();
     });
   });
 
   // Each test starts a catch record, so its draft is deleted after each test
   test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteAllDrafts();
+    await catchRecordFlow.deleteCreatedDrafts();
+    await catchRecordFlow.restoreFavourites(addedFavourites);
   });
 
   test(

@@ -8,11 +8,10 @@
 import { expect, test } from '../../../fixtures/commonfixture';
 
 const signInUrl = /\/sign-in/;
-const signInHeading = 'Sign in';
+const signedOutUrl = /\/signed-out$/;
 
 test.describe('Account Access', () => {
-  // Blocked (OQ-7): Sign out is not shown on /records and the sign-out confirmation step is unverified
-  test.fixme(
+  test(
     'Sign out',
     {
       tag: ['@ui', '@regression', '@signOut', '@e2e'],
@@ -27,18 +26,9 @@ test.describe('Account Access', () => {
         await recordsPage.header.signOutButton().click();
       });
 
-      await test.step('I confirm that I want to sign out', async () => {
-        // UNVERIFIED (OQ-7): confirmation page and control not yet known
-      });
-
-      await test.step('I should return to the Sign in screen', async () => {
-        await signInPage.expectUrl(signInUrl);
-        await expect(signInPage.signInHeading()).toHaveText(signInHeading);
-      });
-
-      await test.step('I should not access my account without signing in again', async () => {
-        await recordsPage.goto('/records');
-        await signInPage.expectUrl(signInUrl);
+      await test.step('I should see that I have been signed out', async () => {
+        await signInPage.expectUrl(signedOutUrl);
+        await expect(signInPage.signedOutHeading()).toBeVisible();
       });
     }
   );

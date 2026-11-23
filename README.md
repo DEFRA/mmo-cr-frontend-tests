@@ -2,7 +2,7 @@ mmo-cr-frontend-tests
 
 A Playwright test suite that runs journey tests against the MMO Catch Recording frontend.
 
-The UI journey suite runs against Chromium, Chrome, Microsoft Edge, Firefox and desktop Safari.
+The UI journey suite runs against Chrome, Microsoft Edge, Firefox and desktop Safari.
 
 Internet Explorer 11 is not supported by Playwright and is therefore subject to separate technical confirmation. It is
 not included in the automated browser matrix until an IE11-compatible test approach is agreed.
@@ -51,7 +51,7 @@ npm install
 Install the browsers used by the UI projects when running locally for the first time:
 
 ```bash
-npx playwright install chromium firefox webkit chrome msedge
+npx playwright install firefox webkit chrome msedge
 ```
 
 ### Running local tests
@@ -60,15 +60,23 @@ Copy `.env.example` to `.env` (loaded automatically by [playwright.config.ts](pl
 `CATCH_RECORDING_ENV` to `dev`, `test` or `prod` to choose the frontend under test (defaults to `test`). Set
 `CATCH_RECORDING_EMAIL` and `CATCH_RECORDING_PASSWORD` for the test account used by the UI journeys.
 
-| Command               | Runs                                                       |
-| --------------------- | ---------------------------------------------------------- |
-| `npm test`            | All projects: every browser project plus the `api` project |
-| `npm run test:ui`     | UI tests in Chromium only                                  |
-| `npm run test:ui:all` | UI tests in Chromium, Chrome, Edge, Firefox and Safari     |
-| `npm run test:api`    | API tests only                                             |
+| Command                 | Runs                                                       |
+| ----------------------- | ---------------------------------------------------------- |
+| `npm test`              | All projects: every browser project plus the `api` project |
+| `npm run test:ui`       | UI tests in Chrome only                                    |
+| `npm run test:ui:all`   | UI tests in Chrome, Edge, Firefox and Safari               |
+| `npm run test:api`      | API tests only                                             |
+| `npm run test:pipeline` | Chrome UI tests plus API tests (used by the CDP pipeline)  |
 
 UI tests run with one worker because they use the same account and mutate its favourites. Keep browser
 projects sequential; parallel execution requires isolated accounts for each worker.
+
+Draft cleanup uses `catchRecordFlow.deleteCreatedDrafts()` to delete only drafts opened by the current
+test through `navigationFlow.openNewRecord()` (also used by `startCatchRecord()` and
+`catchRecordFlow.startRecord()`). Pre-existing and submitted records are preserved. The
+`createdRecords` session fixture applies this same cleanup, including drafts created before a journey
+fails. Cleanup errors remain test failures; the account-wide `draftCleanup: 'all'` option is no longer
+supported.
 
 To run the favourites scenarios across all configured browsers:
 
@@ -106,7 +114,7 @@ The Husky pre-commit hook runs `format:check` and `lint`.
 Set `CATCH_RECORDING_EMAIL` and `CATCH_RECORDING_PASSWORD` for a test account (for example in the local `.env` file), then run:
 
 ```bash
-npx playwright test tests/ui/gears/addGear.spec.ts --project=Chromium
+npx playwright test tests/ui/gears/addGear.spec.ts --project=Chrome
 ```
 
 These tests cover catalogue search and selection, required and invalid hook measurements (including zero), saving one or more gears, keyboard-only entry, and availability when starting a new catch record in the same login session. They create favourites in the test environment; use a dedicated test account. The zero-measurement test currently fails because the test environment accepts zero. Native datalist suggestion popups cannot be inspected reliably by Playwright; the search test checks the available matching option and the invalid-gear submission error instead. Offline synchronisation, audit records, mobile-app behavior, and performance targets require separate integration/device checks and are not asserted by this web UI spec.
@@ -153,6 +161,9 @@ npm run test:api
 
 Tests are run from the CDP-Portal under the Test Suites section. Before any changes can be run, a new docker image must be built, this will happen automatically when a pull request is merged into the `main` branch.
 You can check the progress of the build under the actions section of this repository. Builds typically take around 1-2 minutes.
+
+The CDP pipeline runs `npm run test:pipeline` (Chrome UI tests plus API tests) to stay within the pipeline time limit.
+Run the other browsers locally or through the GitHub journey tests workflow.
 
 The results of the test run are made available in the portal.
 

@@ -19,14 +19,17 @@ import {
 } from '../helpers/catchRecordFlow';
 
 const vesselName = 'ACHILLES';
-const plymouth = 'Plymouth';
-const lowestoft = 'Lowestoft';
-const areaCode = '46D86';
-const seineNets: GearData = { name: 'Seine nets (not specified)' };
+const departurePort = 'Hastings';
+const returnPort = 'Dover';
+const setLonglines: GearData = { name: 'Set longlines' };
 const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
-const gearCatches: GearCatch[] = [{ gear: seineNets, areaCode, species: [cod] }];
+const gearCatches: GearCatch[] = [{ gear: setLonglines, species: [cod] }];
 const submittedStatus = 'Submitted';
-const testFavourites: Favourites = { ports: [plymouth, lowestoft], gears: [seineNets.name], species: [cod.name] };
+const testFavourites: Favourites = {
+  ports: [departurePort, returnPort],
+  gears: [setLonglines.name],
+  species: [cod.name]
+};
 
 type TripScenario = { tripType: string; uat: string; tripDates?: TripDates; tripStepTitle: string };
 
@@ -46,15 +49,14 @@ test.describe('Create Catch Record', () => {
   let createdRecords: string[] = [];
 
   test.beforeEach(async () => {
-    // Full sign-in, favourites set-up and submission journey exceeds the default 30s test timeout
     test.slow();
     createdRecords = [];
     addedFavourites = noFavourites;
   });
 
   test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
     await catchRecordFlow.restoreFavourites(addedFavourites);
+    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   for (const { tripType, uat, tripDates, tripStepTitle } of tripScenarios) {
@@ -90,7 +92,7 @@ test.describe('Create Catch Record', () => {
         });
 
         await test.step('I enter ports and catch details', async () => {
-          await catchRecordFlow.selectPorts(plymouth, lowestoft);
+          await catchRecordFlow.selectPorts(departurePort, returnPort);
           await catchRecordFlow.selectGears(gearCatches.map(({ gear }) => gear));
           await catchRecordFlow.enterCatchDetailsForEachGear(gearCatches);
           await catchRecordFlow.confirmAllCatchLanded();
@@ -108,7 +110,6 @@ test.describe('Create Catch Record', () => {
         });
 
         await test.step('I should receive a catch record reference', async () => {
-          // The post-submit confirmation is unverified (OQ-1), so the reference is checked on the submitted record
           expect(reference).toMatch(recordReferencePattern);
           await recordsPage.openRecord(reference);
           await expect(submittedRecordPage.recordReference()).toHaveText(reference);

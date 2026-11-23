@@ -1,3 +1,9 @@
+/**
+ * Reusable journeys for signing in and navigating through the catch record pages.
+ *
+ * @author Randhir Patel
+ * @since 2026-10-27
+ */
 import { expect } from '@playwright/test';
 import { type AccountPage } from '../../../pages/accountPage';
 import { type AddPortPage } from '../../../pages/addPortPage';
@@ -24,6 +30,8 @@ export type SignInOptions = {
 };
 
 export class NavigationFlow {
+  readonly createdRecordReferences = new Set<string>();
+
   constructor(
     private readonly pages: {
       signInPage: SigninPage;
@@ -118,15 +126,25 @@ export class NavigationFlow {
     await expect(addSpeciesPage.speciesInput()).toBeEditable();
   }
 
-  async startCatchRecord(vesselName = defaultVessel): Promise<void> {
+  // Creates a draft for the vessel and stops on the trip-date question
+  async openNewRecord(vesselName = defaultVessel): Promise<void> {
     const { recordsPage, selectVesselPage, tripDatePage } = this.pages;
 
     await recordsPage.goto('/records');
     await recordsPage.createNewRecordButton().click();
     await selectVesselPage.selectVessel(vesselName);
     await selectVesselPage.clickSaveAndContinue();
+    await tripDatePage.expectUrl(/\/trip-date$/);
+    this.createdRecordReferences.add(await tripDatePage.getRecordReference());
+  }
+
+  async startCatchRecord(vesselName = defaultVessel): Promise<void> {
+    const { tripDatePage } = this.pages;
+
+    await this.openNewRecord(vesselName);
     await tripDatePage.yesRadio().check();
     await tripDatePage.clickSaveAndContinue();
+    await tripDatePage.expectUrl(/\/(departure-port|add-port)(\?|$)/);
   }
 
   async openStatisticalAreaMap(

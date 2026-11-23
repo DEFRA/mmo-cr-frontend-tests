@@ -11,6 +11,7 @@ const favouriteSpecies = 'Atlantic cod (COD)';
 const favouriteGear = 'Pots';
 const favouritePort = 'Plymouth';
 const vesselName = 'ACHILLES';
+const areaCode = '46D86';
 
 test.describe('Account details and selections', () => {
   let savedSelections = {
@@ -21,6 +22,7 @@ test.describe('Account details and selections', () => {
   let accountReadyForCleanup = false;
 
   test.beforeEach(async ({ navigationFlow, accountPage }) => {
+    test.slow();
     accountReadyForCleanup = false;
     await navigationFlow.signInAndOpenAccount({
       requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for account UI tests'
@@ -41,7 +43,7 @@ test.describe('Account details and selections', () => {
     if (!savedSelections.species) await favouritesFlow.removeSpeciesFromAccount(favouriteSpecies);
     if (!savedSelections.gear) await favouritesFlow.removeGearFromAccount(favouriteGear);
     if (!savedSelections.port) await favouritesFlow.removePortFromAccount(favouritePort);
-    await catchRecordFlow.deleteAllDrafts();
+    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(
@@ -51,8 +53,8 @@ test.describe('Account details and selections', () => {
       accountPage,
       favouritesFlow,
       navigationFlow,
-      addPortPage,
-      confirmSamePortPage,
+      catchRecordFlow,
+      departurePortPage,
       gearSelectionPage,
       speciesSelectionPage
     }) => {
@@ -63,7 +65,7 @@ test.describe('Account details and selections', () => {
       await test.step('My account displays my personal and vessel details', async () => {
         await expect(accountPage.personalDetailsHeading()).toBeVisible();
         await expect(accountPage.vesselDetailsHeading()).toBeVisible();
-        await expect(accountPage.vesselNameHeading()).toBeVisible();
+        await expect(accountPage.vesselNameHeading(vesselName)).toBeVisible();
         await expect(accountPage.summaryRow('Ports used')).toBeVisible();
         await expect(accountPage.summaryRow('Gear onboard')).toBeVisible();
         await expect(accountPage.summaryRow('Species caught')).toBeVisible();
@@ -97,20 +99,15 @@ test.describe('Account details and selections', () => {
 
       await test.step('My account selections are available in a new catch-record journey', async () => {
         await navigationFlow.startCatchRecord(vesselName);
-        await expect(addPortPage.page).toHaveURL(/\/add-port\?for=departure/);
-        await expect(addPortPage.portResultItem(favouritePort).getByRole('option')).toBeVisible();
-        await addPortPage.searchAndSelectPort(favouritePort);
-        await addPortPage.clickSaveAndContinue();
-        await expect(confirmSamePortPage.pageHeading()).toBeVisible();
-        await confirmSamePortPage.selectSamePort(true);
-        await confirmSamePortPage.clickSaveAndContinue();
+        await expect(departurePortPage.portRadio(favouritePort)).toBeVisible();
+        await catchRecordFlow.selectPorts(favouritePort, favouritePort);
 
         await expect(gearSelectionPage.pageHeading()).toBeVisible();
         await expect(gearSelectionPage.gearCheckbox(favouriteGear)).toBeVisible();
-        await gearSelectionPage.gearCheckbox(favouriteGear).check();
-        await gearSelectionPage.clickSaveAndContinue();
+        await catchRecordFlow.selectGears([{ name: favouriteGear }]);
+        await catchRecordFlow.selectAreaForCurrentGear(areaCode);
 
-        await expect(speciesSelectionPage.pageHeading()).toBeVisible();
+        await expect(speciesSelectionPage.pageHeadingForGear(favouriteGear.toLowerCase())).toBeVisible();
         await expect(speciesSelectionPage.speciesCheckbox(favouriteSpecies)).toBeVisible();
       });
 

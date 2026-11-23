@@ -6,7 +6,7 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { type Favourites, type GearData, type SpeciesCatch, noFavourites } from '../helpers/catchRecordFlow';
+import { type Favourites, type GearData, type SpeciesCatch } from '../helpers/catchRecordFlow';
 
 const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';
@@ -20,21 +20,7 @@ const noAnswer = 'No';
 const testFavourites: Favourites = { ports: [plymouth], gears: [pots.name], species: [cod.name] };
 
 test.describe('Landing Information', () => {
-  let addedFavourites: Favourites = noFavourites;
-  let createdRecords: string[] = [];
-
-  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
-    createdRecords = [];
-    await test.step('Setup: I am signed in with the test favourites saved', async () => {
-      await navigationFlow.signIn();
-      addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
-    });
-  });
-
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
-    await catchRecordFlow.restoreFavourites(addedFavourites);
-  });
+  test.use({ testFavourites });
 
   test(
     'Confirm all catch will be landed',
@@ -42,7 +28,7 @@ test.describe('Landing Information', () => {
       tag: ['@ui', '@regression', '@landingInformation', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-12' }
     },
-    async ({ catchRecordFlow, catchNotLandedPage, checkAnswersPage }) => {
+    async ({ createdRecords, catchRecordFlow, catchNotLandedPage, checkAnswersPage }) => {
       await test.step('I am completing my catch record', async () => {
         createdRecords.push(await catchRecordFlow.startRecord(vesselName));
         await catchRecordFlow.enterSameDayTrip();

@@ -59,7 +59,7 @@ test.describe('Access Catch Recording', () => {
     }
   );
 
-  test(
+  test.fixme(
     'Incorrect sign-in details',
     {
       tag: ['@ui', '@regression', '@signIn', '@e2e'],

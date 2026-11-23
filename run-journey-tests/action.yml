@@ -3,42 +3,35 @@ description: Starts the docker compose environment and runs the Playwright journ
 
 inputs:
   example-node-backend:
+    description: 'Image tag for the example node backend service'
     required: false
-    type: string
   example-node-frontend:
+    description: 'Image tag for the example node frontend service'
     required: false
-    type: string
   project:
     description: 'Which Playwright projects to run: all, ui or api'
     required: false
-    type: string
     default: all
   env:
     description: 'Environment to run tests against: dev, test or prod'
     required: false
-    type: string
     default: test
   browser:
     description: 'Playwright UI project to run, or "all"'
     required: false
-    type: string
-    default: Chromium
+    default: Chrome
   email:
     description: 'Email for sign-in tests'
     required: false
-    type: string
   password:
     description: 'Password for sign-in tests'
     required: false
-    type: string
   api-token:
     description: 'API token for API tests'
     required: false
-    type: string
   api-base-url:
     description: 'Base URL for API tests (defaults to the frontend URL)'
     required: false
-    type: string
 
 runs:
   using: 'composite'
@@ -66,8 +59,8 @@ runs:
           Edge) npx playwright install --with-deps msedge ;;
           Firefox) npx playwright install --with-deps firefox ;;
           Safari) npx playwright install --with-deps webkit ;;
-          all) npx playwright install --with-deps chromium chrome msedge firefox webkit ;;
-          *) npx playwright install --with-deps chromium ;;
+          all) npx playwright install --with-deps chrome msedge firefox webkit ;;
+          *) npx playwright install --with-deps chrome ;;
         esac
     - name: Start docker compose
       shell: bash

@@ -50,17 +50,18 @@ export class SpeciesSelectionPage extends BasePage {
     this.page.locator('.govuk-error-message[id^="weightAboveMinimum-"]').filter({ hasText: `(${speciesCode})` });
 
   public readonly weightBelowMinimumError = (speciesCode: string): Locator =>
-    this.page.locator(`#weightBelowMinimum-${speciesCode.toLowerCase()}-error`);
+    this.page.locator('.govuk-error-message[id^="weightBelowMinimum-"]').filter({ hasText: `(${speciesCode})` });
 
   public readonly weightDiscardedError = (speciesCode: string): Locator =>
-    this.page.locator(`#weightDiscarded-${speciesCode.toLowerCase()}-error`);
+    this.page.locator('.govuk-error-message[id^="weightDiscarded-"]').filter({ hasText: `(${speciesCode})` });
 
   public readonly addSpeciesLink = (): Locator => this.page.getByRole('link', { name: 'Add species' });
 
   public readonly removeSpeciesLink = (): Locator => this.page.getByRole('link', { name: 'Remove species' });
 
   async selectSpecies(speciesName: string) {
-    await this.speciesCheckbox(speciesName).click();
+    await this.page.waitForLoadState('load');
+    await this.speciesCheckbox(speciesName).check();
   }
 
   async enterSpeciesWeights(speciesCode: string, aboveMin: string, belowMin?: string, discarded?: string) {

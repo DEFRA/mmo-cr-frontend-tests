@@ -39,9 +39,9 @@ export class CheckAnswersPage extends BasePage {
 
   // Species regions share the species name, so narrow them by the gear named in their change links
   public readonly speciesSection = (speciesName: string, gearName: string): Locator =>
-    this.page
-      .getByRole('region', { name: speciesName, exact: true })
-      .filter({ has: this.page.getByRole('link', { name: `${speciesName}, ${gearName}` }) });
+    this.page.getByRole('region', { name: speciesName, exact: true }).filter({
+      has: this.page.getByRole('link', { name: `Change species for ${speciesName}, ${gearName}`, exact: true })
+    });
 
   public readonly speciesSummaryValue = (speciesName: string, gearName: string, key: string): Locator =>
     this.speciesSection(speciesName, gearName)

@@ -6,13 +6,7 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import {
-  type CatchRecordData,
-  type Favourites,
-  type GearData,
-  type SpeciesCatch,
-  noFavourites
-} from '../helpers/catchRecordFlow';
+import { type CatchRecordData, type Favourites, type GearData, type SpeciesCatch } from '../helpers/catchRecordFlow';
 
 const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';
@@ -28,21 +22,7 @@ const reviewRecord: CatchRecordData = {
 const testFavourites: Favourites = { ports: [plymouth], gears: [pots.name], species: [cod.name] };
 
 test.describe('Submit Catch Record', () => {
-  let addedFavourites: Favourites = noFavourites;
-  let createdRecords: string[] = [];
-
-  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
-    createdRecords = [];
-    await test.step('Setup: I am signed in with the test favourites saved', async () => {
-      await navigationFlow.signIn();
-      addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
-    });
-  });
-
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
-    await catchRecordFlow.restoreFavourites(addedFavourites);
-  });
+  test.use({ testFavourites });
 
   // Blocked (OQ-1, OQ-2): post-submit confirmation not verified; no declaration checkbox on the live review page
   test.fixme(
@@ -51,7 +31,7 @@ test.describe('Submit Catch Record', () => {
       tag: ['@ui', '@regression', '@submitCatchRecord', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-15' }
     },
-    async ({ catchRecordFlow, checkAnswersPage, submittedRecordPage }) => {
+    async ({ createdRecords, catchRecordFlow, checkAnswersPage, submittedRecordPage }) => {
       let reference = '';
 
       await test.step('I have reviewed my completed catch record', async () => {

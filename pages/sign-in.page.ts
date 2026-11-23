@@ -15,6 +15,8 @@ export class SigninPage extends BasePage {
   public readonly errorMessage = (): Locator => this.page.locator('#errorIsland');
 
   public readonly signInHeading = (): Locator => this.page.getByTestId('app-heading-title');
+  public readonly signedOutHeading = (): Locator =>
+    this.page.getByRole('heading', { name: 'You have been signed out' });
   public readonly troubleHeading = (): Locator =>
     this.page.getByRole('heading', { name: 'Having trouble signing in?' });
 

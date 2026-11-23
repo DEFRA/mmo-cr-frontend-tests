@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { errors, expect, type Locator, type Page } from '@playwright/test';
 
 /**
  * Provide shared page-object functionality.
@@ -90,7 +90,12 @@ export abstract class BasePage {
     const acceptButton = this.page.getByRole('button', { name: 'Accept additional cookies' });
     try {
       await acceptButton.click({ timeout: 3000 });
-    } catch {}
+    } catch (error) {
+      // The banner is only shown on a first visit, so a timeout means there is nothing to accept
+      if (!(error instanceof errors.TimeoutError)) {
+        throw error;
+      }
+    }
   }
 
   async clickSaveAndContinue() {
