@@ -46,7 +46,7 @@ test.describe('Add favourite gear', () => {
   // Page fixtures are per test, so clean-up runs after each test rather than in afterAll
   test.afterEach(async ({ gearFlow, catchRecordFlow }) => {
     await gearFlow.removeSavedGears(testFavouriteGears);
-    await catchRecordFlow.deleteAllDrafts();
+    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(

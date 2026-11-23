@@ -6,12 +6,7 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import {
-  type Favourites,
-  type GearCatch,
-  type GearData,
-  type SpeciesCatch
-} from '../helpers/catchRecordFlow';
+import { type Favourites, type GearCatch, type GearData, type SpeciesCatch } from '../helpers/catchRecordFlow';
 
 const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';
@@ -24,9 +19,9 @@ const sameSpeciesCatches: GearCatch[] = [
   { gear: pots, areaCode, species: [cod] },
   { gear: trollingLines, areaCode, species: [codWithTrollingLines] }
 ];
-const areaKey = 'Area majority catch caught';
+const areaKey = 'Area majority caught';
 const speciesCaughtKey = 'Species caught';
-const weightRetainedKey = 'Weight above minimum size retained (kg)';
+const weightRetainedKey = 'Weight above minimum size retained';
 const testFavourites: Favourites = {
   ports: [plymouth],
   gears: [pots.name, trollingLines.name],
@@ -63,7 +58,7 @@ test.describe('Species and Weight', () => {
       await test.step('The species and weight should be recorded', async () => {
         await checkAnswersPage.goto('/check-answers');
         await expect(checkAnswersPage.speciesSummaryValue(cod.name, pots.name, weightRetainedKey)).toHaveText(
-          cod.weight
+          `${cod.weight} kg`
         );
       });
 
@@ -97,7 +92,7 @@ test.describe('Species and Weight', () => {
         for (const { gear, species } of sameSpeciesCatches) {
           for (const caught of species) {
             await expect(checkAnswersPage.speciesSummaryValue(caught.name, gear.name, weightRetainedKey)).toHaveText(
-              caught.weight
+              `${caught.weight} kg`
             );
           }
         }

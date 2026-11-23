@@ -24,7 +24,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
 
   // Each test starts a catch record, so its draft is deleted after each test
   test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteAllDrafts();
+    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(

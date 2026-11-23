@@ -11,12 +11,12 @@ import { type Favourites, type GearData } from '../helpers/catchRecordFlow';
 const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';
 const seineNets: GearData = { name: 'Seine nets (not specified)' };
-const areaKey = 'Area majority catch caught';
+const areaKey = 'Statistical sub area';
 const statisticalSubAreaKey = 'Statistical sub area';
 const testFavourites: Favourites = { ports: [plymouth], gears: [seineNets.name], species: [] };
 
 test.describe('Catch Location', () => {
-  test.use({ testFavourites, draftCleanup: 'all' });
+  test.use({ testFavourites });
 
   test(
     'Record where catch was caught',

@@ -44,7 +44,8 @@ test.describe('Home page', () => {
         await expect(homePage.startNowButton()).toBeVisible();
         await expect(homePage.startNowButton()).toHaveAttribute('href', '/sign-in');
 
-        await expect(homePage.privacyNoticeLink()).toBeVisible();
+        await expect(homePage.privacyPolicyLink()).toBeVisible();
+        await expect(homePage.privacyPolicyLink()).toHaveAttribute('href', '/privacy-notice');
       });
     }
   );

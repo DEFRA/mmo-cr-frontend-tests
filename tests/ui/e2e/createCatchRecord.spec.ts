@@ -56,7 +56,7 @@ test.describe('Create Catch Record', () => {
 
   test.afterEach(async ({ catchRecordFlow }) => {
     await catchRecordFlow.restoreFavourites(addedFavourites);
-    await catchRecordFlow.deleteAllDrafts();
+    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   for (const { tripType, uat, tripDates, tripStepTitle } of tripScenarios) {

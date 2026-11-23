@@ -19,8 +19,8 @@ type MeasuredGearData = FavouriteGearData & {
 // Gear names and measurements confirmed by existing gear specs; validation messages confirmed on the live app
 const pots: MeasuredGearData = { name: 'Pots', gearDimension: '45' };
 const traps: FavouriteGearData = { name: 'Traps (not specified)' };
-const testFavouriteGears = [pots.name, traps.name];
 const seineNets = 'Seine nets (not specified)';
+const testFavouriteGears = [pots.name, traps.name, seineNets];
 const seineNetsSearchTerm = 'se';
 const isSeineNets = (name: string): boolean => name === seineNets;
 
@@ -43,7 +43,7 @@ test.describe('Add favourite gear', () => {
   // Page fixtures are per test, so clean-up runs after each test rather than in afterAll
   test.afterEach(async ({ gearFlow, catchRecordFlow }) => {
     await gearFlow.removeSavedGears(testFavouriteGears);
-    await catchRecordFlow.deleteAllDrafts();
+    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(

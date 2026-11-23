@@ -41,7 +41,7 @@ test.describe('Remove species', () => {
       await favouritesFlow.ensureSpeciesAdded(species.name);
     }
     await favouritesFlow.removeSpeciesFromAccount(shads.name);
-    await catchRecordFlow.deleteAllDrafts();
+    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(

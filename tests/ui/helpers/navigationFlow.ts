@@ -24,6 +24,8 @@ export type SignInOptions = {
 };
 
 export class NavigationFlow {
+  readonly createdRecordReferences = new Set<string>();
+
   constructor(
     private readonly pages: {
       signInPage: SigninPage;
@@ -127,6 +129,7 @@ export class NavigationFlow {
     await selectVesselPage.selectVessel(vesselName);
     await selectVesselPage.clickSaveAndContinue();
     await tripDatePage.expectUrl(/\/trip-date$/);
+    this.createdRecordReferences.add(await tripDatePage.getRecordReference());
   }
 
   async startCatchRecord(vesselName = defaultVessel): Promise<void> {
@@ -135,6 +138,7 @@ export class NavigationFlow {
     await this.openNewRecord(vesselName);
     await tripDatePage.yesRadio().check();
     await tripDatePage.clickSaveAndContinue();
+    await tripDatePage.expectUrl(/\/(departure-port|add-port)(\?|$)/);
   }
 
   async openStatisticalAreaMap(

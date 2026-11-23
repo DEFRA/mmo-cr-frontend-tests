@@ -26,11 +26,11 @@ const departureDateKey = 'Departure date';
 const returnDateKey = 'Return date';
 const departurePortKey = 'Departure port';
 const returnPortKey = 'Return port';
-const weightRetainedKey = 'Weight above minimum size retained (kg)';
+const weightRetainedKey = 'Weight above minimum size retained';
 const testFavourites: Favourites = { ports: [plymouth, lowestoft], gears: [pots.name], species: [cod.name] };
 
 test.describe('Unfinished Records', () => {
-  test.use({ testFavourites, draftCleanup: 'all' });
+  test.use({ testFavourites });
 
   let firstDraft: CatchRecordData;
   let secondDraft: CatchRecordData;
@@ -91,7 +91,7 @@ test.describe('Unfinished Records', () => {
         await expect(checkAnswersPage.summaryValue(departurePortKey)).toHaveText(firstDraft.departurePort);
         await expect(checkAnswersPage.summaryValue(returnPortKey)).toHaveText(firstDraft.returnPort);
         await expect(checkAnswersPage.speciesSummaryValue(cod.name, pots.name, weightRetainedKey)).toHaveText(
-          cod.weight
+          `${cod.weight} kg`
         );
       });
 

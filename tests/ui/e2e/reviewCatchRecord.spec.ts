@@ -23,8 +23,8 @@ const pots: GearData = { name: 'Pots' };
 const trollingLines: GearData = { name: 'Trolling lines' };
 const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
 const mackerel: SpeciesCatch = { name: 'Atlantic mackerel (MAC)', code: 'MAC', weight: '50' };
-const areaKey = 'Area majority catch caught';
-const weightRetainedKey = 'Weight above minimum size retained (kg)';
+const areaKey = 'Area majority caught';
+const weightRetainedKey = 'Weight above minimum size retained';
 const changeLinks = ['Change departure date', 'Change return date', 'Change departure port', 'Change return port'];
 const testFavourites: Favourites = {
   ports: [plymouth, lowestoft],
@@ -89,7 +89,7 @@ test.describe('Review Catch Record', () => {
         for (const { gear, species } of reviewRecord.gearCatches) {
           for (const caught of species) {
             await expect(checkAnswersPage.speciesSummaryValue(caught.name, gear.name, weightRetainedKey)).toHaveText(
-              caught.weight
+              `${caught.weight} kg`
             );
           }
         }

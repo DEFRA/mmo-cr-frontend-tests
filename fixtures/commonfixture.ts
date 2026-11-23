@@ -42,8 +42,6 @@ const pageObject =
 type CatchRecordSessionFixtures = {
   // Favourites the account needs for the test; set per describe block with test.use({ testFavourites })
   testFavourites: Favourites;
-  // 'created' deletes only drafts the test recorded; 'all' deletes every draft on the account
-  draftCleanup: 'created' | 'all';
   // Signs in and saves testFavourites; afterwards deletes drafts and removes the favourites it added
   createdRecords: string[];
 };
@@ -86,8 +84,7 @@ type CommonFixtures = CatchRecordSessionFixtures & {
 
 export const test = base.extend<CommonFixtures>({
   testFavourites: [noFavourites, { option: true }],
-  draftCleanup: ['created', { option: true }],
-  createdRecords: async ({ navigationFlow, catchRecordFlow, testFavourites, draftCleanup }, use) => {
+  createdRecords: async ({ navigationFlow, catchRecordFlow, testFavourites }, use) => {
     const createdRecords: string[] = [];
     let addedFavourites: Favourites = noFavourites;
 
@@ -98,11 +95,7 @@ export const test = base.extend<CommonFixtures>({
 
     await use(createdRecords);
 
-    if (draftCleanup === 'all') {
-      await catchRecordFlow.deleteAllDrafts();
-    } else {
-      await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
-    }
+    await catchRecordFlow.deleteCreatedDrafts();
     await catchRecordFlow.restoreFavourites(addedFavourites);
   },
   navigationFlow: async (

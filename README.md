@@ -71,6 +71,13 @@ Copy `.env.example` to `.env` (loaded automatically by [playwright.config.ts](pl
 UI tests run with one worker because they use the same account and mutate its favourites. Keep browser
 projects sequential; parallel execution requires isolated accounts for each worker.
 
+Draft cleanup uses `catchRecordFlow.deleteCreatedDrafts()` to delete only drafts opened by the current
+test through `navigationFlow.openNewRecord()` (also used by `startCatchRecord()` and
+`catchRecordFlow.startRecord()`). Pre-existing and submitted records are preserved. The
+`createdRecords` session fixture applies this same cleanup, including drafts created before a journey
+fails. Cleanup errors remain test failures; the account-wide `draftCleanup: 'all'` option is no longer
+supported.
+
 To run the favourites scenarios across all configured browsers:
 
 ```bash

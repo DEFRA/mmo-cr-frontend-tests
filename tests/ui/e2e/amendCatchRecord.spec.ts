@@ -22,8 +22,8 @@ const seineNets: GearData = { name: 'Seine nets (not specified)' };
 const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
 const returnDateKey = 'Return date';
 const changeReturnDateLink = 'Change return date';
-const areaKey = 'Area majority catch caught';
-const weightRetainedKey = 'Weight above minimum size retained (kg)';
+const areaKey = 'Statistical sub area';
+const weightRetainedKey = 'Weight above minimum size retained';
 const testFavourites: Favourites = { ports: [plymouth, lowestoft], gears: [seineNets.name], species: [cod.name] };
 
 test.describe('Amend Catch Record', () => {
@@ -55,7 +55,10 @@ test.describe('Amend Catch Record', () => {
       await test.step('I am reviewing my catch record', async () => {
         createdRecords.push(await catchRecordFlow.completeRecordToReview(reviewRecord));
         for (const { gear } of reviewRecord.gearCatches) {
-          mapAreaByGear.set(gear.name, (await checkAnswersPage.gearSummaryValue(gear.name, areaKey).innerText()).trim());
+          mapAreaByGear.set(
+            gear.name,
+            (await checkAnswersPage.gearSummaryValue(gear.name, areaKey).innerText()).trim()
+          );
         }
       });
 
@@ -90,7 +93,7 @@ test.describe('Amend Catch Record', () => {
           await expect(checkAnswersPage.gearSummaryValue(gear.name, areaKey)).toHaveText(mapAreaByGear.get(gear.name)!);
           for (const caught of species) {
             await expect(checkAnswersPage.speciesSummaryValue(caught.name, gear.name, weightRetainedKey)).toHaveText(
-              caught.weight
+              `${caught.weight} kg`
             );
           }
         }

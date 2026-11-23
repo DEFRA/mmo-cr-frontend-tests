@@ -70,7 +70,7 @@ function requireDefined<T>(value: T | undefined, message: string): T {
 test.describe('ICES statistical sub-rectangle map', () => {
   // Each test starts a catch record, so its draft is deleted after each test
   test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteAllDrafts();
+    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(
