@@ -1,3 +1,9 @@
+/**
+ * Reusable journeys for signing in and navigating through the catch record pages.
+ *
+ * @author Randhir Patel
+ * @since 2026-10-27
+ */
 import { expect } from '@playwright/test';
 import { type AccountPage } from '../../../pages/accountPage';
 import { type AddPortPage } from '../../../pages/addPortPage';

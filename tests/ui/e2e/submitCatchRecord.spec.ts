@@ -6,12 +6,7 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import {
-  type CatchRecordData,
-  type Favourites,
-  type GearData,
-  type SpeciesCatch
-} from '../helpers/catchRecordFlow';
+import { type CatchRecordData, type Favourites, type GearData, type SpeciesCatch } from '../helpers/catchRecordFlow';
 
 const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';

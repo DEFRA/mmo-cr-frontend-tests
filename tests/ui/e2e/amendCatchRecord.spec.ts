@@ -7,9 +7,9 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import {
-  type CatchRecordData,
   type Favourites,
   type GearData,
+  type MultiDayCatchRecordData,
   type SpeciesCatch,
   daysAgo,
   reviewDate
@@ -29,7 +29,7 @@ const testFavourites: Favourites = { ports: [plymouth, lowestoft], gears: [seine
 test.describe('Amend Catch Record', () => {
   test.use({ testFavourites });
 
-  let reviewRecord: CatchRecordData;
+  let reviewRecord: MultiDayCatchRecordData;
 
   test.beforeEach(() => {
     reviewRecord = {
@@ -82,7 +82,7 @@ test.describe('Amend Catch Record', () => {
       await test.step('All unchanged information should remain the same', async () => {
         const unchangedTripInformation: [string, string][] = [
           ['Vessel', reviewRecord.vesselName],
-          ['Departure date', reviewDate(reviewRecord.tripDates!.departureDate)],
+          ['Departure date', reviewDate(reviewRecord.tripDates.departureDate)],
           ['Departure port', reviewRecord.departurePort],
           ['Return port', reviewRecord.returnPort]
         ];

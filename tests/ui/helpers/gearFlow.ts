@@ -1,3 +1,9 @@
+/**
+ * Reusable journeys for adding, selecting and removing fishing gear.
+ *
+ * @author Randhir Patel
+ * @since 2026-10-28
+ */
 import { expect } from '@playwright/test';
 import { type AccountPage } from '../../../pages/accountPage';
 import { type AddGearPage } from '../../../pages/addGearPage';

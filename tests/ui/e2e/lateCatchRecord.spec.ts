@@ -7,9 +7,9 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import {
-  type CatchRecordData,
   type Favourites,
   type GearData,
+  type MultiDayCatchRecordData,
   type SpeciesCatch,
   daysAgo,
   reviewDate
@@ -27,7 +27,7 @@ const testFavourites: Favourites = { ports: [plymouth], gears: [pots.name], spec
 test.describe('Late Catch Record', () => {
   test.use({ testFavourites });
 
-  let lateRecord: CatchRecordData;
+  let lateRecord: MultiDayCatchRecordData;
 
   test.beforeEach(() => {
     lateRecord = {
@@ -61,7 +61,7 @@ test.describe('Late Catch Record', () => {
 
       await test.step('I should be able to check the trip end date', async () => {
         await expect(checkAnswersPage.summaryValue(returnDateKey)).toHaveText(
-          reviewDate(lateRecord.tripDates!.returnDate)
+          reviewDate(lateRecord.tripDates.returnDate)
         );
         await expect(checkAnswersPage.changeLinkNamed(changeReturnDateLink)).toBeVisible();
       });

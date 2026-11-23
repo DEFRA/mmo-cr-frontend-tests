@@ -35,6 +35,8 @@ export type CatchRecordData = {
   notLanded?: NotLandedCatch;
 };
 
+export type MultiDayCatchRecordData = CatchRecordData & { tripDates: TripDates };
+
 export const noFavourites: Favourites = { ports: [], gears: [], species: [] };
 
 export { recordReferencePattern } from '../../../pages/tripDatePage';

@@ -1,3 +1,9 @@
+/**
+ * Reusable journeys for selecting a statistical area on the map.
+ *
+ * @author Randhir Patel
+ * @since 2026-10-28
+ */
 import { expect } from '@playwright/test';
 import { type MapLabel, type StatisticalAreaPage } from '../../../pages/statisticalAreaPage';
 import { type NavigationFlow } from './navigationFlow';

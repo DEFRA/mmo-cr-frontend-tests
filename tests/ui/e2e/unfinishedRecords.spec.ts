@@ -10,6 +10,7 @@ import {
   type CatchRecordData,
   type Favourites,
   type GearData,
+  type MultiDayCatchRecordData,
   type SpeciesCatch,
   daysAgo,
   recordsListDate,
@@ -32,7 +33,7 @@ const testFavourites: Favourites = { ports: [plymouth, lowestoft], gears: [pots.
 test.describe('Unfinished Records', () => {
   test.use({ testFavourites });
 
-  let firstDraft: CatchRecordData;
+  let firstDraft: MultiDayCatchRecordData;
   let secondDraft: CatchRecordData;
 
   test.beforeEach(() => {
@@ -83,10 +84,10 @@ test.describe('Unfinished Records', () => {
       await test.step('My previously entered information should be retained', async () => {
         await checkAnswersPage.goto('/check-answers');
         await expect(checkAnswersPage.summaryValue(departureDateKey)).toHaveText(
-          reviewDate(firstDraft.tripDates!.departureDate)
+          reviewDate(firstDraft.tripDates.departureDate)
         );
         await expect(checkAnswersPage.summaryValue(returnDateKey)).toHaveText(
-          reviewDate(firstDraft.tripDates!.returnDate)
+          reviewDate(firstDraft.tripDates.returnDate)
         );
         await expect(checkAnswersPage.summaryValue(departurePortKey)).toHaveText(firstDraft.departurePort);
         await expect(checkAnswersPage.summaryValue(returnPortKey)).toHaveText(firstDraft.returnPort);
@@ -174,7 +175,7 @@ test.describe('Unfinished Records', () => {
         await expect(tripDatePage.pageHeading()).not.toContainText(secondReference);
         await checkAnswersPage.goto('/check-answers');
         await expect(checkAnswersPage.summaryValue(returnDateKey)).toHaveText(
-          reviewDate(firstDraft.tripDates!.returnDate)
+          reviewDate(firstDraft.tripDates.returnDate)
         );
         await expect(checkAnswersPage.summaryValue(returnPortKey)).toHaveText(firstDraft.returnPort);
       });

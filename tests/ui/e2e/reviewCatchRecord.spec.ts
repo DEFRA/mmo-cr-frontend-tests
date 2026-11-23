@@ -7,9 +7,9 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import {
-  type CatchRecordData,
   type Favourites,
   type GearData,
+  type MultiDayCatchRecordData,
   type SpeciesCatch,
   daysAgo,
   reviewDate
@@ -35,7 +35,7 @@ const testFavourites: Favourites = {
 test.describe('Review Catch Record', () => {
   test.use({ testFavourites });
 
-  let reviewRecord: CatchRecordData;
+  let reviewRecord: MultiDayCatchRecordData;
 
   test.beforeEach(() => {
     reviewRecord = {
@@ -68,8 +68,8 @@ test.describe('Review Catch Record', () => {
       await test.step('I should see the trip information', async () => {
         const tripInformation: [string, string][] = [
           ['Vessel', reviewRecord.vesselName],
-          ['Departure date', reviewDate(reviewRecord.tripDates!.departureDate)],
-          ['Return date', reviewDate(reviewRecord.tripDates!.returnDate)],
+          ['Departure date', reviewDate(reviewRecord.tripDates.departureDate)],
+          ['Return date', reviewDate(reviewRecord.tripDates.returnDate)],
           ['Departure port', reviewRecord.departurePort],
           ['Return port', reviewRecord.returnPort]
         ];
