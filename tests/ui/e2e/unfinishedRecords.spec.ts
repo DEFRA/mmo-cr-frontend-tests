@@ -12,7 +12,6 @@ import {
   type GearData,
   type SpeciesCatch,
   daysAgo,
-  noFavourites,
   recordsListDate,
   reviewDate
 } from '../helpers/catchRecordFlow';
@@ -31,15 +30,14 @@ const weightRetainedKey = 'Weight above minimum size retained (kg)';
 const testFavourites: Favourites = { ports: [plymouth, lowestoft], gears: [pots.name], species: [cod.name] };
 
 test.describe('Unfinished Records', () => {
-  let addedFavourites: Favourites = noFavourites;
-  let createdRecords: string[] = [];
+  test.use({ testFavourites, draftCleanup: 'all' });
+
   let firstDraft: CatchRecordData;
   let secondDraft: CatchRecordData;
 
-  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
+  test.beforeEach(() => {
     // Completing one or two drafts to review exceeds the default 30s test timeout
     test.slow();
-    createdRecords = [];
     firstDraft = {
       vesselName,
       tripDates: { departureDate: daysAgo(2), returnDate: daysAgo(1) },
@@ -53,16 +51,6 @@ test.describe('Unfinished Records', () => {
       returnPort: plymouth,
       gearCatches: [{ gear: pots, species: [cod] }]
     };
-    await test.step('Setup: I am signed in with the test favourites saved', async () => {
-      await navigationFlow.signIn();
-      addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
-    });
-  });
-
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
-    await catchRecordFlow.restoreFavourites(addedFavourites);
-    await catchRecordFlow.deleteAllDrafts();
   });
 
   test(
@@ -71,7 +59,7 @@ test.describe('Unfinished Records', () => {
       tag: ['@ui', '@regression', '@draftRecords', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-19' }
     },
-    async ({ catchRecordFlow, recordsPage, draftRecordPage, checkAnswersPage, tripDatePage }) => {
+    async ({ createdRecords, catchRecordFlow, recordsPage, draftRecordPage, checkAnswersPage, tripDatePage }) => {
       let reference = '';
 
       await test.step('I started a catch record', async () => {
@@ -123,7 +111,7 @@ test.describe('Unfinished Records', () => {
       tag: ['@ui', '@regression', '@draftRecords', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-20' }
     },
-    async ({ catchRecordFlow, recordsPage, draftRecordPage }) => {
+    async ({ createdRecords, catchRecordFlow, recordsPage, draftRecordPage }) => {
       let reference = '';
 
       await test.step('I have an Unsent catch record', async () => {
@@ -162,7 +150,7 @@ test.describe('Unfinished Records', () => {
       tag: ['@ui', '@regression', '@draftRecords', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-28' }
     },
-    async ({ catchRecordFlow, recordsPage, draftRecordPage, tripDatePage, checkAnswersPage }) => {
+    async ({ createdRecords, catchRecordFlow, recordsPage, draftRecordPage, tripDatePage, checkAnswersPage }) => {
       const secondDraftTripEnd = daysAgo(0);
       let firstReference = '';
       let secondReference = '';

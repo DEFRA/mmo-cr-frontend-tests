@@ -10,8 +10,7 @@ import {
   type Favourites,
   type GearCatch,
   type GearData,
-  type SpeciesCatch,
-  noFavourites
+  type SpeciesCatch
 } from '../helpers/catchRecordFlow';
 
 const vesselName = 'ACHILLES';
@@ -35,21 +34,7 @@ const testFavourites: Favourites = {
 };
 
 test.describe('Fishing Gear', () => {
-  let addedFavourites: Favourites = noFavourites;
-  let createdRecords: string[] = [];
-
-  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
-    createdRecords = [];
-    await test.step('Setup: I am signed in with the test favourites saved', async () => {
-      await navigationFlow.signIn();
-      addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
-    });
-  });
-
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
-    await catchRecordFlow.restoreFavourites(addedFavourites);
-  });
+  test.use({ testFavourites });
 
   test(
     'Catch using multiple gears',
@@ -57,7 +42,7 @@ test.describe('Fishing Gear', () => {
       tag: ['@ui', '@regression', '@fishingGear', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-07' }
     },
-    async ({ catchRecordFlow, checkAnswersPage }) => {
+    async ({ createdRecords, catchRecordFlow, checkAnswersPage }) => {
       await test.step('I am creating a catch record', async () => {
         createdRecords.push(await catchRecordFlow.startRecord(vesselName));
         await catchRecordFlow.enterSameDayTrip();

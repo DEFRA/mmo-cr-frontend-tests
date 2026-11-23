@@ -6,7 +6,7 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
+import { type Favourites } from '../helpers/catchRecordFlow';
 
 const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';
@@ -16,21 +16,7 @@ const returnPortKey = 'Return port';
 const testFavourites: Favourites = { ports: [plymouth, lowestoft], gears: [], species: [] };
 
 test.describe('Trip Information', () => {
-  let addedFavourites: Favourites = noFavourites;
-  let createdRecords: string[] = [];
-
-  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
-    createdRecords = [];
-    await test.step('Setup: I am signed in with the test favourites saved', async () => {
-      await navigationFlow.signIn();
-      addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
-    });
-  });
-
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
-    await catchRecordFlow.restoreFavourites(addedFavourites);
-  });
+  test.use({ testFavourites });
 
   test(
     'Different departure and return ports',
@@ -38,7 +24,14 @@ test.describe('Trip Information', () => {
       tag: ['@ui', '@regression', '@tripDetails', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-06' }
     },
-    async ({ catchRecordFlow, departurePortPage, returnPortPage, checkAnswersPage, gearSelectionPage }) => {
+    async ({
+      createdRecords,
+      catchRecordFlow,
+      departurePortPage,
+      returnPortPage,
+      checkAnswersPage,
+      gearSelectionPage
+    }) => {
       await test.step('I am creating a catch record', async () => {
         createdRecords.push(await catchRecordFlow.startRecord(vesselName));
         await catchRecordFlow.enterSameDayTrip();

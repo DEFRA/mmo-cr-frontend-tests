@@ -6,7 +6,7 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { type Favourites, type GearData, noFavourites } from '../helpers/catchRecordFlow';
+import { type Favourites, type GearData } from '../helpers/catchRecordFlow';
 
 const vesselName = 'ACHILLES';
 const plymouth = 'Plymouth';
@@ -16,21 +16,7 @@ const statisticalSubAreaKey = 'Statistical sub area';
 const testFavourites: Favourites = { ports: [plymouth], gears: [seineNets.name], species: [] };
 
 test.describe('Catch Location', () => {
-  let addedFavourites: Favourites = noFavourites;
-  let createdRecords: string[] = [];
-
-  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
-    createdRecords = [];
-    await test.step('Setup: I am signed in with the test favourites saved', async () => {
-      await navigationFlow.signIn();
-      addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
-    });
-  });
-
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteAllDrafts();
-    await catchRecordFlow.restoreFavourites(addedFavourites);
-  });
+  test.use({ testFavourites, draftCleanup: 'all' });
 
   test(
     'Record where catch was caught',
@@ -38,7 +24,7 @@ test.describe('Catch Location', () => {
       tag: ['@ui', '@regression', '@catchLocation', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-08' }
     },
-    async ({ catchRecordFlow, checkAnswersPage, speciesSelectionPage }) => {
+    async ({ createdRecords, catchRecordFlow, checkAnswersPage, speciesSelectionPage }) => {
       let areaCode = '';
 
       await test.step('I am creating a catch record', async () => {

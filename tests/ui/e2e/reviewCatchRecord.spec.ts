@@ -12,7 +12,6 @@ import {
   type GearData,
   type SpeciesCatch,
   daysAgo,
-  noFavourites,
   reviewDate
 } from '../helpers/catchRecordFlow';
 
@@ -34,12 +33,11 @@ const testFavourites: Favourites = {
 };
 
 test.describe('Review Catch Record', () => {
-  let addedFavourites: Favourites = noFavourites;
-  let createdRecords: string[] = [];
+  test.use({ testFavourites });
+
   let reviewRecord: CatchRecordData;
 
-  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
-    createdRecords = [];
+  test.beforeEach(() => {
     reviewRecord = {
       vesselName,
       tripDates: { departureDate: daysAgo(2), returnDate: daysAgo(1) },
@@ -50,15 +48,6 @@ test.describe('Review Catch Record', () => {
         { gear: trollingLines, areaCode, species: [mackerel] }
       ]
     };
-    await test.step('Setup: I am signed in with the test favourites saved', async () => {
-      await navigationFlow.signIn();
-      addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
-    });
-  });
-
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
-    await catchRecordFlow.restoreFavourites(addedFavourites);
   });
 
   test(
@@ -67,7 +56,7 @@ test.describe('Review Catch Record', () => {
       tag: ['@ui', '@regression', '@reviewCatchRecord', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-13' }
     },
-    async ({ catchRecordFlow, checkAnswersPage }) => {
+    async ({ createdRecords, catchRecordFlow, checkAnswersPage }) => {
       await test.step('I have completed all required catch information', async () => {
         createdRecords.push(await catchRecordFlow.completeRecordToReview(reviewRecord));
       });

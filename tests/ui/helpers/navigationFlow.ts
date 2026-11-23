@@ -118,13 +118,21 @@ export class NavigationFlow {
     await expect(addSpeciesPage.speciesInput()).toBeEditable();
   }
 
-  async startCatchRecord(vesselName = defaultVessel): Promise<void> {
+  // Creates a draft for the vessel and stops on the trip-date question
+  async openNewRecord(vesselName = defaultVessel): Promise<void> {
     const { recordsPage, selectVesselPage, tripDatePage } = this.pages;
 
     await recordsPage.goto('/records');
     await recordsPage.createNewRecordButton().click();
     await selectVesselPage.selectVessel(vesselName);
     await selectVesselPage.clickSaveAndContinue();
+    await tripDatePage.expectUrl(/\/trip-date$/);
+  }
+
+  async startCatchRecord(vesselName = defaultVessel): Promise<void> {
+    const { tripDatePage } = this.pages;
+
+    await this.openNewRecord(vesselName);
     await tripDatePage.yesRadio().check();
     await tripDatePage.clickSaveAndContinue();
   }

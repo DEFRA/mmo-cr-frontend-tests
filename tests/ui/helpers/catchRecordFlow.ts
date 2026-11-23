@@ -7,7 +7,6 @@ import { type DraftRecordPage } from '../../../pages/draftRecordPage';
 import { type GearSelectionPage } from '../../../pages/gearSelectionPage';
 import { type RecordsPage } from '../../../pages/recordsPage';
 import { type ReturnPortPage } from '../../../pages/returnPortPage';
-import { type SelectVesselPage } from '../../../pages/selectVesselPage';
 import { type SpeciesNotLandedPage } from '../../../pages/speciesNotLandedPage';
 import { type SpeciesSelectionPage } from '../../../pages/speciesSelectionPage';
 import { type StatisticalAreaOtherPage } from '../../../pages/statisticalAreaOtherPage';
@@ -69,7 +68,6 @@ export class CatchRecordFlow {
     private readonly pages: {
       accountPage: AccountPage;
       recordsPage: RecordsPage;
-      selectVesselPage: SelectVesselPage;
       tripDatePage: TripDatePage;
       tripDepartureDatePage: TripDepartureDatePage;
       tripReturnDatePage: TripReturnDatePage;
@@ -119,13 +117,7 @@ export class CatchRecordFlow {
 
   // Creates the draft and returns its reference
   async startRecord(vesselName: string): Promise<string> {
-    const { recordsPage, selectVesselPage, tripDatePage } = this.pages;
-
-    await recordsPage.goto('/records');
-    await recordsPage.createNewRecordButton().click();
-    await selectVesselPage.selectVessel(vesselName);
-    await selectVesselPage.clickSaveAndContinue();
-    await tripDatePage.expectUrl(/\/trip-date$/);
+    await this.navigationFlow.openNewRecord(vesselName);
     return this.readRecordReference();
   }
 

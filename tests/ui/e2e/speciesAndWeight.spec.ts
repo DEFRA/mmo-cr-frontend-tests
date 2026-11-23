@@ -10,8 +10,7 @@ import {
   type Favourites,
   type GearCatch,
   type GearData,
-  type SpeciesCatch,
-  noFavourites
+  type SpeciesCatch
 } from '../helpers/catchRecordFlow';
 
 const vesselName = 'ACHILLES';
@@ -35,21 +34,7 @@ const testFavourites: Favourites = {
 };
 
 test.describe('Species and Weight', () => {
-  let addedFavourites: Favourites = noFavourites;
-  let createdRecords: string[] = [];
-
-  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
-    createdRecords = [];
-    await test.step('Setup: I am signed in with the test favourites saved', async () => {
-      await navigationFlow.signIn();
-      addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
-    });
-  });
-
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
-    await catchRecordFlow.restoreFavourites(addedFavourites);
-  });
+  test.use({ testFavourites });
 
   test(
     'Record species and catch weight',
@@ -57,7 +42,7 @@ test.describe('Species and Weight', () => {
       tag: ['@ui', '@regression', '@catchWeightRecording', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-09' }
     },
-    async ({ catchRecordFlow, speciesSelectionPage, checkAnswersPage }) => {
+    async ({ createdRecords, catchRecordFlow, speciesSelectionPage, checkAnswersPage }) => {
       await test.step('I have recorded the fishing gear and catch area', async () => {
         createdRecords.push(await catchRecordFlow.startRecord(vesselName));
         await catchRecordFlow.enterSameDayTrip();
@@ -95,7 +80,7 @@ test.describe('Species and Weight', () => {
       tag: ['@ui', '@regression', '@catchWeightRecording', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-10' }
     },
-    async ({ catchRecordFlow, checkAnswersPage }) => {
+    async ({ createdRecords, catchRecordFlow, checkAnswersPage }) => {
       await test.step('I used more than one fishing gear', async () => {
         createdRecords.push(await catchRecordFlow.startRecord(vesselName));
         await catchRecordFlow.enterSameDayTrip();

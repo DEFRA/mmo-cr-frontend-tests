@@ -31,9 +31,24 @@ import { GearFlow } from '../tests/ui/helpers/gearFlow';
 import { SpeciesFlow } from '../tests/ui/helpers/speciesFlow';
 import { FavouritesFlow } from '../tests/ui/helpers/favouritesFlow';
 import { SpeciesNotLandedPage } from '../pages/speciesNotLandedPage';
-import { CatchRecordFlow } from '../tests/ui/helpers/catchRecordFlow';
+import { CatchRecordFlow, type Favourites, noFavourites } from '../tests/ui/helpers/catchRecordFlow';
 
-type CommonFixtures = {
+const pageObject =
+  <T>(PageObjectClass: new (page: Page) => T) =>
+  async ({ page }: { page: Page }, use: (pageObject: T) => Promise<void>) => {
+    await use(new PageObjectClass(page));
+  };
+
+type CatchRecordSessionFixtures = {
+  // Favourites the account needs for the test; set per describe block with test.use({ testFavourites })
+  testFavourites: Favourites;
+  // 'created' deletes only drafts the test recorded; 'all' deletes every draft on the account
+  draftCleanup: 'created' | 'all';
+  // Signs in and saves testFavourites; afterwards deletes drafts and removes the favourites it added
+  createdRecords: string[];
+};
+
+type CommonFixtures = CatchRecordSessionFixtures & {
   signInPage: SigninPage;
   homePage: HomePage;
   recordsPage: RecordsPage;
@@ -70,6 +85,26 @@ type CommonFixtures = {
 };
 
 export const test = base.extend<CommonFixtures>({
+  testFavourites: [noFavourites, { option: true }],
+  draftCleanup: ['created', { option: true }],
+  createdRecords: async ({ navigationFlow, catchRecordFlow, testFavourites, draftCleanup }, use) => {
+    const createdRecords: string[] = [];
+    let addedFavourites: Favourites = noFavourites;
+
+    await base.step('Setup: I am signed in with the test favourites saved', async () => {
+      await navigationFlow.signIn();
+      addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
+    });
+
+    await use(createdRecords);
+
+    if (draftCleanup === 'all') {
+      await catchRecordFlow.deleteAllDrafts();
+    } else {
+      await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
+    }
+    await catchRecordFlow.restoreFavourites(addedFavourites);
+  },
   navigationFlow: async (
     {
       signInPage,
@@ -130,7 +165,6 @@ export const test = base.extend<CommonFixtures>({
     {
       accountPage,
       recordsPage,
-      selectVesselPage,
       tripDatePage,
       tripDepartureDatePage,
       tripReturnDatePage,
@@ -154,7 +188,6 @@ export const test = base.extend<CommonFixtures>({
         {
           accountPage,
           recordsPage,
-          selectVesselPage,
           tripDatePage,
           tripDepartureDatePage,
           tripReturnDatePage,
@@ -174,90 +207,32 @@ export const test = base.extend<CommonFixtures>({
       )
     );
   },
-  speciesNotLandedPage: async ({ page }: { page: Page }, use) => {
-    await use(new SpeciesNotLandedPage(page));
-  },
-  signInPage: async ({ page }: { page: Page }, use) => {
-    const signInPage = new SigninPage(page);
-    await use(signInPage);
-  },
-  homePage: async ({ page }: { page: Page }, use) => {
-    const homePage = new HomePage(page);
-    await use(homePage);
-  },
-  recordsPage: async ({ page }: { page: Page }, use) => {
-    const recordsPage = new RecordsPage(page);
-    await use(recordsPage);
-  },
-  draftRecordPage: async ({ page }: { page: Page }, use) => {
-    const draftRecordPage = new DraftRecordPage(page);
-    await use(draftRecordPage);
-  },
-  selectVesselPage: async ({ page }: { page: Page }, use) => {
-    const selectVesselPage = new SelectVesselPage(page);
-    await use(selectVesselPage);
-  },
-
-  tripDatePage: async ({ page }: { page: Page }, use) => {
-    await use(new TripDatePage(page));
-  },
-  tripDepartureDatePage: async ({ page }: { page: Page }, use) => {
-    await use(new TripDepartureDatePage(page));
-  },
-  tripReturnDatePage: async ({ page }: { page: Page }, use) => {
-    await use(new TripReturnDatePage(page));
-  },
-  addPortPage: async ({ page }: { page: Page }, use) => {
-    await use(new AddPortPage(page));
-  },
-  confirmSamePortPage: async ({ page }: { page: Page }, use) => {
-    await use(new ConfirmSamePortPage(page));
-  },
-  departurePortPage: async ({ page }: { page: Page }, use) => {
-    await use(new DeparturePortPage(page));
-  },
-  returnPortPage: async ({ page }: { page: Page }, use) => {
-    await use(new ReturnPortPage(page));
-  },
-  gearSelectionPage: async ({ page }: { page: Page }, use) => {
-    await use(new GearSelectionPage(page));
-  },
-  addGearPage: async ({ page }: { page: Page }, use) => {
-    await use(new AddGearPage(page));
-  },
-  statisticalAreaPage: async ({ page }: { page: Page }, use) => {
-    await use(new StatisticalAreaPage(page));
-  },
-  statisticalAreaOtherPage: async ({ page }: { page: Page }, use) => {
-    await use(new StatisticalAreaOtherPage(page));
-  },
-  speciesSelectionPage: async ({ page }: { page: Page }, use) => {
-    await use(new SpeciesSelectionPage(page));
-  },
-  addSpeciesPage: async ({ page }: { page: Page }, use) => {
-    await use(new AddSpeciesPage(page));
-  },
-  catchNotLandedPage: async ({ page }: { page: Page }, use) => {
-    await use(new CatchNotLandedPage(page));
-  },
-  removeSpeciesPage: async ({ page }: { page: Page }, use) => {
-    await use(new RemoveSpeciesPage(page));
-  },
-  checkAnswersPage: async ({ page }: { page: Page }, use) => {
-    await use(new CheckAnswersPage(page));
-  },
-  submittedRecordPage: async ({ page }: { page: Page }, use) => {
-    await use(new SubmittedRecordPage(page));
-  },
-  accountPage: async ({ page }: { page: Page }, use) => {
-    await use(new AccountPage(page));
-  },
-  removeGearPage: async ({ page }: { page: Page }, use) => {
-    await use(new RemoveGearPage(page));
-  },
-  removePortPage: async ({ page }: { page: Page }, use) => {
-    await use(new RemovePortPage(page));
-  },
+  speciesNotLandedPage: pageObject(SpeciesNotLandedPage),
+  signInPage: pageObject(SigninPage),
+  homePage: pageObject(HomePage),
+  recordsPage: pageObject(RecordsPage),
+  draftRecordPage: pageObject(DraftRecordPage),
+  selectVesselPage: pageObject(SelectVesselPage),
+  tripDatePage: pageObject(TripDatePage),
+  tripDepartureDatePage: pageObject(TripDepartureDatePage),
+  tripReturnDatePage: pageObject(TripReturnDatePage),
+  addPortPage: pageObject(AddPortPage),
+  confirmSamePortPage: pageObject(ConfirmSamePortPage),
+  departurePortPage: pageObject(DeparturePortPage),
+  returnPortPage: pageObject(ReturnPortPage),
+  gearSelectionPage: pageObject(GearSelectionPage),
+  addGearPage: pageObject(AddGearPage),
+  statisticalAreaPage: pageObject(StatisticalAreaPage),
+  statisticalAreaOtherPage: pageObject(StatisticalAreaOtherPage),
+  speciesSelectionPage: pageObject(SpeciesSelectionPage),
+  addSpeciesPage: pageObject(AddSpeciesPage),
+  catchNotLandedPage: pageObject(CatchNotLandedPage),
+  removeSpeciesPage: pageObject(RemoveSpeciesPage),
+  checkAnswersPage: pageObject(CheckAnswersPage),
+  submittedRecordPage: pageObject(SubmittedRecordPage),
+  accountPage: pageObject(AccountPage),
+  removeGearPage: pageObject(RemoveGearPage),
+  removePortPage: pageObject(RemovePortPage),
   healthApi: async ({ request }: { request: APIRequestContext }, use) => {
     await use(new HealthApi(request));
   }

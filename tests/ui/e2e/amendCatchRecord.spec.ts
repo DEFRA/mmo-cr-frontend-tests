@@ -12,7 +12,6 @@ import {
   type GearData,
   type SpeciesCatch,
   daysAgo,
-  noFavourites,
   reviewDate
 } from '../helpers/catchRecordFlow';
 
@@ -28,12 +27,11 @@ const weightRetainedKey = 'Weight above minimum size retained (kg)';
 const testFavourites: Favourites = { ports: [plymouth, lowestoft], gears: [seineNets.name], species: [cod.name] };
 
 test.describe('Amend Catch Record', () => {
-  let addedFavourites: Favourites = noFavourites;
-  let createdRecords: string[] = [];
+  test.use({ testFavourites });
+
   let reviewRecord: CatchRecordData;
 
-  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
-    createdRecords = [];
+  test.beforeEach(() => {
     reviewRecord = {
       vesselName,
       tripDates: { departureDate: daysAgo(2), returnDate: daysAgo(1) },
@@ -42,15 +40,6 @@ test.describe('Amend Catch Record', () => {
       // No areaCode, so the area is selected on the map rather than under "Other"
       gearCatches: [{ gear: seineNets, species: [cod] }]
     };
-    await test.step('Setup: I am signed in with the test favourites saved', async () => {
-      await navigationFlow.signIn();
-      addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
-    });
-  });
-
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteDraftsIfPresent(createdRecords);
-    await catchRecordFlow.restoreFavourites(addedFavourites);
   });
 
   test(
@@ -59,7 +48,7 @@ test.describe('Amend Catch Record', () => {
       tag: ['@ui', '@regression', '@amendCatchRecord', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-14' }
     },
-    async ({ catchRecordFlow, checkAnswersPage, tripReturnDatePage }) => {
+    async ({ createdRecords, catchRecordFlow, checkAnswersPage, tripReturnDatePage }) => {
       const amendedReturnDate = daysAgo(0);
       const mapAreaByGear = new Map<string, string>();
 
