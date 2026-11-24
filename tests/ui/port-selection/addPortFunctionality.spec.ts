@@ -1,7 +1,7 @@
 /**
  * Select a previously used port, or add another port through the "Add port" link, on the departure-port and
  * return-port screens of a new catch record.
- * Traceability: CRAR ticket TBC.
+ * Traceability: CRAR-422.
  *
  * @author Hemasrivani07
  * @since 2026-11-24

@@ -1,13 +1,13 @@
-# CRAR-TBC: Select a previously used port when creating a new catch record
+# CRAR-422: Select a previously used port when creating a new catch record
 
-| Field   | Value                                                             |
-| ------- | ----------------------------------------------------------------- |
-| Status  | Approved                                                          |
-| Ticket  | TBC (OQ-1: key not yet provided; keep this file name until it is) |
-| Author  | Hemasrivani07                                                     |
-| Created | 2026-11-24                                                        |
-| Feature | @favouritePorts                                                   |
-| Type    | UI (`tests/ui`)                                                   |
+| Field   | Value           |
+| ------- | --------------- |
+| Status  | Approved        |
+| Ticket  | CRAR-422        |
+| Author  | Hemasrivani07   |
+| Created | 2026-11-24      |
+| Feature | @favouritePorts |
+| Type    | UI (`tests/ui`) |
 
 ## Source
 
@@ -711,7 +711,7 @@ export const test = base.extend<CommonFixtures>({
 /**
  * Select a previously used port, or add another port through the "Add port" link, on the departure-port and
  * return-port screens of a new catch record.
- * Traceability: CRAR ticket TBC.
+ * Traceability: CRAR-422.
  *
  * @author Hemasrivani07
  * @since 2026-11-24
@@ -1238,8 +1238,8 @@ and is spelled correctly.
 OQ-1 to OQ-11 were answered or accepted on 2026-11-24 (first approval). OQ-12 and OQ-13 were answered at re-approval on
 2026-11-24. Nothing remains open. OQ-13 is a live verification item for the Spec Author.
 
-1. **CRAR ticket key. Still TBC.** No key has been provided yet. Keep this file name and the `Traceability: CRAR ticket
-TBC` JSDoc line. When the key is provided, rename the plan and headers and use `feature/CRAR-<number>_<description>`.
+1. **CRAR ticket key. Answered: CRAR-422.** The plan and spec use this ticket key. The branch must follow
+   `feature/CRAR-422_<description>`.
 2. **Meaning of "previously used port". Answered.** It means the account's saved favourite ports ("Ports used"). AC14
    is planned with the saved favourite Plymouth in `addPortFunctionality.spec.ts`.
 3. **Add port control role. Answered.** It is a **link**. Rename `addPortButton` to `addPortLink`.
@@ -1324,6 +1324,7 @@ TBC` JSDoc line. When the key is provided, rename the plan and headers and use `
 | 2026-11-24 | Applied the re-approval answers. OQ-12: single-spec exception accepted and recorded. OQ-13: the "Add port" link must sit below the port options; added the step "The "Add port" link is displayed below the port options" to Scenarios 1 and 2 (step mapping renumbered), with the new page-object method `PortSelectionPage.isAddPortLinkBelowPortOptions()` and locator `portRadios`, marked for live verification.                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | 2026-11-24 | Revised plan approved by @hehemasr_CGEMU.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 2026-11-24 | Renamed the single spec to `addPortFunctionality.spec.ts` at the user's request; scenario content and approved scope are unchanged.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| 2026-11-24 | Ticket key confirmed as CRAR-422; updated the plan and spec traceability references.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ## Implementation record
 
