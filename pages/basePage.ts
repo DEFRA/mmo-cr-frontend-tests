@@ -130,15 +130,31 @@ export abstract class DateInputPage extends BasePage {
   }
 }
 
+/**
+ * Choose a saved port on the departure-port and return-port screens, or add another port.
+ *
+ * @author Randhir Patel
+ * @since 2026-10-05
+ */
 export abstract class PortSelectionPage extends BasePage {
   public readonly portRadio = (portName: string): Locator => this.page.getByLabel(portName);
-  public readonly addPortButton = (): Locator => this.page.getByRole('button', { name: 'Add port' });
+  public readonly portRadios = (): Locator => this.page.getByRole('radio');
+  public readonly checkedPortRadios = (): Locator => this.page.getByRole('radio', { checked: true });
+  public readonly addPortLink = (): Locator => this.page.getByRole('link', { name: 'Add port' });
 
   async selectPort(portName: string) {
     await this.portRadio(portName).click();
   }
 
   async clickAddPort() {
-    await this.addPortButton().click();
+    await this.addPortLink().click();
+  }
+
+  // True when the top of the Add port link is at or below the bottom of the last port radio
+  async isAddPortLinkBelowPortOptions(): Promise<boolean> {
+    const lastPortRadioBox = await this.portRadios().last().boundingBox();
+    const addPortLinkBox = await this.addPortLink().boundingBox();
+    if (!lastPortRadioBox || !addPortLinkBox) return false;
+    return addPortLinkBox.y >= lastPortRadioBox.y + lastPortRadioBox.height;
   }
 }

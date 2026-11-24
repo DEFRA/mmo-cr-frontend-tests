@@ -42,7 +42,9 @@ const pageObject =
 type CatchRecordSessionFixtures = {
   // Favourites the account needs for the test; set per describe block with test.use({ testFavourites })
   testFavourites: Favourites;
-  // Signs in and saves testFavourites; afterwards deletes drafts and removes the favourites it added
+  // Favourites that must not be saved during the test; removed at sign-in and restored afterwards
+  absentFavourites: Favourites;
+  // Signs in and prepares favourites; afterwards deletes the test's drafts and restores the favourites it changed
   createdRecords: string[];
 };
 
@@ -84,19 +86,23 @@ type CommonFixtures = CatchRecordSessionFixtures & {
 
 export const test = base.extend<CommonFixtures>({
   testFavourites: [noFavourites, { option: true }],
-  createdRecords: async ({ navigationFlow, catchRecordFlow, testFavourites }, use) => {
+  absentFavourites: [noFavourites, { option: true }],
+  createdRecords: async ({ navigationFlow, catchRecordFlow, testFavourites, absentFavourites }, use) => {
     const createdRecords: string[] = [];
     let addedFavourites: Favourites = noFavourites;
+    let removedFavourites: Favourites = noFavourites;
 
     await base.step('Setup: I am signed in with the test favourites saved', async () => {
       await navigationFlow.signIn();
       addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
+      removedFavourites = await catchRecordFlow.removeSavedFavourites(absentFavourites);
     });
 
     await use(createdRecords);
 
     await catchRecordFlow.deleteCreatedDrafts();
     await catchRecordFlow.restoreFavourites(addedFavourites);
+    await catchRecordFlow.restoreAbsentFavourites(absentFavourites, removedFavourites);
   },
   navigationFlow: async (
     {

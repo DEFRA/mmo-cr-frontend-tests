@@ -116,6 +116,32 @@ export class CatchRecordFlow {
     for (const species of added.species) await this.favouritesFlow.removeSpeciesFromAccount(species);
   }
 
+  // Removes the given favourites if saved; returns only those it removed so they can be re-added afterwards
+  async removeSavedFavourites(favourites: Favourites): Promise<Favourites> {
+    if (favourites.ports.length + favourites.gears.length + favourites.species.length === 0) return noFavourites;
+
+    const { accountPage } = this.pages;
+    await this.navigationFlow.openAccount();
+    const savedPorts = await accountPage.getPortsUsed();
+    const savedGear = await accountPage.getGearOnboardText();
+    const savedSpecies = await accountPage.getSpeciesCaught();
+    const removed: Favourites = {
+      ports: favourites.ports.filter((port) => savedPorts.includes(port)),
+      gears: favourites.gears.filter((gear) => savedGear.includes(gear)),
+      species: favourites.species.filter((species) => savedSpecies.includes(species))
+    };
+    await this.restoreFavourites(removed);
+    return removed;
+  }
+
+  // Removes absent favourites the journey saved, then re-adds those that were saved before the test
+  async restoreAbsentFavourites(absent: Favourites, removed: Favourites): Promise<void> {
+    await this.restoreFavourites(absent);
+    if (removed.ports.length + removed.gears.length + removed.species.length > 0) {
+      await this.ensureFavourites(removed);
+    }
+  }
+
   // Creates the draft and returns its reference
   async startRecord(vesselName: string): Promise<string> {
     await this.navigationFlow.openNewRecord(vesselName);
@@ -149,13 +175,20 @@ export class CatchRecordFlow {
     await departurePortPage.expectUrl(/\/departure-port$/);
   }
 
-  // Both ports must be favourites so the radio lists are shown instead of the port search
-  async selectPorts(departurePort: string, returnPort: string): Promise<void> {
-    const { departurePortPage, returnPortPage, gearSelectionPage } = this.pages;
+  // The port must be a favourite so the radio list is shown; waits for the return-port screen
+  async selectDeparturePort(departurePort: string): Promise<void> {
+    const { departurePortPage, returnPortPage } = this.pages;
 
     await departurePortPage.selectPort(departurePort);
     await departurePortPage.clickSaveAndContinue();
     await returnPortPage.expectUrl(/\/return-port$/);
+  }
+
+  // Both ports must be favourites so the radio lists are shown instead of the port search
+  async selectPorts(departurePort: string, returnPort: string): Promise<void> {
+    const { returnPortPage, gearSelectionPage } = this.pages;
+
+    await this.selectDeparturePort(departurePort);
     await returnPortPage.selectPort(returnPort);
     await returnPortPage.clickSaveAndContinue();
     await gearSelectionPage.expectUrl(/\/gear-selection$/);
