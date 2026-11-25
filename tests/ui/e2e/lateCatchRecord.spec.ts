@@ -51,14 +51,18 @@ test.describe('Late Catch Record', () => {
       });
 
       await test.step('I should be able to check the trip end date', async () => {
-        await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnDate)).toHaveText(
-          reviewDate(lateRecord.tripDates.returnDate)
-        );
-        await expect(checkAnswersPage.changeLinkNamed(checkAnswers.changeLinks.returnDate)).toBeVisible();
+        await expect(
+          checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnDate),
+          'Summary value to have text'
+        ).toHaveText(reviewDate(lateRecord.tripDates.returnDate));
+        await expect(
+          checkAnswersPage.changeLinkNamed(checkAnswers.changeLinks.returnDate),
+          'Change link named to be visible'
+        ).toBeVisible();
       });
 
       await test.step('I should be able to continue', async () => {
-        await expect(checkAnswersPage.submitButton()).toBeEnabled();
+        await expect(checkAnswersPage.submitButton(), 'Submit button to be enabled').toBeEnabled();
       });
     }
   );
@@ -88,14 +92,15 @@ test.describe('Late Catch Record', () => {
       });
 
       await test.step('The late warning should no longer apply', async () => {
-        await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnDate)).toHaveText(
-          reviewDate(correctedReturnDate)
-        );
+        await expect(
+          checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnDate),
+          'Summary value to have text'
+        ).toHaveText(reviewDate(correctedReturnDate));
         // UNVERIFIED (OQ-4): assert the late-submission warning is no longer shown
       });
 
       await test.step('I should be able to continue', async () => {
-        await expect(checkAnswersPage.submitButton()).toBeEnabled();
+        await expect(checkAnswersPage.submitButton(), 'Submit button to be enabled').toBeEnabled();
       });
     }
   );

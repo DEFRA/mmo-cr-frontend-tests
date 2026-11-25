@@ -98,14 +98,21 @@ test.describe('Create Catch Record', () => {
         await test.step(`The ${tripType} trip should be recorded successfully`, async () => {
           const tripEndDate = tripDates?.returnDate ?? new Date();
           await recordsPage.goto('/records');
-          await expect(recordsPage.recordStatus(reference)).toHaveText(recordStatuses.submitted);
-          await expect(recordsPage.recordRow(reference)).toContainText(recordsListDate(tripEndDate));
+          await expect(
+            recordsPage.recordStatus(reference),
+            `Record status to have text ${recordStatuses.submitted}`
+          ).toHaveText(recordStatuses.submitted);
+          await expect(recordsPage.recordRow(reference), 'Record row to contain text').toContainText(
+            recordsListDate(tripEndDate)
+          );
         });
 
         await test.step('I should receive a catch record reference', async () => {
-          expect(reference).toMatch(recordReferencePattern);
+          expect(reference, `Reference to match ${recordReferencePattern}`).toMatch(recordReferencePattern);
           await recordsPage.openRecord(reference);
-          await expect(submittedRecordPage.recordReference()).toHaveText(reference);
+          await expect(submittedRecordPage.recordReference(), `Record reference to have text ${reference}`).toHaveText(
+            reference
+          );
         });
       }
     );

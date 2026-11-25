@@ -30,20 +30,20 @@ export class AddSpeciesPage extends BasePage {
     const option = this.suggestionOption(speciesName);
     await option.scrollIntoViewIfNeeded();
     await option.click();
-    await expect(this.speciesInput()).toHaveValue(speciesName);
+    await expect(this.speciesInput(), `Species input to have value ${speciesName}`).toHaveValue(speciesName);
   }
 
   async searchSpeciesOptions(searchTerm: string): Promise<string[]> {
     await this.speciesInput().fill(searchTerm);
-    await expect(this.searchResults().first()).toBeVisible();
+    await expect(this.searchResults().first(), 'Search results to be visible').toBeVisible();
     return (await this.searchResults().allTextContents()).map((species) => species.trim());
   }
 
   async selectSpeciesFromSuggestions(speciesName: string): Promise<void> {
     await this.speciesInput().fill(speciesName.slice(0, 2));
     const option = this.suggestionOption(speciesName);
-    await expect(option).toBeVisible();
+    await expect(option, 'Option to be visible').toBeVisible();
     await option.click();
-    await expect(this.speciesInput()).toHaveValue(speciesName);
+    await expect(this.speciesInput(), `Species input to have value ${speciesName}`).toHaveValue(speciesName);
   }
 }

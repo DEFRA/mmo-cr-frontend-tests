@@ -47,11 +47,11 @@ test.describe('Access Catch Recording', () => {
       });
 
       await test.step('I should see my catch records', async () => {
-        await expect(recordsPage.catchRecordsTable()).toBeVisible();
+        await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
       });
 
       await test.step('I should be able to create a new catch record', async () => {
-        await expect(recordsPage.createNewRecordButton()).toBeEnabled();
+        await expect(recordsPage.createNewRecordButton(), 'Create new record button to be enabled').toBeEnabled();
       });
     }
   );
@@ -78,17 +78,22 @@ test.describe('Access Catch Recording', () => {
 
       await test.step('I should remain on the Sign in screen', async () => {
         await signInPage.expectUrl(signInUrl);
-        await expect(signInPage.signInHeading()).toHaveText(signInData.signInHeading);
+        await expect(signInPage.signInHeading(), `Sign in heading to have text ${signInData.signInHeading}`).toHaveText(
+          signInData.signInHeading
+        );
       });
 
       await test.step('I should see a clear error message', async () => {
-        await expect(signInPage.errorMessage()).toContainText(errorMessages.signIn.invalidCredentials);
+        await expect(
+          signInPage.errorMessage(),
+          `Error message to contain text ${errorMessages.signIn.invalidCredentials}`
+        ).toContainText(errorMessages.signIn.invalidCredentials);
       });
 
       await test.step('I should be able to correct my details and try again', async () => {
-        await expect(signInPage.emailInput()).toBeEditable();
-        await expect(signInPage.passwordInput()).toBeEditable();
-        await expect(signInPage.signInButton()).toBeEnabled();
+        await expect(signInPage.emailInput(), 'Email input to be editable').toBeEditable();
+        await expect(signInPage.passwordInput(), 'Password input to be editable').toBeEditable();
+        await expect(signInPage.signInButton(), 'Sign in button to be enabled').toBeEnabled();
       });
     }
   );

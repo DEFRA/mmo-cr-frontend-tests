@@ -108,7 +108,9 @@ test.describe('Favourite ports', () => {
       });
 
       await test.step('"Lowestoft" is shown in Ports used', async () => {
-        await expect(accountPage.portsUsedValue()).toContainText(ports.second);
+        await expect(accountPage.portsUsedValue(), `Ports used to contain text ${ports.second}`).toContainText(
+          ports.second
+        );
       });
     }
   );
@@ -124,12 +126,14 @@ Mapping rules:
 - `Background` -> `test.beforeEach`, with each Background statement as its own `test.step`.
 - `Scenario Outline` / `Examples` -> a `for ... of` loop over a typed data array generating one `test` per row; substitute `<placeholders>` with row values in both the test name and step titles so names stay unique.
 - Assertions belong in `Then` steps; `Given`/`When` steps perform setup and actions only. Built-in synchronisation checks inside existing page-object or flow methods (e.g. `searchAndSelectPort`) are acceptable in `Given`/`When` steps; do not add new explicit assertions there.
+- Give every `expect` a message as its second argument so reports say what was checked, e.g. `expect(accountPage.addPortLink(), 'Add port link to be visible').toBeVisible()`. Bare `expect(locator)` shows only `Expect "toBeVisible"` in the report. Include the expected value when it is a simple variable (`` `Ports used to contain text ${ports.first}` ``). Does not apply to `expect.poll`.
 - Tags: always include `@ui` (or `@api`), one of `@smoke` / `@regression`, and a camelCase feature tag. Reuse an existing feature tag when one already covers the area, and use correct spelling; flag any misspelt tag instead of copying it.
 
 ## Test data and environment
 
 - Sign in via `navigationFlow.signIn()` / `signInAndOpenAccount()`, which read `CATCH_RECORDING_EMAIL` / `CATCH_RECORDING_PASSWORD` from `.env`. Never place credentials in code, logs, or chat, and never print `.env` contents.
 - Use only test data already in existing specs or confirmed in the live app (e.g. `Cod (COD)`, `Plymouth`).
+- The account page lists one section per vessel. `AccountPage` locators and helpers (`summaryRow`, `portsUsedValue`, `addGearLink`, `getPortsUsed`, `clickAddGear`, etc.) take an optional `vesselName` that defaults to `vessels.testVessel`; pass another vessel name only when a scenario needs a different vessel.
 - Keep test data in `test-data/testData.ts`, not in specs or helpers. It exports one object per area: `vessels`, `ports`, `gears`, `catchSpecies` (named so because `species` is a common local name), `areas`, `checkAnswers` (summary-list keys, change links, Yes/No answers), `recordStatuses`, `errorMessages` and `signInData`. Import only what the file uses, e.g. `import { vessels, ports } from '../../../test-data/testData';`.
 - Reference values directly in steps (e.g. `catchRecordFlow.startRecord(vessels.testVessel)`, `checkAnswers.summaryKeys.departurePort`, `errorMessages.ports.departureRequired`). Do not declare per-spec string constants such as `const plymouth = 'Plymouth';`; add a new value to the right export in `testData.ts` first, reusing an existing key when the value already exists.
 - Spec-level constants are only for values composed from `testData.ts` data (e.g. `const testFavourites: Favourites = { ports: [ports.first], gears: [], species: [] };`), Scenario Outline example tables, and values that do not belong in shared data (`RegExp` URL patterns, dates computed with `daysAgo`).

@@ -92,14 +92,29 @@ test.describe('Species catch weight entry', () => {
       });
 
       await test.step('The selected species and required weight field are displayed', async () => {
-        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name)).toBeChecked();
-        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toBeVisible();
-        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toBeEditable();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name),
+          'Species checkbox to be checked'
+        ).toBeChecked();
+        await expect(
+          speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code),
+          'Weight above minimum input to be visible'
+        ).toBeVisible();
+        await expect(
+          speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code),
+          'Weight above minimum input to be editable'
+        ).toBeEditable();
       });
 
       await test.step('The optional weight fields are initially hidden', async () => {
-        await expect(speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code)).toBeHidden();
-        await expect(speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code)).toBeHidden();
+        await expect(
+          speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code),
+          'Weight below minimum input to be hidden'
+        ).toBeHidden();
+        await expect(
+          speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code),
+          'Weight discarded input to be hidden'
+        ).toBeHidden();
       });
 
       await test.step('The user reveals the optional weight fields', async () => {
@@ -108,10 +123,22 @@ test.describe('Species catch weight entry', () => {
       });
 
       await test.step('The optional weight fields are displayed and editable', async () => {
-        await expect(speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code)).toBeVisible();
-        await expect(speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code)).toBeEditable();
-        await expect(speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code)).toBeVisible();
-        await expect(speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code)).toBeEditable();
+        await expect(
+          speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code),
+          'Weight below minimum input to be visible'
+        ).toBeVisible();
+        await expect(
+          speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code),
+          'Weight below minimum input to be editable'
+        ).toBeEditable();
+        await expect(
+          speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code),
+          'Weight discarded input to be visible'
+        ).toBeVisible();
+        await expect(
+          speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code),
+          'Weight discarded input to be editable'
+        ).toBeEditable();
       });
     }
   );
@@ -140,16 +167,22 @@ test.describe('Species catch weight entry', () => {
       });
 
       await test.step('The species and saved weights are displayed', async () => {
-        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name)).toBeChecked();
-        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toHaveValue(
-          catchSpecies.weights.initial.aboveMinimum
-        );
-        await expect(speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code)).toHaveValue(
-          catchSpecies.weights.initial.belowMinimum
-        );
-        await expect(speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code)).toHaveValue(
-          catchSpecies.weights.initial.discarded
-        );
+        await expect(
+          speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name),
+          'Species checkbox to be checked'
+        ).toBeChecked();
+        await expect(
+          speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code),
+          `Weight above minimum input to have value ${catchSpecies.weights.initial.aboveMinimum}`
+        ).toHaveValue(catchSpecies.weights.initial.aboveMinimum);
+        await expect(
+          speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code),
+          `Weight below minimum input to have value ${catchSpecies.weights.initial.belowMinimum}`
+        ).toHaveValue(catchSpecies.weights.initial.belowMinimum);
+        await expect(
+          speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code),
+          `Weight discarded input to have value ${catchSpecies.weights.initial.discarded}`
+        ).toHaveValue(catchSpecies.weights.initial.discarded);
       });
     }
   );
@@ -188,15 +221,18 @@ test.describe('Species catch weight entry', () => {
       });
 
       await test.step('The edited values are displayed', async () => {
-        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toHaveValue(
-          catchSpecies.weights.edited.aboveMinimum
-        );
-        await expect(speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code)).toHaveValue(
-          catchSpecies.weights.edited.belowMinimum
-        );
-        await expect(speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code)).toHaveValue(
-          catchSpecies.weights.edited.discarded
-        );
+        await expect(
+          speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code),
+          `Weight above minimum input to have value ${catchSpecies.weights.edited.aboveMinimum}`
+        ).toHaveValue(catchSpecies.weights.edited.aboveMinimum);
+        await expect(
+          speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code),
+          `Weight below minimum input to have value ${catchSpecies.weights.edited.belowMinimum}`
+        ).toHaveValue(catchSpecies.weights.edited.belowMinimum);
+        await expect(
+          speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code),
+          `Weight discarded input to have value ${catchSpecies.weights.edited.discarded}`
+        ).toHaveValue(catchSpecies.weights.edited.discarded);
       });
     }
   );
@@ -211,8 +247,11 @@ test.describe('Species catch weight entry', () => {
       });
 
       await test.step('The page shows the validation error for the required weight', async () => {
-        await expect(speciesSelectionPage.errorSummary()).toBeVisible();
-        await expect(speciesSelectionPage.weightAboveMinimumError(catchSpecies.cod.code)).toBeVisible();
+        await expect(speciesSelectionPage.errorSummary(), 'Error summary to be visible').toBeVisible();
+        await expect(
+          speciesSelectionPage.weightAboveMinimumError(catchSpecies.cod.code),
+          'Weight above minimum error to be visible'
+        ).toBeVisible();
       });
     }
   );
@@ -235,9 +274,9 @@ test.describe('Species catch weight entry', () => {
 
         await test.step('The page shows whether the weights satisfy the comparison rule', async () => {
           if (comparison.valid) {
-            await expect(speciesSelectionPage.errorSummary()).toBeHidden();
+            await expect(speciesSelectionPage.errorSummary(), 'Error summary to be hidden').toBeHidden();
           } else {
-            await expect(speciesSelectionPage.errorSummary()).toBeVisible();
+            await expect(speciesSelectionPage.errorSummary(), 'Error summary to be visible').toBeVisible();
           }
         });
       }
@@ -256,7 +295,7 @@ test.describe('Species catch weight entry', () => {
         });
 
         await test.step('The page has no validation errors', async () => {
-          await expect(speciesSelectionPage.errorSummary()).toBeHidden();
+          await expect(speciesSelectionPage.errorSummary(), 'Error summary to be hidden').toBeHidden();
         });
       }
     );
@@ -274,8 +313,11 @@ test.describe('Species catch weight entry', () => {
         });
 
         await test.step('The page shows a validation error', async () => {
-          await expect(speciesSelectionPage.errorSummary()).toBeVisible();
-          await expect(speciesSelectionPage.weightAboveMinimumError(catchSpecies.cod.code)).toBeVisible();
+          await expect(speciesSelectionPage.errorSummary(), 'Error summary to be visible').toBeVisible();
+          await expect(
+            speciesSelectionPage.weightAboveMinimumError(catchSpecies.cod.code),
+            'Weight above minimum error to be visible'
+          ).toBeVisible();
         });
       }
     );
@@ -308,12 +350,18 @@ test.describe('Species catch weight entry', () => {
         });
 
         await test.step('The page shows a validation error for the optional weight', async () => {
-          await expect(speciesSelectionPage.errorSummary()).toBeVisible();
+          await expect(speciesSelectionPage.errorSummary(), 'Error summary to be visible').toBeVisible();
 
           if (optionalWeightCase.field === 'belowMinimum') {
-            await expect(speciesSelectionPage.weightBelowMinimumError(catchSpecies.cod.code)).toBeVisible();
+            await expect(
+              speciesSelectionPage.weightBelowMinimumError(catchSpecies.cod.code),
+              'Weight below minimum error to be visible'
+            ).toBeVisible();
           } else {
-            await expect(speciesSelectionPage.weightDiscardedError(catchSpecies.cod.code)).toBeVisible();
+            await expect(
+              speciesSelectionPage.weightDiscardedError(catchSpecies.cod.code),
+              'Weight discarded error to be visible'
+            ).toBeVisible();
           }
         });
       }

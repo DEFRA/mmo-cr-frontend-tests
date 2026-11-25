@@ -42,16 +42,23 @@ test.describe('Landing Information', () => {
 
       await test.step('I should continue to the review screen', async () => {
         await checkAnswersPage.expectUrl(/\/check-answers$/);
-        await expect(checkAnswersPage.pageHeading()).toBeVisible();
+        await expect(checkAnswersPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       });
 
       // UNVERIFIED (OQ-8): the live review still shows a "Species not landed" section with "Not landed: No"
       await test.step('No catch-not-landed section should be displayed', async () => {
-        await expect(checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.notLanded)).toHaveText(
-          checkAnswers.answers.no
-        );
-        await expect(checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.notLandedSpecies)).toHaveCount(0);
-        await expect(checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.weightKeptOnboard)).toHaveCount(0);
+        await expect(
+          checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.notLanded),
+          `Not landed value to have text ${checkAnswers.answers.no}`
+        ).toHaveText(checkAnswers.answers.no);
+        await expect(
+          checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.notLandedSpecies),
+          'Not landed value to have count'
+        ).toHaveCount(0);
+        await expect(
+          checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.weightKeptOnboard),
+          'Not landed value to have count'
+        ).toHaveCount(0);
       });
     }
   );

@@ -69,9 +69,10 @@ test.describe('Amend Catch Record', () => {
       });
 
       await test.step('The updated information should be displayed', async () => {
-        await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnDate)).toHaveText(
-          reviewDate(amendedReturnDate)
-        );
+        await expect(
+          checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnDate),
+          'Summary value to have text'
+        ).toHaveText(reviewDate(amendedReturnDate));
       });
 
       await test.step('All unchanged information should remain the same', async () => {
@@ -82,15 +83,17 @@ test.describe('Amend Catch Record', () => {
           [checkAnswers.summaryKeys.returnPort, reviewRecord.returnPort]
         ];
         for (const [key, value] of unchangedTripInformation) {
-          await expect(checkAnswersPage.summaryValue(key)).toHaveText(value);
+          await expect(checkAnswersPage.summaryValue(key), `Summary value to have text ${value}`).toHaveText(value);
         }
         for (const { gear, species } of reviewRecord.gearCatches) {
           await expect(
-            checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.statisticalSubArea)
+            checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.statisticalSubArea),
+            'Gear summary value to have text'
           ).toHaveText(mapAreaByGear.get(gear.name)!);
           for (const caught of species) {
             await expect(
-              checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained)
+              checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained),
+              'Species summary value to have text'
             ).toHaveText(`${caught.weight} kg`);
           }
         }

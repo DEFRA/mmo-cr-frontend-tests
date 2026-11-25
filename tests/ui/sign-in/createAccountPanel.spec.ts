@@ -19,8 +19,10 @@ test.describe('Create an account information panel', () => {
     { tag: ['@ui', '@regression', '@signIn'] },
     async ({ signInPage }) => {
       await test.step('The Create an account panel is expanded', async () => {
-        await expect(signInPage.registrationDetails()).toHaveAttribute('open');
-        await expect(signInPage.registrationGuidance()).toBeVisible();
+        await expect(signInPage.registrationDetails(), 'Registration details to have attribute open').toHaveAttribute(
+          'open'
+        );
+        await expect(signInPage.registrationGuidance(), 'Registration guidance to be visible').toBeVisible();
       });
     }
   );
@@ -31,8 +33,11 @@ test.describe('Create an account information panel', () => {
     async ({ signInPage }) => {
       await test.step('The Create an account information is collapsed', async () => {
         await signInPage.registerLink().click();
-        await expect(signInPage.registrationDetails()).not.toHaveAttribute('open');
-        await expect(signInPage.registrationGuidance()).toBeHidden();
+        await expect(
+          signInPage.registrationDetails(),
+          'Registration details not to have attribute open'
+        ).not.toHaveAttribute('open');
+        await expect(signInPage.registrationGuidance(), 'Registration guidance to be hidden').toBeHidden();
       });
 
       await test.step('The user taps "Create an account"', async () => {
@@ -40,24 +45,30 @@ test.describe('Create an account information panel', () => {
       });
 
       await test.step('The panel expands and the icon changes to the expanded state', async () => {
-        await expect(signInPage.registrationDetails()).toHaveAttribute('open');
-        await expect(signInPage.registrationGuidance()).toBeVisible();
+        await expect(signInPage.registrationDetails(), 'Registration details to have attribute open').toHaveAttribute(
+          'open'
+        );
+        await expect(signInPage.registrationGuidance(), 'Registration guidance to be visible').toBeVisible();
       });
 
       await test.step('The Vessel Owner guidance is displayed', async () => {
-        await expect(signInPage.registrationGuidance()).toContainText(
+        await expect(signInPage.registrationGuidance(), 'Registration guidance to contain text').toContainText(
           new RegExp(signInData.createAccountGuidance.vesselOwnerHeading, 'i')
         );
-        await expect(signInPage.registrationGuidance()).toContainText(signInData.createAccountGuidance.vesselOwnerText);
+        await expect(
+          signInPage.registrationGuidance(),
+          `Registration guidance to contain text ${signInData.createAccountGuidance.vesselOwnerText}`
+        ).toContainText(signInData.createAccountGuidance.vesselOwnerText);
       });
 
       await test.step('The Skipper or Agent guidance is displayed', async () => {
-        await expect(signInPage.registrationGuidance()).toContainText(
+        await expect(signInPage.registrationGuidance(), 'Registration guidance to contain text').toContainText(
           new RegExp(signInData.createAccountGuidance.skipperOrAgentHeading, 'i')
         );
-        await expect(signInPage.registrationGuidance()).toContainText(
-          signInData.createAccountGuidance.skipperOrAgentText
-        );
+        await expect(
+          signInPage.registrationGuidance(),
+          `Registration guidance to contain text ${signInData.createAccountGuidance.skipperOrAgentText}`
+        ).toContainText(signInData.createAccountGuidance.skipperOrAgentText);
       });
     }
   );
@@ -67,7 +78,9 @@ test.describe('Create an account information panel', () => {
     { tag: ['@ui', '@regression', '@signIn'] },
     async ({ signInPage }) => {
       await test.step('The Create an account information panel is expanded', async () => {
-        await expect(signInPage.registrationDetails()).toHaveAttribute('open');
+        await expect(signInPage.registrationDetails(), 'Registration details to have attribute open').toHaveAttribute(
+          'open'
+        );
       });
 
       await test.step('The user taps "Create an account"', async () => {
@@ -75,8 +88,11 @@ test.describe('Create an account information panel', () => {
       });
 
       await test.step('The panel collapses, the text is hidden and the icon returns to collapsed', async () => {
-        await expect(signInPage.registrationDetails()).not.toHaveAttribute('open');
-        await expect(signInPage.registrationGuidance()).toBeHidden();
+        await expect(
+          signInPage.registrationDetails(),
+          'Registration details not to have attribute open'
+        ).not.toHaveAttribute('open');
+        await expect(signInPage.registrationGuidance(), 'Registration guidance to be hidden').toBeHidden();
       });
     }
   );
@@ -88,7 +104,9 @@ test.describe('Create an account information panel', () => {
       await test.step('The Create an account information panel is expanded', async () => {
         await signInPage.registerLink().click();
         await signInPage.registerLink().click();
-        await expect(signInPage.registrationDetails()).toHaveAttribute('open');
+        await expect(signInPage.registrationDetails(), 'Registration details to have attribute open').toHaveAttribute(
+          'open'
+        );
       });
 
       await test.step('The user scrolls within the page', async () => {
@@ -97,8 +115,10 @@ test.describe('Create an account information panel', () => {
       });
 
       await test.step('The panel remains expanded', async () => {
-        await expect(signInPage.registrationDetails()).toHaveAttribute('open');
-        await expect(signInPage.registrationGuidance()).toBeVisible();
+        await expect(signInPage.registrationDetails(), 'Registration details to have attribute open').toHaveAttribute(
+          'open'
+        );
+        await expect(signInPage.registrationGuidance(), 'Registration guidance to be visible').toBeVisible();
       });
     }
   );

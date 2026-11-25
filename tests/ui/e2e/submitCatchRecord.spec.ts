@@ -56,7 +56,9 @@ test.describe('Submit Catch Record', () => {
       });
 
       await test.step('I should receive a catch record reference', async () => {
-        await expect(submittedRecordPage.recordReference()).toHaveText(reference);
+        await expect(submittedRecordPage.recordReference(), `Record reference to have text ${reference}`).toHaveText(
+          reference
+        );
       });
     }
   );

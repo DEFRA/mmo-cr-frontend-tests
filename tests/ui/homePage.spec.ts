@@ -15,37 +15,70 @@ test.describe('Home page', () => {
       await test.step('Displays the required controls and content', async () => {
         await homePage.goto('/');
 
-        await expect(homePage.pageTitle()).toBeVisible();
-        await expect(homePage.pageTitle()).toHaveText('How to record your catch');
-        await expect(homePage.pageCaption()).toHaveText('Guidance');
+        await expect(homePage.pageTitle(), 'Page title to be visible').toBeVisible();
+        await expect(homePage.pageTitle(), 'Page title to have text How to record your catch').toHaveText(
+          'How to record your catch'
+        );
+        await expect(homePage.pageCaption(), 'Page caption to have text Guidance').toHaveText('Guidance');
 
-        await expect(homePage.phaseBanner()).toBeVisible();
-        await expect(homePage.warningText()).toBeVisible();
-        await expect(homePage.warningText()).toContainText(
-          'You need to create a catch record within 24 hours of landing your catch.'
+        await expect(homePage.phaseBanner(), 'Phase banner to be visible').toBeVisible();
+        await expect(homePage.warningText(), 'Warning text to be visible').toBeVisible();
+        await expect(
+          homePage.warningText(),
+          'Warning text to contain text You need to create a catch record within 24 hours of landing your catch.'
+        ).toContainText('You need to create a catch record within 24 hours of landing your catch.');
+
+        await expect(homePage.languageSwitcher.container(), 'Container to be visible').toBeVisible();
+        await expect(homePage.languageSwitcher.english(), 'English to be visible').toBeVisible();
+        await expect(homePage.languageSwitcher.welsh(), 'Welsh to be visible').toBeVisible();
+
+        await expect(
+          homePage.guidanceContents.whatWeNeedFromYouLink(),
+          'What we need from you link to be visible'
+        ).toBeVisible();
+        await expect(
+          homePage.guidanceContents.whenToCreateYourRecordLink(),
+          'When to create your record link to be visible'
+        ).toBeVisible();
+        await expect(homePage.guidanceContents.specialCasesLink(), 'Special cases link to be visible').toBeVisible();
+        await expect(
+          homePage.guidanceContents.howToCreateARecordLink(),
+          'How to create arecord link to be visible'
+        ).toBeVisible();
+        await expect(homePage.guidanceContents.getHelpLink(), 'Get help link to be visible').toBeVisible();
+
+        await expect(
+          homePage.guidanceHeadings.whatWeNeedFromYouHeading(),
+          'What we need from you heading to be visible'
+        ).toBeVisible();
+        await expect(
+          homePage.guidanceHeadings.whenToCreateYourRecordHeading(),
+          'When to create your record heading to be visible'
+        ).toBeVisible();
+        await expect(
+          homePage.guidanceHeadings.specialCasesHeading(),
+          'Special cases heading to be visible'
+        ).toBeVisible();
+        await expect(
+          homePage.guidanceHeadings.howToCreateARecordHeading(),
+          'How to create arecord heading to be visible'
+        ).toBeVisible();
+        await expect(
+          homePage.guidanceHeadings.getHelpWithYourRecordHeading(),
+          'Get help with your record heading to be visible'
+        ).toBeVisible();
+
+        await expect(homePage.startNowButton(), 'Start now button to be visible').toBeVisible();
+        await expect(homePage.startNowButton(), 'Start now button to have attribute').toHaveAttribute(
+          'href',
+          '/sign-in'
         );
 
-        await expect(homePage.languageSwitcher.container()).toBeVisible();
-        await expect(homePage.languageSwitcher.english()).toBeVisible();
-        await expect(homePage.languageSwitcher.welsh()).toBeVisible();
-
-        await expect(homePage.guidanceContents.whatWeNeedFromYouLink()).toBeVisible();
-        await expect(homePage.guidanceContents.whenToCreateYourRecordLink()).toBeVisible();
-        await expect(homePage.guidanceContents.specialCasesLink()).toBeVisible();
-        await expect(homePage.guidanceContents.howToCreateARecordLink()).toBeVisible();
-        await expect(homePage.guidanceContents.getHelpLink()).toBeVisible();
-
-        await expect(homePage.guidanceHeadings.whatWeNeedFromYouHeading()).toBeVisible();
-        await expect(homePage.guidanceHeadings.whenToCreateYourRecordHeading()).toBeVisible();
-        await expect(homePage.guidanceHeadings.specialCasesHeading()).toBeVisible();
-        await expect(homePage.guidanceHeadings.howToCreateARecordHeading()).toBeVisible();
-        await expect(homePage.guidanceHeadings.getHelpWithYourRecordHeading()).toBeVisible();
-
-        await expect(homePage.startNowButton()).toBeVisible();
-        await expect(homePage.startNowButton()).toHaveAttribute('href', '/sign-in');
-
-        await expect(homePage.privacyPolicyLink()).toBeVisible();
-        await expect(homePage.privacyPolicyLink()).toHaveAttribute('href', '/privacy-notice');
+        await expect(homePage.privacyPolicyLink(), 'Privacy policy link to be visible').toBeVisible();
+        await expect(homePage.privacyPolicyLink(), 'Privacy policy link to have attribute').toHaveAttribute(
+          'href',
+          '/privacy-notice'
+        );
       });
     }
   );
@@ -87,8 +120,8 @@ test.describe('Home page', () => {
 
         for (const testCase of testCases) {
           await testCase.link.click();
-          await expect(homePage.page).toHaveURL(new RegExp(`.*${testCase.hash}$`));
-          await expect(testCase.heading).toBeInViewport();
+          await expect(homePage.page, 'Page to have url').toHaveURL(new RegExp(`.*${testCase.hash}$`));
+          await expect(testCase.heading, 'Heading to be in viewport').toBeInViewport();
         }
       });
     }
@@ -101,7 +134,7 @@ test.describe('Home page', () => {
       await test.step('Clicking Start now button navigates to sign-in page', async () => {
         await homePage.goto('/');
         await homePage.startNowButton().click();
-        await expect(homePage.page).toHaveURL(/.*\/sign-in/);
+        await expect(homePage.page, 'Page to have url').toHaveURL(/.*\/sign-in/);
       });
     }
   );

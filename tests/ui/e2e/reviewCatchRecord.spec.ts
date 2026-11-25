@@ -57,15 +57,16 @@ test.describe('Review Catch Record', () => {
           [checkAnswers.summaryKeys.returnPort, reviewRecord.returnPort]
         ];
         for (const [key, value] of tripInformation) {
-          await expect(checkAnswersPage.summaryValue(key)).toHaveText(value);
+          await expect(checkAnswersPage.summaryValue(key), `Summary value to have text ${value}`).toHaveText(value);
         }
       });
 
       await test.step('I should see gear and catch areas', async () => {
         for (const { gear } of reviewRecord.gearCatches) {
-          await expect(checkAnswersPage.gearSection(gear.name)).toBeVisible();
+          await expect(checkAnswersPage.gearSection(gear.name), 'Gear section to be visible').toBeVisible();
           await expect(
-            checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.areaMajorityCaught)
+            checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.areaMajorityCaught),
+            `Gear summary value to have text ${areas.validCode}`
           ).toHaveText(areas.validCode);
         }
       });
@@ -74,7 +75,8 @@ test.describe('Review Catch Record', () => {
         for (const { gear, species } of reviewRecord.gearCatches) {
           for (const caught of species) {
             await expect(
-              checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained)
+              checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained),
+              'Species summary value to have text'
             ).toHaveText(`${caught.weight} kg`);
           }
         }
@@ -83,7 +85,7 @@ test.describe('Review Catch Record', () => {
       // UNVERIFIED (OQ-6): "identify anything requiring correction" is assumed to mean every answer has a Change link
       await test.step('I should be able to identify anything requiring correction', async () => {
         for (const changeLink of Object.values(checkAnswers.changeLinks)) {
-          await expect(checkAnswersPage.changeLinkNamed(changeLink)).toBeVisible();
+          await expect(checkAnswersPage.changeLinkNamed(changeLink), 'Change link named to be visible').toBeVisible();
         }
       });
     }

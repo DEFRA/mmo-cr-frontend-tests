@@ -33,7 +33,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
 
       await test.step('The required statistical sub area is not displayed in the list', async () => {
         // Precondition guard: suggestions depend on the departure port, so confirm the test area is not a suggestion
-        await expect(statisticalAreaOtherPage.areaRadio(areas.validCode)).toHaveCount(0);
+        await expect(statisticalAreaOtherPage.areaRadio(areas.validCode), 'Area radio to have count').toHaveCount(0);
       });
 
       await test.step('The fisher selects the "Other" radio button', async () => {
@@ -41,14 +41,23 @@ test.describe('Enter statistical sub area using the Other option', () => {
       });
 
       await test.step('A type-ahead input field is displayed', async () => {
-        await expect(statisticalAreaOtherPage.otherRadio()).toBeChecked();
-        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toBeVisible();
-        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toBeEditable();
+        await expect(statisticalAreaOtherPage.otherRadio(), 'Other radio to be checked').toBeChecked();
+        await expect(
+          statisticalAreaOtherPage.alternativeAreaInput(),
+          'Alternative area input to be visible'
+        ).toBeVisible();
+        await expect(
+          statisticalAreaOtherPage.alternativeAreaInput(),
+          'Alternative area input to be editable'
+        ).toBeEditable();
       });
 
       await test.step('The fisher can manually enter a statistical sub area code', async () => {
         await statisticalAreaOtherPage.alternativeAreaInput().fill(areas.validCode);
-        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toHaveValue(areas.validCode);
+        await expect(
+          statisticalAreaOtherPage.alternativeAreaInput(),
+          `Alternative area input to have value ${areas.validCode}`
+        ).toHaveValue(areas.validCode);
       });
     }
   );
@@ -71,17 +80,28 @@ test.describe('Enter statistical sub area using the Other option', () => {
       });
 
       await test.step('Matching statistical sub area codes are displayed in a dropdown list', async () => {
-        await expect(statisticalAreaOtherPage.alternativeAreaResultsList()).toBeVisible();
-        await expect(statisticalAreaOtherPage.alternativeAreaResultItem(areas.validCode)).toBeVisible();
+        await expect(
+          statisticalAreaOtherPage.alternativeAreaResultsList(),
+          'Alternative area results list to be visible'
+        ).toBeVisible();
+        await expect(
+          statisticalAreaOtherPage.alternativeAreaResultItem(areas.validCode),
+          'Alternative area result item to be visible'
+        ).toBeVisible();
       });
 
       await test.step('Each matching result displays the statistical sub area code, associated coordinates and related ICES rectangle (where applicable)', async () => {
-        await expect(statisticalAreaOtherPage.coordinatesDisplay(areas.validCode)).toContainText(coordinatesPattern);
+        await expect(
+          statisticalAreaOtherPage.coordinatesDisplay(areas.validCode),
+          `Coordinates display to contain text ${coordinatesPattern}`
+        ).toContainText(coordinatesPattern);
 
         for (const resultItem of await statisticalAreaOtherPage.alternativeAreaResultItems().all()) {
-          await expect(resultItem).toContainText(searchTerm);
-          await expect(resultItem).toContainText(areaCodePattern);
-          await expect(resultItem).toContainText(coordinatesPattern);
+          await expect(resultItem, `Result item to contain text ${searchTerm}`).toContainText(searchTerm);
+          await expect(resultItem, `Result item to contain text ${areaCodePattern}`).toContainText(areaCodePattern);
+          await expect(resultItem, `Result item to contain text ${coordinatesPattern}`).toContainText(
+            coordinatesPattern
+          );
         }
       });
     }
@@ -104,20 +124,28 @@ test.describe('Enter statistical sub area using the Other option', () => {
 
       await test.step('The corresponding coordinates are displayed automatically', async () => {
         const coordinates = statisticalAreaOtherPage.coordinatesDisplay(areas.validCode);
-        await expect(coordinates).toBeVisible();
-        await expect(coordinates).toContainText(coordinatesPattern);
+        await expect(coordinates, 'Coordinates to be visible').toBeVisible();
+        await expect(coordinates, `Coordinates to contain text ${coordinatesPattern}`).toContainText(
+          coordinatesPattern
+        );
         initialCoordinates = (await coordinates.innerText()).match(coordinatesPattern)?.[0];
       });
 
       await test.step('The coordinates update dynamically as additional characters are entered', async () => {
         await statisticalAreaOtherPage.alternativeAreaInput().pressSequentially(additionalCharacters);
-        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toHaveValue(areas.validCode);
+        await expect(
+          statisticalAreaOtherPage.alternativeAreaInput(),
+          `Alternative area input to have value ${areas.validCode}`
+        ).toHaveValue(areas.validCode);
 
-        await expect(statisticalAreaOtherPage.alternativeAreaResultItems().first()).toContainText(areas.validCode);
+        await expect(
+          statisticalAreaOtherPage.alternativeAreaResultItems().first(),
+          `Alternative area result items to contain text ${areas.validCode}`
+        ).toContainText(areas.validCode);
         const coordinates = statisticalAreaOtherPage.coordinatesDisplay(areas.validCode);
-        await expect(coordinates).toBeVisible();
-        expect(initialCoordinates).toBeDefined();
-        await expect(coordinates).toContainText(initialCoordinates ?? '');
+        await expect(coordinates, 'Coordinates to be visible').toBeVisible();
+        expect(initialCoordinates, 'Initial coordinates to be defined').toBeDefined();
+        await expect(coordinates, 'Coordinates to contain text').toContainText(initialCoordinates ?? '');
       });
     }
   );
@@ -141,17 +169,21 @@ test.describe('Enter statistical sub area using the Other option', () => {
       });
 
       await test.step('The statistical sub area code is populated into the field', async () => {
-        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toHaveValue(new RegExp(areas.validCode));
+        await expect(
+          statisticalAreaOtherPage.alternativeAreaInput(),
+          'Alternative area input to have value'
+        ).toHaveValue(new RegExp(areas.validCode));
       });
 
       await test.step('The corresponding coordinates are saved against the catch record', async () => {
         await statisticalAreaOtherPage.clickSaveAndContinue();
-        await expect(statisticalAreaOtherPage.page).not.toHaveURL(/\/statistical-area-other/);
+        await expect(statisticalAreaOtherPage.page, 'Page not to have url').not.toHaveURL(/\/statistical-area-other/);
 
         await checkAnswersPage.goto('/check-answers');
-        await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.statisticalSubArea)).toContainText(
-          areas.validCode
-        );
+        await expect(
+          checkAnswersPage.summaryValue(checkAnswers.summaryKeys.statisticalSubArea),
+          `Summary value to contain text ${areas.validCode}`
+        ).toContainText(areas.validCode);
       });
     }
   );
@@ -169,9 +201,15 @@ test.describe('Enter statistical sub area using the Other option', () => {
       });
 
       await test.step(`An error message is displayed stating: "${errorMessages.areas.invalidFormat}"`, async () => {
-        await expect(statisticalAreaOtherPage.errorSummary()).toBeVisible();
-        await expect(statisticalAreaOtherPage.errorSummary()).toContainText(errorMessages.areas.invalidFormat);
-        await expect(statisticalAreaOtherPage.fieldErrorMessage()).toContainText(errorMessages.areas.invalidFormat);
+        await expect(statisticalAreaOtherPage.errorSummary(), 'Error summary to be visible').toBeVisible();
+        await expect(
+          statisticalAreaOtherPage.errorSummary(),
+          `Error summary to contain text ${errorMessages.areas.invalidFormat}`
+        ).toContainText(errorMessages.areas.invalidFormat);
+        await expect(
+          statisticalAreaOtherPage.fieldErrorMessage(),
+          `Field error message to contain text ${errorMessages.areas.invalidFormat}`
+        ).toContainText(errorMessages.areas.invalidFormat);
       });
     }
   );

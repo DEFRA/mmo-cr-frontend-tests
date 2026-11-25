@@ -36,15 +36,22 @@ test.describe('Complete Catch Record', () => {
 
       await test.step('I should be told what information is required', async () => {
         await tripDatePage.expectUrl(/\/trip-date$/);
-        await expect(tripDatePage.common.errorSummary()).toContainText(errorMessages.tripDates.sameDayRequired);
-        await expect(tripDatePage.common.errorMessage()).toContainText(errorMessages.tripDates.sameDayRequired);
+        await expect(
+          tripDatePage.common.errorSummary(),
+          `Error summary to contain text ${errorMessages.tripDates.sameDayRequired}`
+        ).toContainText(errorMessages.tripDates.sameDayRequired);
+        await expect(
+          tripDatePage.common.errorMessage(),
+          `Error message to contain text ${errorMessages.tripDates.sameDayRequired}`
+        ).toContainText(errorMessages.tripDates.sameDayRequired);
       });
 
       await test.step('I should be able to correct it', async () => {
         await expect(
-          tripDatePage.common.errorSummary().getByRole('link', { name: errorMessages.tripDates.sameDayRequired })
+          tripDatePage.common.errorSummary().getByRole('link', { name: errorMessages.tripDates.sameDayRequired }),
+          'Error summary to have attribute'
         ).toHaveAttribute('href', tripDateFieldAnchor);
-        await expect(tripDatePage.yesRadio()).toBeEnabled();
+        await expect(tripDatePage.yesRadio(), 'Yes radio to be enabled').toBeEnabled();
       });
 
       await test.step('I enter valid information and continue', async () => {
@@ -54,7 +61,7 @@ test.describe('Complete Catch Record', () => {
 
       await test.step('I should continue after entering valid information', async () => {
         await departurePortPage.expectUrl(/\/departure-port$/);
-        await expect(departurePortPage.pageHeading()).toBeVisible();
+        await expect(departurePortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       });
     }
   );

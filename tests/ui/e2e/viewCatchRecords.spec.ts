@@ -44,21 +44,26 @@ test.describe('View Catch Records', () => {
       });
 
       await test.step('I should see my catch records', async () => {
-        await expect(recordsPage.catchRecordsTable()).toBeVisible();
-        await expect(recordsPage.recordRows().first()).toBeVisible();
+        await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
+        await expect(recordsPage.recordRows().first(), 'Record rows to be visible').toBeVisible();
       });
 
       await test.step('I should see the status of each record', async () => {
-        await expect(recordsPage.recordStatuses()).toHaveCount(await recordsPage.recordRows().count());
+        await expect(recordsPage.recordStatuses(), 'Record statuses to have count').toHaveCount(
+          await recordsPage.recordRows().count()
+        );
         for (const status of await recordsPage.recordStatuses().all()) {
-          await expect(status).toHaveText(recordStatusPattern);
+          await expect(status, `Status to have text ${recordStatusPattern}`).toHaveText(recordStatusPattern);
         }
       });
 
       await test.step('I should identify records requiring action', async () => {
-        await expect(recordsPage.recordStatus(draftReference)).toHaveText(recordStatuses.draft);
+        await expect(
+          recordsPage.recordStatus(draftReference),
+          `Record status to have text ${recordStatuses.draft}`
+        ).toHaveText(recordStatuses.draft);
         for (const draftLink of await recordsPage.draftRecordLinks().all()) {
-          await expect(draftLink).toHaveAttribute('href', draftRecordHref);
+          await expect(draftLink, 'Draft link to have attribute').toHaveAttribute('href', draftRecordHref);
         }
       });
     }

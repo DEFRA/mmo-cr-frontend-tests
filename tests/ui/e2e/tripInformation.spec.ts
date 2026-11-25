@@ -45,14 +45,20 @@ test.describe('Trip Information', () => {
 
       await test.step('Both ports should be saved against the trip', async () => {
         await checkAnswersPage.goto('/check-answers');
-        await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort)).toHaveText(ports.first);
-        await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnPort)).toHaveText(ports.second);
+        await expect(
+          checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort),
+          `Summary value to have text ${ports.first}`
+        ).toHaveText(ports.first);
+        await expect(
+          checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnPort),
+          `Summary value to have text ${ports.second}`
+        ).toHaveText(ports.second);
       });
 
       await test.step('I should be able to continue', async () => {
         await checkAnswersPage.goBack();
         await gearSelectionPage.expectUrl(/\/gear-selection$/);
-        await expect(gearSelectionPage.pageHeading()).toBeVisible();
+        await expect(gearSelectionPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       });
     }
   );

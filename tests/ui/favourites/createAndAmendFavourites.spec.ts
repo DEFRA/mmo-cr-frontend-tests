@@ -99,7 +99,7 @@ const unapprovedFavourites = [
     openAdd: ({ accountPage }: AddFavouritePages) => accountPage.addSpeciesLink().click(),
     enterUnapproved: async ({ addSpeciesPage }: AddFavouritePages) => {
       await addSpeciesPage.speciesInput().fill(`${catchSpecies.unapprovedPrefix} ${Date.now()}`);
-      await expect(addSpeciesPage.noResultsMessage()).toBeVisible();
+      await expect(addSpeciesPage.noResultsMessage(), 'No results message to be visible').toBeVisible();
       await addSpeciesPage.speciesInput().press('Tab');
     },
     addPage: ({ addSpeciesPage }: AddFavouritePages) => addSpeciesPage
@@ -143,9 +143,9 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@regression', '@favouriteSpecies'] },
     async ({ accountPage }) => {
       await test.step('My account displays species, ports and gear in separate groups', async () => {
-        await expect(accountPage.summaryRow('Species caught')).toBeVisible();
-        await expect(accountPage.summaryRow('Ports used')).toBeVisible();
-        await expect(accountPage.summaryRow('Gear onboard')).toBeVisible();
+        await expect(accountPage.summaryRow('Species caught'), 'Summary row to be visible').toBeVisible();
+        await expect(accountPage.summaryRow('Ports used'), 'Summary row to be visible').toBeVisible();
+        await expect(accountPage.summaryRow('Gear onboard'), 'Summary row to be visible').toBeVisible();
       });
     }
   );
@@ -163,7 +163,10 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('The species is saved in my favourites', async () => {
-        await expect(accountPage.speciesCaughtValue()).toContainText(catchSpecies.cod.name);
+        await expect(
+          accountPage.speciesCaughtValue(),
+          `Species caught value to contain text ${catchSpecies.cod.name}`
+        ).toContainText(catchSpecies.cod.name);
       });
     }
   );
@@ -182,7 +185,10 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('I am informed that the species is already a favourite', async () => {
-        await expect(addSpeciesPage.errorSummary()).toContainText(duplicateSpeciesError);
+        await expect(
+          addSpeciesPage.errorSummary(),
+          `Error summary to contain text ${duplicateSpeciesError}`
+        ).toContainText(duplicateSpeciesError);
         await addSpeciesPage.expectUrl(/\/add-species/);
       });
 
@@ -210,7 +216,10 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('The gear is saved in my favourites', async () => {
-        await expect(accountPage.gearOnboardValue()).toContainText(gears.pots.name);
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value to contain text ${gears.pots.name}`
+        ).toContainText(gears.pots.name);
       });
     }
   );
@@ -228,7 +237,9 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('The port is saved in my favourites', async () => {
-        await expect(accountPage.portsUsedValue()).toContainText(ports.first);
+        await expect(accountPage.portsUsedValue(), `Ports used value to contain text ${ports.first}`).toContainText(
+          ports.first
+        );
       });
     }
   );
@@ -248,14 +259,16 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('I am informed that the gear is already a favourite', async () => {
-        await expect(addGearPage.errorSummary()).toContainText(duplicateGearError);
+        await expect(addGearPage.errorSummary(), `Error summary to contain text ${duplicateGearError}`).toContainText(
+          duplicateGearError
+        );
         await addGearPage.expectUrl(/\/add-gear/);
       });
 
       await test.step('Exactly one copy remains saved', async () => {
         await accountPage.goto('/account');
         await accountPage.clickRemoveGear();
-        await expect(removeGearPage.gearCheckbox(gears.pots.name)).toHaveCount(1);
+        await expect(removeGearPage.gearCheckbox(gears.pots.name), 'Gear checkbox to have count').toHaveCount(1);
       });
     }
   );
@@ -275,7 +288,7 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('I am informed that the port is already a favourite', async () => {
-        await expect(addPortPage.errorSummary()).toContainText(/already/i);
+        await expect(addPortPage.errorSummary(), 'Error summary to contain text').toContainText(/already/i);
         await addPortPage.expectUrl(/\/add-port/);
       });
 
@@ -310,7 +323,10 @@ test.describe('Create and amend favourites', () => {
         await test.step(`The ${favourite.kind} is no longer saved as a favourite`, async () => {
           await accountPage.expectUrl(/\/account$/);
           await accountPage.reload();
-          await expect(favourite.savedValue(accountPage)).not.toContainText(favourite.name);
+          await expect(
+            favourite.savedValue(accountPage),
+            `Saved value not to contain text ${favourite.name}`
+          ).not.toContainText(favourite.name);
         });
       }
     );
@@ -330,8 +346,13 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('Only the replacement port is saved', async () => {
-        await expect(accountPage.portsUsedValue()).not.toContainText(ports.first);
-        await expect(accountPage.portsUsedValue()).toContainText(ports.second);
+        await expect(
+          accountPage.portsUsedValue(),
+          `Ports used value not to contain text ${ports.first}`
+        ).not.toContainText(ports.first);
+        await expect(accountPage.portsUsedValue(), `Ports used value to contain text ${ports.second}`).toContainText(
+          ports.second
+        );
       });
     }
   );
@@ -351,14 +372,14 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('My favourite is displayed before I search the wider catalogue', async () => {
-        await expect(gearSelectionPage.gearCheckbox(gears.pots.name)).toBeVisible();
+        await expect(gearSelectionPage.gearCheckbox(gears.pots.name), 'Gear checkbox to be visible').toBeVisible();
       });
 
       await test.step('I can still search the wider gear catalogue', async () => {
         await gearSelectionPage.addGearLink().click();
-        await expect(addGearPage.gearInput()).toBeEmpty();
+        await expect(addGearPage.gearInput(), 'Gear input to be empty').toBeEmpty();
         await addGearPage.searchGearOptions(gears.searchable.searchTerm);
-        await expect(addGearPage.gearOption(gears.searchable.name)).toBeVisible();
+        await expect(addGearPage.gearOption(gears.searchable.name), 'Gear option to be visible').toBeVisible();
       });
     }
   );
@@ -376,14 +397,17 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('My favourite is displayed before I search the wider catalogue', async () => {
-        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name)).toBeVisible();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name),
+          'Species checkbox to be visible'
+        ).toBeVisible();
       });
 
       await test.step('I can still search the wider species catalogue', async () => {
         await navigationFlow.openAddSpecies();
-        await expect(addSpeciesPage.speciesInput()).toBeEmpty();
+        await expect(addSpeciesPage.speciesInput(), 'Species input to be empty').toBeEmpty();
         await addSpeciesPage.speciesInput().fill(catchSpecies.searchTerms.second);
-        await expect(addSpeciesPage.searchResults().first()).toBeVisible();
+        await expect(addSpeciesPage.searchResults().first(), 'Search results to be visible').toBeVisible();
       });
     }
   );
@@ -401,7 +425,10 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('My favourite is available without searching the catalogue', async () => {
-        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name)).toBeVisible();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name),
+          'Species checkbox to be visible'
+        ).toBeVisible();
       });
 
       await test.step('I select the favourite and continue without entering its catch weight', async () => {
@@ -415,10 +442,19 @@ test.describe('Create and amend favourites', () => {
 
       await test.step('Mandatory catch-weight validation prevents progression', async () => {
         await speciesSelectionPage.expectUrl(/\/species-selection$/);
-        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name)).toBeChecked();
-        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toBeEmpty();
-        await expect(speciesSelectionPage.errorSummary()).toBeVisible();
-        await expect(speciesSelectionPage.weightAboveMinimumError(catchSpecies.cod.code)).toBeVisible();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name),
+          'Species checkbox to be checked'
+        ).toBeChecked();
+        await expect(
+          speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code),
+          'Weight above minimum input to be empty'
+        ).toBeEmpty();
+        await expect(speciesSelectionPage.errorSummary(), 'Error summary to be visible').toBeVisible();
+        await expect(
+          speciesSelectionPage.weightAboveMinimumError(catchSpecies.cod.code),
+          'Weight above minimum error to be visible'
+        ).toBeVisible();
       });
     }
   );
@@ -446,14 +482,17 @@ test.describe('Create and amend favourites', () => {
         });
 
         await test.step('My favourite port is displayed before I enter a search', async () => {
-          await expect(portPage.portRadio(ports.first)).toBeVisible();
+          await expect(portPage.portRadio(ports.first), 'Port radio to be visible').toBeVisible();
         });
 
         await test.step('I can search the wider port catalogue', async () => {
           await addPortPage.goto(`/add-port?for=${portType}&entry=1`);
-          await expect(addPortPage.portInput()).toBeEmpty();
+          await expect(addPortPage.portInput(), 'Port input to be empty').toBeEmpty();
           await addPortPage.searchPorts(ports.searchTerms.second);
-          await expect(addPortPage.portResultItem(ports.second).getByRole('option')).toBeVisible();
+          await expect(
+            addPortPage.portResultItem(ports.second).getByRole('option'),
+            'Port result item to be visible'
+          ).toBeVisible();
         });
       }
     );
@@ -472,7 +511,10 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('Matching approved ports are suggested', async () => {
-        await expect(addPortPage.portResultItem(ports.first).getByRole('option')).toBeVisible();
+        await expect(
+          addPortPage.portResultItem(ports.first).getByRole('option'),
+          'Port result item to be visible'
+        ).toBeVisible();
       });
     }
   );
@@ -494,7 +536,10 @@ test.describe('Create and amend favourites', () => {
         });
 
         await test.step(favourite.rejectedStep, async () => {
-          await expect(favourite.addPage(pages).errorSummary()).toContainText(favourite.error);
+          await expect(
+            favourite.addPage(pages).errorSummary(),
+            `Add page to contain text ${favourite.error}`
+          ).toContainText(favourite.error);
           await favourite.addPage(pages).expectUrl(favourite.url);
         });
       }
@@ -516,9 +561,17 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('All three favourites remain saved', async () => {
-        await expect(accountPage.speciesCaughtValue()).toContainText(catchSpecies.cod.name);
-        await expect(accountPage.gearOnboardValue()).toContainText(gears.pots.name);
-        await expect(accountPage.portsUsedValue()).toContainText(ports.first);
+        await expect(
+          accountPage.speciesCaughtValue(),
+          `Species caught value to contain text ${catchSpecies.cod.name}`
+        ).toContainText(catchSpecies.cod.name);
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value to contain text ${gears.pots.name}`
+        ).toContainText(gears.pots.name);
+        await expect(accountPage.portsUsedValue(), `Ports used value to contain text ${ports.first}`).toContainText(
+          ports.first
+        );
       });
     }
   );

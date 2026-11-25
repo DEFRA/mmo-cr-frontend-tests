@@ -46,7 +46,7 @@ test.describe('Trip Dates', () => {
 
       await test.step('Only permitted dates should be accepted', async () => {
         await departurePortPage.expectUrl(/\/departure-port$/);
-        await expect(departurePortPage.pageHeading()).toBeVisible();
+        await expect(departurePortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       });
     }
   );
@@ -73,12 +73,14 @@ test.describe('Trip Dates', () => {
 
       await test.step('A future date should not be accepted', async () => {
         await tripDepartureDatePage.expectUrl(/\/trip-departure-date$/);
-        await expect(tripDepartureDatePage.common.errorSummary()).toContainText(
-          errorMessages.tripDates.futureDeparture
-        );
-        await expect(tripDepartureDatePage.common.errorMessage()).toContainText(
-          errorMessages.tripDates.futureDeparture
-        );
+        await expect(
+          tripDepartureDatePage.common.errorSummary(),
+          `Error summary to contain text ${errorMessages.tripDates.futureDeparture}`
+        ).toContainText(errorMessages.tripDates.futureDeparture);
+        await expect(
+          tripDepartureDatePage.common.errorMessage(),
+          `Error message to contain text ${errorMessages.tripDates.futureDeparture}`
+        ).toContainText(errorMessages.tripDates.futureDeparture);
       });
     }
   );
@@ -111,12 +113,14 @@ test.describe('Trip Dates', () => {
 
       await test.step('The return date should not be before the departure date', async () => {
         await tripReturnDatePage.expectUrl(/\/trip-return-date$/);
-        await expect(tripReturnDatePage.common.errorSummary()).toContainText(
-          errorMessages.tripDates.returnBeforeDeparture
-        );
-        await expect(tripReturnDatePage.common.errorMessage()).toContainText(
-          errorMessages.tripDates.returnBeforeDeparture
-        );
+        await expect(
+          tripReturnDatePage.common.errorSummary(),
+          `Error summary to contain text ${errorMessages.tripDates.returnBeforeDeparture}`
+        ).toContainText(errorMessages.tripDates.returnBeforeDeparture);
+        await expect(
+          tripReturnDatePage.common.errorMessage(),
+          `Error message to contain text ${errorMessages.tripDates.returnBeforeDeparture}`
+        ).toContainText(errorMessages.tripDates.returnBeforeDeparture);
       });
     }
   );

@@ -22,7 +22,10 @@ test.describe.skip('Sign in error scenarios', () => {
       });
 
       await test.step(`"${errorMessages.signIn.emailRequired}" is displayed`, async () => {
-        await expect(signInPage.errorMessage()).toContainText(errorMessages.signIn.emailRequired);
+        await expect(
+          signInPage.errorMessage(),
+          `Error message to contain text ${errorMessages.signIn.emailRequired}`
+        ).toContainText(errorMessages.signIn.emailRequired);
       });
     }
   );
@@ -36,7 +39,10 @@ test.describe.skip('Sign in error scenarios', () => {
       });
 
       await test.step(`"${errorMessages.signIn.passwordRequired}" is displayed`, async () => {
-        await expect(signInPage.errorMessage()).toContainText(errorMessages.signIn.passwordRequired);
+        await expect(
+          signInPage.errorMessage(),
+          `Error message to contain text ${errorMessages.signIn.passwordRequired}`
+        ).toContainText(errorMessages.signIn.passwordRequired);
       });
     }
   );
@@ -50,8 +56,14 @@ test.describe.skip('Sign in error scenarios', () => {
       });
 
       await test.step('Both validation messages are displayed', async () => {
-        await expect(signInPage.errorMessage()).toContainText(errorMessages.signIn.emailRequired);
-        await expect(signInPage.errorMessage()).toContainText(errorMessages.signIn.passwordRequired);
+        await expect(
+          signInPage.errorMessage(),
+          `Error message to contain text ${errorMessages.signIn.emailRequired}`
+        ).toContainText(errorMessages.signIn.emailRequired);
+        await expect(
+          signInPage.errorMessage(),
+          `Error message to contain text ${errorMessages.signIn.passwordRequired}`
+        ).toContainText(errorMessages.signIn.passwordRequired);
       });
     }
   );
@@ -65,7 +77,10 @@ test.describe.skip('Sign in error scenarios', () => {
       });
 
       await test.step(`"${errorMessages.signIn.emailInvalid}" is displayed`, async () => {
-        await expect(signInPage.errorMessage()).toContainText(errorMessages.signIn.emailInvalid);
+        await expect(
+          signInPage.errorMessage(),
+          `Error message to contain text ${errorMessages.signIn.emailInvalid}`
+        ).toContainText(errorMessages.signIn.emailInvalid);
       });
     }
   );

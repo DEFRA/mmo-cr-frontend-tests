@@ -29,12 +29,12 @@ export class AddPortPage extends BasePage {
   async searchPorts(searchTerm: string): Promise<void> {
     await this.page.waitForLoadState('load');
     await this.portInput().fill(searchTerm);
-    await expect(this.portResultsList().getByRole('option').first()).toBeVisible();
+    await expect(this.portResultsList().getByRole('option').first(), 'Port results list to be visible').toBeVisible();
   }
 
   async searchAndSelectPort(portName: string) {
     await this.searchPorts(searchTermFor(portName));
     await this.portResultItem(portName).getByRole('option', { name: portName, exact: true }).click();
-    await expect(this.portInput()).toHaveValue(portName);
+    await expect(this.portInput(), `Port input to have value ${portName}`).toHaveValue(portName);
   }
 }

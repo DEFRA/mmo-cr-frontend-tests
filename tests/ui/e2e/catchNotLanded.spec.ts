@@ -49,18 +49,21 @@ test.describe('Catch Not Landed', () => {
 
       await test.step('The catch not landed should be recorded', async () => {
         await checkAnswersPage.expectUrl(/\/check-answers$/);
-        await expect(checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.notLanded)).toHaveText(
-          checkAnswers.answers.yes
-        );
+        await expect(
+          checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.notLanded),
+          `Not landed value to have text ${checkAnswers.answers.yes}`
+        ).toHaveText(checkAnswers.answers.yes);
       });
 
       await test.step('It should appear correctly on the review screen', async () => {
-        await expect(checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.notLandedSpecies)).toHaveText(
-          catchSpecies.cod.name
-        );
-        await expect(checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.weightKeptOnboard)).toHaveText(
-          catchSpecies.weights.keptOnboard
-        );
+        await expect(
+          checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.notLandedSpecies),
+          `Not landed value to have text ${catchSpecies.cod.name}`
+        ).toHaveText(catchSpecies.cod.name);
+        await expect(
+          checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.weightKeptOnboard),
+          `Not landed value to have text ${catchSpecies.weights.keptOnboard}`
+        ).toHaveText(catchSpecies.weights.keptOnboard);
       });
     }
   );

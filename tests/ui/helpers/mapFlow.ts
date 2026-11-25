@@ -39,8 +39,8 @@ export class MapFlow {
         requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for map UI tests'
       }
     });
-    await expect(this.mapPage.pageHeading()).toBeVisible();
-    await expect(this.mapPage.mapCanvas()).toBeVisible();
+    await expect(this.mapPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+    await expect(this.mapPage.mapCanvas(), 'Map canvas to be visible').toBeVisible();
     await expect.poll(() => this.mapPage.readMapSubrectangleCount()).toBeGreaterThanOrEqual(9);
     return portName;
   }
@@ -55,7 +55,7 @@ export class MapFlow {
 
   private async fetchMapData<T>(file: string): Promise<T> {
     const response = await this.mapPage.page.request.get(`/public/offline-map/${file}`);
-    expect(response.ok()).toBeTruthy();
+    expect(response.ok(), 'Ok to be truthy').toBeTruthy();
     return (await response.json()) as T;
   }
 

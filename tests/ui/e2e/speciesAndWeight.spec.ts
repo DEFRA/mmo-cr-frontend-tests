@@ -53,15 +53,20 @@ test.describe('Species and Weight', () => {
             catchSpecies.cod.name,
             gears.pots.name,
             checkAnswers.summaryKeys.weightRetained
-          )
+          ),
+          'Species summary value to have text'
         ).toHaveText(`${catchSpecies.cod.weight} kg`);
       });
 
       await test.step('They should be linked to the correct fishing gear', async () => {
         await expect(
-          checkAnswersPage.gearSummaryValue(gears.pots.name, checkAnswers.summaryKeys.speciesCaught)
+          checkAnswersPage.gearSummaryValue(gears.pots.name, checkAnswers.summaryKeys.speciesCaught),
+          `Gear summary value to contain text ${catchSpecies.cod.name}`
         ).toContainText(catchSpecies.cod.name);
-        await expect(checkAnswersPage.speciesSection(catchSpecies.cod.name, gears.pots.name)).toBeVisible();
+        await expect(
+          checkAnswersPage.speciesSection(catchSpecies.cod.name, gears.pots.name),
+          'Species section to be visible'
+        ).toBeVisible();
       });
     }
   );
@@ -89,7 +94,8 @@ test.describe('Species and Weight', () => {
         for (const { gear, species } of sameSpeciesCatches) {
           for (const caught of species) {
             await expect(
-              checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained)
+              checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained),
+              'Species summary value to have text'
             ).toHaveText(`${caught.weight} kg`);
           }
         }
@@ -98,11 +104,13 @@ test.describe('Species and Weight', () => {
       await test.step('The review should display the correct values', async () => {
         for (const { gear, species } of sameSpeciesCatches) {
           await expect(
-            checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.areaMajorityCaught)
+            checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.areaMajorityCaught),
+            `Gear summary value to have text ${areas.validCode}`
           ).toHaveText(areas.validCode);
           for (const caught of species) {
             await expect(
-              checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.speciesCaught)
+              checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.speciesCaught),
+              `Gear summary value to contain text ${caught.name}`
             ).toContainText(caught.name);
           }
         }

@@ -1,4 +1,5 @@
 import { type Locator } from '@playwright/test';
+import { vessels } from '../test-data/testData';
 import { BasePage } from './basePage';
 
 /**
@@ -21,8 +22,12 @@ export class AccountPage extends BasePage {
       name: new RegExp(`^${vesselName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\(`)
     });
 
-  public readonly summaryRow = (key: string): Locator =>
-    this.page
+  /** Summary list under a vessel heading; defaults to the configured test vessel. */
+  public readonly vesselSummary = (vesselName: string = vessels.testVessel): Locator =>
+    this.vesselNameHeading(vesselName).locator('xpath=following-sibling::dl[1]');
+
+  public readonly summaryRow = (key: string, vesselName: string = vessels.testVessel): Locator =>
+    this.vesselSummary(vesselName)
       .locator('.govuk-summary-list__row')
       .filter({
         has: this.page.locator('.govuk-summary-list__key', {
@@ -31,39 +36,45 @@ export class AccountPage extends BasePage {
       })
       .first();
 
-  public readonly summaryValue = (key: string): Locator => this.summaryRow(key).locator('.govuk-summary-list__value');
+  public readonly summaryValue = (key: string, vesselName: string = vessels.testVessel): Locator =>
+    this.summaryRow(key, vesselName).locator('.govuk-summary-list__value');
 
-  public readonly gearOnboardValue = (): Locator => this.summaryValue('Gear onboard');
+  public readonly gearOnboardValue = (vesselName: string = vessels.testVessel): Locator =>
+    this.summaryValue('Gear onboard', vesselName);
 
-  public readonly addGearLink = (): Locator => this.summaryRow('Gear onboard').getByRole('link', { name: 'Add gear' });
+  public readonly addGearLink = (vesselName: string = vessels.testVessel): Locator =>
+    this.summaryRow('Gear onboard', vesselName).getByRole('link', { name: 'Add gear' });
 
-  public readonly removeGearLink = (): Locator =>
-    this.summaryRow('Gear onboard').getByRole('link', { name: 'Remove gear' });
+  public readonly removeGearLink = (vesselName: string = vessels.testVessel): Locator =>
+    this.summaryRow('Gear onboard', vesselName).getByRole('link', { name: 'Remove gear' });
 
-  public readonly speciesCaughtValue = (): Locator => this.summaryValue('Species caught');
+  public readonly speciesCaughtValue = (vesselName: string = vessels.testVessel): Locator =>
+    this.summaryValue('Species caught', vesselName);
 
-  public readonly addSpeciesLink = (): Locator =>
-    this.summaryRow('Species caught').getByRole('link', { name: 'Add species' });
+  public readonly addSpeciesLink = (vesselName: string = vessels.testVessel): Locator =>
+    this.summaryRow('Species caught', vesselName).getByRole('link', { name: 'Add species' });
 
-  public readonly removeSpeciesLink = (): Locator =>
-    this.summaryRow('Species caught').getByRole('link', { name: 'Remove species' });
+  public readonly removeSpeciesLink = (vesselName: string = vessels.testVessel): Locator =>
+    this.summaryRow('Species caught', vesselName).getByRole('link', { name: 'Remove species' });
 
-  public readonly portsUsedValue = (): Locator => this.summaryValue('Ports used');
+  public readonly portsUsedValue = (vesselName: string = vessels.testVessel): Locator =>
+    this.summaryValue('Ports used', vesselName);
 
-  public readonly addPortLink = (): Locator => this.summaryRow('Ports used').getByRole('link', { name: 'Add port' });
+  public readonly addPortLink = (vesselName: string = vessels.testVessel): Locator =>
+    this.summaryRow('Ports used', vesselName).getByRole('link', { name: 'Add port' });
 
-  public readonly removePortLink = (): Locator =>
-    this.summaryRow('Ports used').getByRole('link', { name: 'Remove port' });
+  public readonly removePortLink = (vesselName: string = vessels.testVessel): Locator =>
+    this.summaryRow('Ports used', vesselName).getByRole('link', { name: 'Remove port' });
 
   public readonly viewAllCatchRecordsButton = (): Locator =>
     this.page.getByRole('button', { name: 'View all catch records' });
 
-  async getPortsUsed(): Promise<string[]> {
-    return this.listValues(this.portsUsedValue());
+  async getPortsUsed(vesselName: string = vessels.testVessel): Promise<string[]> {
+    return this.listValues(this.portsUsedValue(vesselName));
   }
 
-  async getSpeciesCaught(): Promise<string[]> {
-    return this.listValues(this.speciesCaughtValue());
+  async getSpeciesCaught(vesselName: string = vessels.testVessel): Promise<string[]> {
+    return this.listValues(this.speciesCaughtValue(vesselName));
   }
 
   private async listValues(value: Locator): Promise<string[]> {
@@ -73,16 +84,16 @@ export class AccountPage extends BasePage {
       .filter(Boolean);
   }
 
-  async getGearOnboardText(): Promise<string> {
-    const text = await this.gearOnboardValue().textContent();
+  async getGearOnboardText(vesselName: string = vessels.testVessel): Promise<string> {
+    const text = await this.gearOnboardValue(vesselName).textContent();
     return text ? text.trim() : '';
   }
 
-  async clickRemoveGear() {
-    await this.removeGearLink().click();
+  async clickRemoveGear(vesselName: string = vessels.testVessel) {
+    await this.removeGearLink(vesselName).click();
   }
 
-  async clickAddGear() {
-    await this.addGearLink().click();
+  async clickAddGear(vesselName: string = vessels.testVessel) {
+    await this.addGearLink(vesselName).click();
   }
 }

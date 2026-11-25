@@ -40,17 +40,22 @@ test.describe('Catch Location', () => {
       await test.step('The selected area should be recorded', async () => {
         await checkAnswersPage.goto('/check-answers');
         await expect(
-          checkAnswersPage.gearSummaryValue(gears.seineNets.name, checkAnswers.summaryKeys.statisticalSubArea)
+          checkAnswersPage.gearSummaryValue(gears.seineNets.name, checkAnswers.summaryKeys.statisticalSubArea),
+          `Gear summary value to have text ${areaCode}`
         ).toHaveText(areaCode);
-        await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.statisticalSubArea)).toContainText(
-          areaCode
-        );
+        await expect(
+          checkAnswersPage.summaryValue(checkAnswers.summaryKeys.statisticalSubArea),
+          `Summary value to contain text ${areaCode}`
+        ).toContainText(areaCode);
       });
 
       await test.step('I should continue to species selection', async () => {
         await checkAnswersPage.goBack();
         await speciesSelectionPage.expectUrl(/\/species-selection\?gearId=/);
-        await expect(speciesSelectionPage.pageHeadingForGear(gears.seineNets.name)).toBeVisible();
+        await expect(
+          speciesSelectionPage.pageHeadingForGear(gears.seineNets.name),
+          'Page heading for gear to be visible'
+        ).toBeVisible();
       });
     }
   );

@@ -21,7 +21,10 @@ test.describe('Remove favourite gear', () => {
       await gearFlow.removeSavedGears(testFavouriteGears);
       await navigationFlow.openAddGear();
       await gearFlow.savePots(gears.pots.gearDimension);
-      await expect(accountPage.gearOnboardValue()).toContainText(gears.pots.name);
+      await expect(
+        accountPage.gearOnboardValue(),
+        `Gear onboard value to contain text ${gears.pots.name}`
+      ).toContainText(gears.pots.name);
     });
   });
 
@@ -46,9 +49,15 @@ test.describe('Remove favourite gear', () => {
 
       await test.step('The gear is no longer saved as a favourite', async () => {
         await accountPage.expectUrl(/\/account$/);
-        await expect(accountPage.gearOnboardValue()).not.toContainText(gears.pots.name);
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value not to contain text ${gears.pots.name}`
+        ).not.toContainText(gears.pots.name);
         await accountPage.reload();
-        await expect(accountPage.gearOnboardValue()).not.toContainText(gears.pots.name);
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value not to contain text ${gears.pots.name}`
+        ).not.toContainText(gears.pots.name);
       });
     }
   );
@@ -63,29 +72,46 @@ test.describe('Remove favourite gear', () => {
         await navigationFlow.openAddGear();
         await gearFlow.saveGearFromAddPage(gears.traps.name);
         await accountPage.expectUrl(/\/account$/);
-        await expect(accountPage.gearOnboardValue()).toContainText(gears.pots.name);
-        await expect(accountPage.gearOnboardValue()).toContainText(gears.traps.name);
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value to contain text ${gears.pots.name}`
+        ).toContainText(gears.pots.name);
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value to contain text ${gears.traps.name}`
+        ).toContainText(gears.traps.name);
         await accountPage.clickRemoveGear();
-        await expect(removeGearPage.gearHint(gears.traps.name)).toBeVisible();
+        await expect(removeGearPage.gearHint(gears.traps.name), 'Gear hint to be visible').toBeVisible();
         retainedHint = await removeGearPage.gearHint(gears.traps.name).innerText();
       });
 
       await test.step('I select only one favourite and confirm removal', async () => {
         await removeGearPage.selectGearToRemove(gears.pots.name);
-        await expect(removeGearPage.gearCheckbox(gears.traps.name)).not.toBeChecked();
+        await expect(
+          removeGearPage.gearCheckbox(gears.traps.name),
+          'Gear checkbox not to be checked'
+        ).not.toBeChecked();
         await removeGearPage.clickContinue();
       });
 
       await test.step('The selected gear is removed and the remaining configuration is unchanged', async () => {
         await accountPage.expectUrl(/\/account$/);
         await accountPage.reload();
-        await expect(accountPage.gearOnboardValue()).not.toContainText(gears.pots.name);
-        await expect(accountPage.gearOnboardValue()).toContainText(gears.traps.name);
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value not to contain text ${gears.pots.name}`
+        ).not.toContainText(gears.pots.name);
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value to contain text ${gears.traps.name}`
+        ).toContainText(gears.traps.name);
         await accountPage.clickRemoveGear();
-        await expect(removeGearPage.pageHeading()).toBeVisible();
-        await expect(removeGearPage.gearCheckbox(gears.pots.name)).toHaveCount(0);
-        await expect(removeGearPage.gearCheckbox(gears.traps.name)).toBeVisible();
-        await expect(removeGearPage.gearHint(gears.traps.name)).toHaveText(retainedHint);
+        await expect(removeGearPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+        await expect(removeGearPage.gearCheckbox(gears.pots.name), 'Gear checkbox to have count').toHaveCount(0);
+        await expect(removeGearPage.gearCheckbox(gears.traps.name), 'Gear checkbox to be visible').toBeVisible();
+        await expect(removeGearPage.gearHint(gears.traps.name), `Gear hint to have text ${retainedHint}`).toHaveText(
+          retainedHint
+        );
       });
     }
   );
@@ -109,8 +135,12 @@ test.describe('Remove favourite gear', () => {
       await test.step('My saved gear and its measurements remain unchanged', async () => {
         await accountPage.expectUrl(/\/account$/);
         await accountPage.reload();
-        await expect(accountPage.gearOnboardValue()).toHaveText(savedGear);
-        await expect(accountPage.gearOnboardValue()).toContainText(gearDimensionText(gears.pots.gearDimension));
+        await expect(accountPage.gearOnboardValue(), `Gear onboard value to have text ${savedGear}`).toHaveText(
+          savedGear
+        );
+        await expect(accountPage.gearOnboardValue(), 'Gear onboard value to contain text').toContainText(
+          gearDimensionText(gears.pots.gearDimension)
+        );
       });
     }
   );
@@ -124,7 +154,10 @@ test.describe('Remove favourite gear', () => {
         await removeGearPage.selectGearToRemove(gears.pots.name);
         await removeGearPage.clickContinue();
         await accountPage.expectUrl(/\/account$/);
-        await expect(accountPage.gearOnboardValue()).not.toContainText(gears.pots.name);
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value not to contain text ${gears.pots.name}`
+        ).not.toContainText(gears.pots.name);
       });
 
       await test.step('I start a new catch record and reach gear selection', async () => {
@@ -134,15 +167,15 @@ test.describe('Remove favourite gear', () => {
       });
 
       await test.step('The removed gear is not offered as a favourite', async () => {
-        await expect(gearSelectionPage.pageHeading()).toBeVisible();
-        await expect(gearSelectionPage.gearCheckbox(gears.pots.name)).toHaveCount(0);
+        await expect(gearSelectionPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+        await expect(gearSelectionPage.gearCheckbox(gears.pots.name), 'Gear checkbox to have count').toHaveCount(0);
       });
 
       await test.step('The gear remains available through the standard catalogue search', async () => {
         await gearSelectionPage.addGearLink().click();
-        await expect(addGearPage.gearInput()).toBeEditable();
+        await expect(addGearPage.gearInput(), 'Gear input to be editable').toBeEditable();
         await addGearPage.searchGearOptions(gears.pots.searchTerm);
-        await expect(addGearPage.gearOption(gears.pots.name)).toBeVisible();
+        await expect(addGearPage.gearOption(gears.pots.name), 'Gear option to be visible').toBeVisible();
       });
     }
   );
@@ -156,22 +189,28 @@ test.describe('Remove favourite gear', () => {
         await gearFlow.saveGearFromAddPage(gears.traps.name);
         await accountPage.expectUrl(/\/account$/);
         await accountPage.clickRemoveGear();
-        await expect(removeGearPage.gearCheckbox(gears.pots.name)).toBeVisible();
-        await expect(removeGearPage.gearCheckbox(gears.traps.name)).toBeVisible();
+        await expect(removeGearPage.gearCheckbox(gears.pots.name), 'Gear checkbox to be visible').toBeVisible();
+        await expect(removeGearPage.gearCheckbox(gears.traps.name), 'Gear checkbox to be visible').toBeVisible();
       });
 
       await test.step('I select both favourites and confirm removal', async () => {
         await removeGearPage.selectGearToRemove(gears.pots.name, gears.traps.name);
-        await expect(removeGearPage.gearCheckbox(gears.pots.name)).toBeChecked();
-        await expect(removeGearPage.gearCheckbox(gears.traps.name)).toBeChecked();
+        await expect(removeGearPage.gearCheckbox(gears.pots.name), 'Gear checkbox to be checked').toBeChecked();
+        await expect(removeGearPage.gearCheckbox(gears.traps.name), 'Gear checkbox to be checked').toBeChecked();
         await removeGearPage.clickContinue();
       });
 
       await test.step('Neither selected gear remains saved after reloading', async () => {
         await accountPage.expectUrl(/\/account$/);
         await accountPage.reload();
-        await expect(accountPage.gearOnboardValue()).not.toContainText(gears.pots.name);
-        await expect(accountPage.gearOnboardValue()).not.toContainText(gears.traps.name);
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value not to contain text ${gears.pots.name}`
+        ).not.toContainText(gears.pots.name);
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value not to contain text ${gears.traps.name}`
+        ).not.toContainText(gears.traps.name);
       });
     }
   );
@@ -185,7 +224,10 @@ test.describe('Remove favourite gear', () => {
         await removeGearPage.selectGearToRemove(gears.pots.name);
         await removeGearPage.clickContinue();
         await accountPage.expectUrl(/\/account$/);
-        await expect(accountPage.gearOnboardValue()).not.toContainText(gears.pots.name);
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value not to contain text ${gears.pots.name}`
+        ).not.toContainText(gears.pots.name);
       });
 
       await test.step('I select the same gear from the catalogue again', async () => {
@@ -195,8 +237,8 @@ test.describe('Remove favourite gear', () => {
       });
 
       await test.step('The previous favourite measurement is not restored', async () => {
-        await expect(addGearPage.measurementsHeading('pots')).toBeVisible();
-        await expect(addGearPage.gearDimensionInput()).toBeEmpty();
+        await expect(addGearPage.measurementsHeading('pots'), 'Measurements heading to be visible').toBeVisible();
+        await expect(addGearPage.gearDimensionInput(), 'Gear dimension input to be empty').toBeEmpty();
       });
 
       await test.step('I save a new measurement', async () => {
@@ -207,12 +249,14 @@ test.describe('Remove favourite gear', () => {
       await test.step('Only the new configuration is saved', async () => {
         await accountPage.expectUrl(/\/account$/);
         await accountPage.reload();
-        await expect(accountPage.gearOnboardValue()).toContainText(
+        await expect(accountPage.gearOnboardValue(), 'Gear onboard value to contain text').toContainText(
           gearDimensionText(gears.measurements.replacementDimension)
         );
-        await expect(accountPage.gearOnboardValue()).not.toContainText(gearDimensionText(gears.pots.gearDimension));
+        await expect(accountPage.gearOnboardValue(), 'Gear onboard value not to contain text').not.toContainText(
+          gearDimensionText(gears.pots.gearDimension)
+        );
         await accountPage.clickRemoveGear();
-        await expect(removeGearPage.gearCheckbox(gears.pots.name)).toHaveCount(1);
+        await expect(removeGearPage.gearCheckbox(gears.pots.name), 'Gear checkbox to have count').toHaveCount(1);
       });
     }
   );

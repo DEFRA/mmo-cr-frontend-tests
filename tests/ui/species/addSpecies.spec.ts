@@ -54,8 +54,8 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('The Add Species page is displayed', async () => {
         await addSpeciesPage.expectUrl(/\/add-species/);
-        await expect(addSpeciesPage.pageHeading()).toBeVisible();
-        await expect(addSpeciesPage.speciesInput()).toBeEditable();
+        await expect(addSpeciesPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+        await expect(addSpeciesPage.speciesInput(), 'Species input to be editable').toBeEditable();
       });
 
       await test.step('The user can search for a species by name', async () => {
@@ -69,7 +69,7 @@ test.describe('Add species to a catch record', () => {
       await test.step('The selected species is added to the catch record', async () => {
         await addSpeciesPage.clickSaveAndContinue();
         await speciesSelectionPage.expectUrl(/\/species-selection$/);
-        await expect(speciesSelectionPage.speciesCheckbox(species)).toBeVisible();
+        await expect(speciesSelectionPage.speciesCheckbox(species), 'Species checkbox to be visible').toBeVisible();
       });
     }
   );
@@ -98,7 +98,7 @@ test.describe('Add species to a catch record', () => {
       await test.step('The user can select a species from the results list', async () => {
         await addSpeciesPage.selectSpeciesFromSuggestions(species);
         await addSpeciesPage.clickSaveAndContinue();
-        await expect(speciesSelectionPage.speciesCheckbox(species)).toBeVisible();
+        await expect(speciesSelectionPage.speciesCheckbox(species), 'Species checkbox to be visible').toBeVisible();
       });
     }
   );
@@ -130,11 +130,17 @@ test.describe('Add species to a catch record', () => {
       await test.step('The newly selected species is added to the existing species list', async () => {
         await addSpeciesPage.clickSaveAndContinue();
         await speciesSelectionPage.expectUrl(/\/species-selection$/);
-        await expect(speciesSelectionPage.speciesCheckbox(secondSpecies)).toBeVisible();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(secondSpecies),
+          'Species checkbox to be visible'
+        ).toBeVisible();
       });
 
       await test.step('Previously added species remain unchanged', async () => {
-        await expect(speciesSelectionPage.speciesCheckbox(firstSpecies)).toBeVisible();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(firstSpecies),
+          'Species checkbox to be visible'
+        ).toBeVisible();
       });
     }
   );
@@ -160,7 +166,9 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('An error message is shown: "<species> has already been added."', async () => {
-        await expect(addSpeciesPage.errorSummary()).toContainText(duplicateSpeciesError(species));
+        await expect(addSpeciesPage.errorSummary(), 'Error summary to contain text').toContainText(
+          duplicateSpeciesError(species)
+        );
       });
     }
   );
@@ -190,7 +198,10 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('Previously selected species are displayed', async () => {
-        await expect(speciesSelectionPage.speciesCheckbox(firstSpecies)).toBeChecked();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(firstSpecies),
+          'Species checkbox to be checked'
+        ).toBeChecked();
       });
 
       await test.step('The user can add additional species', async () => {
@@ -200,8 +211,14 @@ test.describe('Add species to a catch record', () => {
           (species) => species !== firstSpecies
         );
 
-        await expect(speciesSelectionPage.speciesCheckbox(firstSpecies)).toBeChecked();
-        await expect(speciesSelectionPage.speciesCheckbox(secondSpecies)).toBeVisible();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(firstSpecies),
+          'Species checkbox to be checked'
+        ).toBeChecked();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(secondSpecies),
+          'Species checkbox to be visible'
+        ).toBeVisible();
       });
     }
   );
@@ -221,7 +238,10 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step(`An error message is displayed: "${errorMessages.species.noneSelected}."`, async () => {
-        await expect(speciesSelectionPage.errorSummary()).toContainText(errorMessages.species.noneSelected);
+        await expect(
+          speciesSelectionPage.errorSummary(),
+          `Error summary to contain text ${errorMessages.species.noneSelected}`
+        ).toContainText(errorMessages.species.noneSelected);
         await speciesSelectionPage.expectUrl(/\/species-selection$/);
       });
     }
@@ -274,7 +294,10 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('The selected species is added to the catch record', async () => {
         await speciesSelectionPage.expectUrl(/\/species-selection$/);
-        await expect(speciesSelectionPage.speciesCheckbox(secondSpecies)).toBeVisible();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(secondSpecies),
+          'Species checkbox to be visible'
+        ).toBeVisible();
       });
     }
   );
@@ -296,13 +319,19 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step(`An error message is displayed: "${errorMessages.species.unapproved}"`, async () => {
-        await expect(addSpeciesPage.errorSummary()).toContainText(errorMessages.species.unapproved);
+        await expect(
+          addSpeciesPage.errorSummary(),
+          `Error summary to contain text ${errorMessages.species.unapproved}`
+        ).toContainText(errorMessages.species.unapproved);
         await addSpeciesPage.expectUrl(/\/add-species/);
       });
 
       await test.step('The text is not added to the catch record', async () => {
         await navigationFlow.openSpeciesSelection();
-        await expect(speciesSelectionPage.speciesCheckbox(unapprovedSpecies)).toHaveCount(0);
+        await expect(
+          speciesSelectionPage.speciesCheckbox(unapprovedSpecies),
+          'Species checkbox to have count'
+        ).toHaveCount(0);
       });
     }
   );

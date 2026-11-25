@@ -51,19 +51,31 @@ test.describe('Remove species', () => {
       });
 
       await test.step('The user is taken to the Remove Species page', async () => {
-        await expect(removeSpeciesPage.pageHeading()).toBeVisible();
+        await expect(removeSpeciesPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       });
 
       await test.step('All selected species are displayed', async () => {
-        await expect(removeSpeciesPage.speciesCheckbox(catchSpecies.cod.name)).toBeVisible();
-        await expect(removeSpeciesPage.speciesCheckbox(catchSpecies.mackerel.name)).toBeVisible();
+        await expect(
+          removeSpeciesPage.speciesCheckbox(catchSpecies.cod.name),
+          'Species checkbox to be visible'
+        ).toBeVisible();
+        await expect(
+          removeSpeciesPage.speciesCheckbox(catchSpecies.mackerel.name),
+          'Species checkbox to be visible'
+        ).toBeVisible();
       });
 
       await test.step('The user can select one or more species to remove', async () => {
         await removeSpeciesPage.selectSpeciesToRemove(catchSpecies.cod.name);
         await removeSpeciesPage.selectSpeciesToRemove(catchSpecies.mackerel.name);
-        await expect(removeSpeciesPage.speciesCheckbox(catchSpecies.cod.name)).toBeChecked();
-        await expect(removeSpeciesPage.speciesCheckbox(catchSpecies.mackerel.name)).toBeChecked();
+        await expect(
+          removeSpeciesPage.speciesCheckbox(catchSpecies.cod.name),
+          'Species checkbox to be checked'
+        ).toBeChecked();
+        await expect(
+          removeSpeciesPage.speciesCheckbox(catchSpecies.mackerel.name),
+          'Species checkbox to be checked'
+        ).toBeChecked();
       });
     }
   );
@@ -81,7 +93,10 @@ test.describe('Remove species', () => {
         await speciesSelectionPage.enterSpeciesWeights(catchSpecies.shads.code, catchSpecies.shads.weight);
         await speciesSelectionPage.saveAndReturn();
         for (const species of [catchSpecies.cod, catchSpecies.mackerel, catchSpecies.shads]) {
-          await expect(speciesSelectionPage.weightAboveMinimumInput(species.code)).toHaveValue(species.weight);
+          await expect(
+            speciesSelectionPage.weightAboveMinimumInput(species.code),
+            `Weight above minimum input to have value ${species.weight}`
+          ).toHaveValue(species.weight);
         }
       });
 
@@ -96,17 +111,33 @@ test.describe('Remove species', () => {
       });
 
       await test.step('All selected species are removed from the catch record', async () => {
-        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name)).toBeHidden();
-        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.shads.name)).toBeHidden();
-        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.mackerel.name)).toBeVisible();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name),
+          'Species checkbox to be hidden'
+        ).toBeHidden();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(catchSpecies.shads.name),
+          'Species checkbox to be hidden'
+        ).toBeHidden();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(catchSpecies.mackerel.name),
+          'Species checkbox to be visible'
+        ).toBeVisible();
       });
 
       await test.step('Associated catch-weight data is removed', async () => {
-        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toBeHidden();
-        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.shads.code)).toBeHidden();
-        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.mackerel.code)).toHaveValue(
-          catchSpecies.mackerel.weight
-        );
+        await expect(
+          speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code),
+          'Weight above minimum input to be hidden'
+        ).toBeHidden();
+        await expect(
+          speciesSelectionPage.weightAboveMinimumInput(catchSpecies.shads.code),
+          'Weight above minimum input to be hidden'
+        ).toBeHidden();
+        await expect(
+          speciesSelectionPage.weightAboveMinimumInput(catchSpecies.mackerel.code),
+          `Weight above minimum input to have value ${catchSpecies.mackerel.weight}`
+        ).toHaveValue(catchSpecies.mackerel.weight);
       });
     }
   );
@@ -117,7 +148,7 @@ test.describe('Remove species', () => {
     async ({ speciesSelectionPage, removeSpeciesPage }) => {
       await test.step('The user has selected Remove Species', async () => {
         await speciesSelectionPage.clickRemoveSpecies();
-        await expect(removeSpeciesPage.pageHeading()).toBeVisible();
+        await expect(removeSpeciesPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       });
 
       await test.step('The user selects Cancel or Back', async () => {
@@ -126,16 +157,18 @@ test.describe('Remove species', () => {
       });
 
       await test.step('No species are removed', async () => {
-        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toHaveValue(
-          catchSpecies.cod.weight
-        );
-        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.mackerel.code)).toHaveValue(
-          catchSpecies.mackerel.weight
-        );
+        await expect(
+          speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code),
+          `Weight above minimum input to have value ${catchSpecies.cod.weight}`
+        ).toHaveValue(catchSpecies.cod.weight);
+        await expect(
+          speciesSelectionPage.weightAboveMinimumInput(catchSpecies.mackerel.code),
+          `Weight above minimum input to have value ${catchSpecies.mackerel.weight}`
+        ).toHaveValue(catchSpecies.mackerel.weight);
       });
 
       await test.step('The user returns to the previous page', async () => {
-        await expect(speciesSelectionPage.pageHeading()).toBeVisible();
+        await expect(speciesSelectionPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       });
     }
   );
@@ -145,9 +178,10 @@ test.describe('Remove species', () => {
     { tag: ['@ui', '@regression', '@removeSpecies'] },
     async ({ speciesSelectionPage, removeSpeciesPage }) => {
       await test.step('The user has previously selected species', async () => {
-        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toHaveValue(
-          catchSpecies.cod.weight
-        );
+        await expect(
+          speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code),
+          `Weight above minimum input to have value ${catchSpecies.cod.weight}`
+        ).toHaveValue(catchSpecies.cod.weight);
       });
 
       await test.step('The user returns to the species page', async () => {
@@ -155,20 +189,28 @@ test.describe('Remove species', () => {
       });
 
       await test.step('Previously selected species are displayed', async () => {
-        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toHaveValue(
-          catchSpecies.cod.weight
-        );
-        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.mackerel.code)).toHaveValue(
-          catchSpecies.mackerel.weight
-        );
+        await expect(
+          speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code),
+          `Weight above minimum input to have value ${catchSpecies.cod.weight}`
+        ).toHaveValue(catchSpecies.cod.weight);
+        await expect(
+          speciesSelectionPage.weightAboveMinimumInput(catchSpecies.mackerel.code),
+          `Weight above minimum input to have value ${catchSpecies.mackerel.weight}`
+        ).toHaveValue(catchSpecies.mackerel.weight);
       });
 
       await test.step('The user can remove existing species', async () => {
         await speciesSelectionPage.clickRemoveSpecies();
         await removeSpeciesPage.selectSpeciesToRemove(catchSpecies.cod.name);
         await removeSpeciesPage.clickSaveAndContinue();
-        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name)).toBeHidden();
-        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.mackerel.name)).toBeVisible();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name),
+          'Species checkbox to be hidden'
+        ).toBeHidden();
+        await expect(
+          speciesSelectionPage.speciesCheckbox(catchSpecies.mackerel.name),
+          'Species checkbox to be visible'
+        ).toBeVisible();
       });
     }
   );

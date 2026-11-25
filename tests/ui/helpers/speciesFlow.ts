@@ -35,7 +35,7 @@ export class SpeciesFlow {
     const matchingSpecies = (await addSpeciesPage.searchSpeciesOptions(searchTerm)).filter((option) =>
       option.toLocaleLowerCase().startsWith(searchTerm.toLocaleLowerCase())
     );
-    expect(matchingSpecies).toContain(species);
+    expect(matchingSpecies, `Matching species to contain ${species}`).toContain(species);
   }
 
   // Requires the Add Species page to be open; submits a species that may already be added (hidden from the catalogue)
@@ -44,7 +44,7 @@ export class SpeciesFlow {
 
     await addSpeciesPage.speciesInput().fill(speciesName);
     const option = addSpeciesPage.suggestionOption(speciesName);
-    await expect(option.or(addSpeciesPage.noResultsMessage())).toBeVisible();
+    await expect(option.or(addSpeciesPage.noResultsMessage()), 'Or to be visible').toBeVisible();
     if (await option.isVisible()) {
       await option.click();
     } else {

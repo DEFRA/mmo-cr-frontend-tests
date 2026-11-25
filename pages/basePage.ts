@@ -83,7 +83,7 @@ export abstract class BasePage {
     for (let tab = 0; tab < maxTabs && !(await target.evaluate((el) => el === document.activeElement)); tab++) {
       await this.pressKey(tabKey);
     }
-    await expect(target).toBeFocused();
+    await expect(target, 'Target to be focused').toBeFocused();
   }
 
   async acceptCookies() {
@@ -104,11 +104,11 @@ export abstract class BasePage {
 
   async expectTitle(title: string) {
     await this.page.waitForLoadState('domcontentloaded');
-    await expect(this.page).toHaveTitle(title);
+    await expect(this.page, `Page to have title ${title}`).toHaveTitle(title);
   }
 
   async expectUrl(url: string | RegExp) {
-    await expect(this.page).toHaveURL(url);
+    await expect(this.page, `Page to have url ${url}`).toHaveURL(url);
   }
 }
 

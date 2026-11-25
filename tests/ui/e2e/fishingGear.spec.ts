@@ -46,10 +46,11 @@ test.describe('Fishing Gear', () => {
       await test.step('Each gear should be recorded separately', async () => {
         await checkAnswersPage.goto('/check-answers');
         for (const { gear } of multiGearCatches) {
-          await expect(checkAnswersPage.gearSection(gear.name)).toBeVisible();
-          await expect(checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.gearType)).toHaveText(
-            gear.name
-          );
+          await expect(checkAnswersPage.gearSection(gear.name), 'Gear section to be visible').toBeVisible();
+          await expect(
+            checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.gearType),
+            `Gear summary value to have text ${gear.name}`
+          ).toHaveText(gear.name);
         }
       });
 
@@ -57,10 +58,12 @@ test.describe('Fishing Gear', () => {
         for (const { gear, species } of multiGearCatches) {
           for (const caught of species) {
             await expect(
-              checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.speciesCaught)
+              checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.speciesCaught),
+              `Gear summary value to contain text ${caught.name}`
             ).toContainText(caught.name);
             await expect(
-              checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained)
+              checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained),
+              'Species summary value to have text'
             ).toHaveText(`${caught.weight} kg`);
           }
         }

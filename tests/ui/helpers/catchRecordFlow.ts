@@ -257,7 +257,7 @@ export class CatchRecordFlow {
   private async currentGearCatch(gearCatches: GearCatch[]): Promise<GearCatch> {
     const { statisticalAreaPage } = this.pages;
 
-    await expect(statisticalAreaPage.pageHeadingForGear()).toBeVisible();
+    await expect(statisticalAreaPage.pageHeadingForGear(), 'Page heading for gear to be visible').toBeVisible();
     for (const gearCatch of gearCatches) {
       if (await statisticalAreaPage.pageHeadingForGear(gearCatch.gear.name).isVisible()) return gearCatch;
     }
@@ -309,15 +309,30 @@ export class CatchRecordFlow {
 
     for (const reference of references) {
       await recordsPage.goto('/records');
-      await expect(recordsPage.catchRecordsTable()).toBeVisible();
+      await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
       if ((await recordsPage.recordRow(reference).count()) === 0) continue;
       if ((await recordsPage.recordStatus(reference).innerText()).trim() !== recordStatuses.draft) continue;
 
       await recordsPage.openRecord(reference);
-      await expect(draftRecordPage.pageHeading()).toBeVisible();
+      await expect(draftRecordPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       await draftRecordPage.deleteDraft();
       await recordsPage.expectUrl(/\/records$/);
-      await expect(recordsPage.recordRow(reference)).toHaveCount(0);
+      await expect(recordsPage.recordRow(reference), 'Record row to have count').toHaveCount(0);
+    }
+  }
+
+  // Deletes every draft on the records list, including ones left behind by earlier runs
+  async deleteAllDrafts(): Promise<void> {
+    const { recordsPage, draftRecordPage } = this.pages;
+
+    await recordsPage.goto('/records');
+    await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
+    while ((await recordsPage.draftRecordRows().count()) > 0) {
+      await recordsPage.openFirstDraftRecord();
+      await expect(draftRecordPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+      await draftRecordPage.deleteDraft();
+      await recordsPage.expectUrl(/\/records$/);
+      await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
     }
   }
 

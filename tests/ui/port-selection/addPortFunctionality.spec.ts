@@ -82,25 +82,27 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('The "Select the port you set off from" screen is displayed', async () => {
           await departurePortPage.expectUrl(/\/departure-port$/);
-          await expect(departurePortPage.pageHeading()).toBeVisible();
+          await expect(departurePortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
         });
 
         await test.step('The catch record reference of the new record is displayed', async () => {
-          await expect(departurePortPage.pageHeading()).toContainText(reference);
+          await expect(departurePortPage.pageHeading(), `Page heading to contain text ${reference}`).toContainText(
+            reference
+          );
         });
 
         await test.step(`"${ports.first}" and "${ports.second}" are displayed as port options`, async () => {
-          await expect(departurePortPage.portRadio(ports.first)).toBeVisible();
-          await expect(departurePortPage.portRadio(ports.second)).toBeVisible();
+          await expect(departurePortPage.portRadio(ports.first), 'Port radio to be visible').toBeVisible();
+          await expect(departurePortPage.portRadio(ports.second), 'Port radio to be visible').toBeVisible();
         });
 
         await test.step('No port option is selected', async () => {
-          await expect(departurePortPage.checkedPortRadios()).toHaveCount(0);
+          await expect(departurePortPage.checkedPortRadios(), 'Checked port radios to have count').toHaveCount(0);
         });
 
         await test.step('The "Add port" link is displayed alongside the port options', async () => {
-          await expect(departurePortPage.addPortLink()).toBeVisible();
-          await expect(departurePortPage.portRadio(ports.first)).toBeVisible();
+          await expect(departurePortPage.addPortLink(), 'Add port link to be visible').toBeVisible();
+          await expect(departurePortPage.portRadio(ports.first), 'Port radio to be visible').toBeVisible();
         });
 
         await test.step('The "Add port" link is displayed below the port options', async () => {
@@ -109,11 +111,14 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('The "Save and continue" button is displayed', async () => {
-          await expect(departurePortPage.common.saveAndContinueButton()).toBeVisible();
+          await expect(
+            departurePortPage.common.saveAndContinueButton(),
+            'Save and continue button to be visible'
+          ).toBeVisible();
         });
 
         await test.step('The "Back" link is displayed', async () => {
-          await expect(departurePortPage.common.backLink()).toBeVisible();
+          await expect(departurePortPage.common.backLink(), 'Back link to be visible').toBeVisible();
         });
 
         await test.step('I select "Add port"', async () => {
@@ -122,7 +127,7 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('The "Enter the port or closest port you set off from" screen is displayed', async () => {
           await addPortPage.expectUrl(/\/add-port\?for=departure/);
-          await expect(addPortPage.pageHeading()).toBeVisible();
+          await expect(addPortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
         });
 
         await test.step(`I search for and select "${ports.third}"`, async () => {
@@ -135,13 +140,17 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('I continue to the return port step', async () => {
           await expect(
-            confirmSamePortPage.pageHeading().or(returnPortPage.pageHeading()).or(addPortPage.returnPortHeading())
+            confirmSamePortPage.pageHeading().or(returnPortPage.pageHeading()).or(addPortPage.returnPortHeading()),
+            'Page heading to be visible'
           ).toBeVisible();
         });
 
         await test.step(`"${ports.third}" is recorded as the departure port`, async () => {
           await checkAnswersPage.goto('/check-answers');
-          await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort)).toHaveText(ports.third);
+          await expect(
+            checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort),
+            `Summary value to have text ${ports.third}`
+          ).toHaveText(ports.third);
         });
       }
     );
@@ -176,25 +185,27 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('The "Select the port you returned to" screen is displayed', async () => {
           await returnPortPage.expectUrl(/\/return-port$/);
-          await expect(returnPortPage.pageHeading()).toBeVisible();
+          await expect(returnPortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
         });
 
         await test.step('The catch record reference of the new record is displayed', async () => {
-          await expect(returnPortPage.pageHeading()).toContainText(reference);
+          await expect(returnPortPage.pageHeading(), `Page heading to contain text ${reference}`).toContainText(
+            reference
+          );
         });
 
         await test.step(`"${ports.first}" and "${ports.second}" are displayed as port options`, async () => {
-          await expect(returnPortPage.portRadio(ports.first)).toBeVisible();
-          await expect(returnPortPage.portRadio(ports.second)).toBeVisible();
+          await expect(returnPortPage.portRadio(ports.first), 'Port radio to be visible').toBeVisible();
+          await expect(returnPortPage.portRadio(ports.second), 'Port radio to be visible').toBeVisible();
         });
 
         await test.step('No port option is selected', async () => {
-          await expect(returnPortPage.checkedPortRadios()).toHaveCount(0);
+          await expect(returnPortPage.checkedPortRadios(), 'Checked port radios to have count').toHaveCount(0);
         });
 
         await test.step('The "Add port" link is displayed alongside the port options', async () => {
-          await expect(returnPortPage.addPortLink()).toBeVisible();
-          await expect(returnPortPage.portRadio(ports.first)).toBeVisible();
+          await expect(returnPortPage.addPortLink(), 'Add port link to be visible').toBeVisible();
+          await expect(returnPortPage.portRadio(ports.first), 'Port radio to be visible').toBeVisible();
         });
 
         await test.step('The "Add port" link is displayed below the port options', async () => {
@@ -203,11 +214,14 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('The "Save and continue" button is displayed', async () => {
-          await expect(returnPortPage.common.saveAndContinueButton()).toBeVisible();
+          await expect(
+            returnPortPage.common.saveAndContinueButton(),
+            'Save and continue button to be visible'
+          ).toBeVisible();
         });
 
         await test.step('The "Back" link is displayed', async () => {
-          await expect(returnPortPage.common.backLink()).toBeVisible();
+          await expect(returnPortPage.common.backLink(), 'Back link to be visible').toBeVisible();
         });
 
         await test.step('I select "Add port"', async () => {
@@ -216,7 +230,7 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('The "Enter the port or closest port you returned to" screen is displayed', async () => {
           await addPortPage.expectUrl(/\/add-port\?for=return/);
-          await expect(addPortPage.returnPortHeading()).toBeVisible();
+          await expect(addPortPage.returnPortHeading(), 'Return port heading to be visible').toBeVisible();
         });
 
         await test.step(`I search for and select "${ports.third}"`, async () => {
@@ -229,16 +243,22 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('The "What gear did you use?" screen is displayed', async () => {
           await gearSelectionPage.expectUrl(/\/gear-selection$/);
-          await expect(gearSelectionPage.pageHeading()).toBeVisible();
+          await expect(gearSelectionPage.pageHeading(), 'Page heading to be visible').toBeVisible();
         });
 
         await test.step(`"${ports.first}" is recorded as the departure port`, async () => {
           await checkAnswersPage.goto('/check-answers');
-          await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort)).toHaveText(ports.first);
+          await expect(
+            checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort),
+            `Summary value to have text ${ports.first}`
+          ).toHaveText(ports.first);
         });
 
         await test.step(`"${ports.third}" is recorded as the return port`, async () => {
-          await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnPort)).toHaveText(ports.third);
+          await expect(
+            checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnPort),
+            `Summary value to have text ${ports.third}`
+          ).toHaveText(ports.third);
         });
       }
     );
@@ -278,16 +298,22 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('The "What gear did you use?" screen is displayed', async () => {
           await gearSelectionPage.expectUrl(/\/gear-selection$/);
-          await expect(gearSelectionPage.pageHeading()).toBeVisible();
+          await expect(gearSelectionPage.pageHeading(), 'Page heading to be visible').toBeVisible();
         });
 
         await test.step(`"${ports.first}" is recorded as the departure port`, async () => {
           await checkAnswersPage.goto('/check-answers');
-          await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort)).toHaveText(ports.first);
+          await expect(
+            checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort),
+            `Summary value to have text ${ports.first}`
+          ).toHaveText(ports.first);
         });
 
         await test.step(`"${ports.first}" is recorded as the return port`, async () => {
-          await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnPort)).toHaveText(ports.first);
+          await expect(
+            checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnPort),
+            `Summary value to have text ${ports.first}`
+          ).toHaveText(ports.first);
         });
       }
     );
@@ -307,15 +333,18 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('I remain on the "Select the port you set off from" screen', async () => {
           await departurePortPage.expectUrl(/\/departure-port$/);
-          await expect(departurePortPage.pageHeading()).toBeVisible();
+          await expect(departurePortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
         });
 
         await test.step('I am not taken to the "Select the port you returned to" screen', async () => {
-          await expect(returnPortPage.pageHeading()).toBeHidden();
+          await expect(returnPortPage.pageHeading(), 'Page heading to be hidden').toBeHidden();
         });
 
         await test.step('The inline error "Select the port you left from" is displayed', async () => {
-          await expect(departurePortPage.common.errorMessage()).toContainText(errorMessages.ports.departureRequired);
+          await expect(
+            departurePortPage.common.errorMessage(),
+            `Error message to contain text ${errorMessages.ports.departureRequired}`
+          ).toContainText(errorMessages.ports.departureRequired);
         });
       }
     );
@@ -339,15 +368,18 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('I remain on the "Select the port you returned to" screen', async () => {
           await returnPortPage.expectUrl(/\/return-port$/);
-          await expect(returnPortPage.pageHeading()).toBeVisible();
+          await expect(returnPortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
         });
 
         await test.step('I am not taken to the "What gear did you use?" screen', async () => {
-          await expect(gearSelectionPage.pageHeading()).toBeHidden();
+          await expect(gearSelectionPage.pageHeading(), 'Page heading to be hidden').toBeHidden();
         });
 
         await test.step('The inline error "Select the port you returned to" is displayed', async () => {
-          await expect(returnPortPage.common.errorMessage()).toContainText(errorMessages.ports.returnRequired);
+          await expect(
+            returnPortPage.common.errorMessage(),
+            `Error message to contain text ${errorMessages.ports.returnRequired}`
+          ).toContainText(errorMessages.ports.returnRequired);
         });
       }
     );
@@ -366,7 +398,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step(`"${ports.first}" is selected`, async () => {
-          await expect(departurePortPage.portRadio(ports.first)).toBeChecked();
+          await expect(departurePortPage.portRadio(ports.first), 'Port radio to be checked').toBeChecked();
         });
 
         await test.step(`I select "${ports.second}" as the port I set off from`, async () => {
@@ -374,11 +406,11 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step(`"${ports.second}" is selected`, async () => {
-          await expect(departurePortPage.portRadio(ports.second)).toBeChecked();
+          await expect(departurePortPage.portRadio(ports.second), 'Port radio to be checked').toBeChecked();
         });
 
         await test.step(`"${ports.first}" is no longer selected`, async () => {
-          await expect(departurePortPage.portRadio(ports.first)).not.toBeChecked();
+          await expect(departurePortPage.portRadio(ports.first), 'Port radio not to be checked').not.toBeChecked();
         });
       }
     );
@@ -405,7 +437,7 @@ test.describe('Select a previously used port or add another port', () => {
 
           await test.step(`The "${previousScreen}" screen is displayed`, async () => {
             await previousPage.expectUrl(previousUrl);
-            await expect(previousPage.pageHeading()).toBeVisible();
+            await expect(previousPage.pageHeading(), 'Page heading to be visible').toBeVisible();
           });
         }
       );
@@ -430,7 +462,7 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('The "Select the port you set off from" screen is displayed', async () => {
           await departurePortPage.expectUrl(/\/departure-port$/);
-          await expect(departurePortPage.pageHeading()).toBeVisible();
+          await expect(departurePortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
         });
       }
     );
@@ -451,12 +483,12 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step(`"${ports.first}" is displayed as a port option on the "Select the port you set off from" screen`, async () => {
-          await expect(departurePortPage.pageHeading()).toBeVisible();
-          await expect(departurePortPage.portRadio(ports.first)).toBeVisible();
+          await expect(departurePortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+          await expect(departurePortPage.portRadio(ports.first), 'Port radio to be visible').toBeVisible();
         });
 
         await test.step(`"${ports.first}" is not selected`, async () => {
-          await expect(departurePortPage.portRadio(ports.first)).not.toBeChecked();
+          await expect(departurePortPage.portRadio(ports.first), 'Port radio not to be checked').not.toBeChecked();
         });
       }
     );
@@ -473,7 +505,7 @@ test.describe('Select a previously used port or add another port', () => {
             createdRecords.push(await catchRecordFlow.startRecord(vessels.testVessel));
             await catchRecordFlow.enterSameDayTrip();
             if (isReturnScreen) await catchRecordFlow.selectDeparturePort(ports.first);
-            await expect(portPage.pageHeading()).toBeVisible();
+            await expect(portPage.pageHeading(), 'Page heading to be visible').toBeVisible();
           });
 
           await test.step('I select "Cymraeg"', async () => {
@@ -486,8 +518,8 @@ test.describe('Select a previously used port or add another port', () => {
           });
 
           await test.step(`"${ports.first}" and "${ports.second}" are still displayed as port options`, async () => {
-            await expect(portPage.portRadio(ports.first)).toBeVisible();
-            await expect(portPage.portRadio(ports.second)).toBeVisible();
+            await expect(portPage.portRadio(ports.first), 'Port radio to be visible').toBeVisible();
+            await expect(portPage.portRadio(ports.second), 'Port radio to be visible').toBeVisible();
           });
         }
       );
