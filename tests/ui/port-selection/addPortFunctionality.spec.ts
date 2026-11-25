@@ -8,17 +8,10 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, type TripDates, daysAgo } from '../helpers/catchRecordFlow';
+import { vessels, ports, checkAnswers, errorMessages } from '../../../test-data/testData';
 
-const vesselName = 'ACHILLES';
-const plymouth = 'Plymouth';
-const lowestoft = 'Lowestoft';
-const hastings = 'Hastings';
-const departurePortKey = 'Departure port';
-const returnPortKey = 'Return port';
-const departurePortRequiredError = 'Select the port you left from';
-const returnPortRequiredError = 'Select the port you returned to';
-const testFavourites: Favourites = { ports: [plymouth, lowestoft], gears: [], species: [] };
-const absentFavourites: Favourites = { ports: [hastings], gears: [], species: [] };
+const testFavourites: Favourites = { ports: [ports.plymouth, ports.lowestoft], gears: [], species: [] };
+const absentFavourites: Favourites = { ports: [ports.hastings], gears: [], species: [] };
 
 type BackNavigationScenario = {
   tripType: string;
@@ -79,7 +72,7 @@ test.describe('Select a previously used port or add another port', () => {
         let reference = '';
 
         await test.step('I have started a new catch record for "ACHILLES"', async () => {
-          reference = await catchRecordFlow.startRecord(vesselName);
+          reference = await catchRecordFlow.startRecord(vessels.achilles);
           createdRecords.push(reference);
         });
 
@@ -97,8 +90,8 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('"Plymouth" and "Lowestoft" are displayed as port options', async () => {
-          await expect(departurePortPage.portRadio(plymouth)).toBeVisible();
-          await expect(departurePortPage.portRadio(lowestoft)).toBeVisible();
+          await expect(departurePortPage.portRadio(ports.plymouth)).toBeVisible();
+          await expect(departurePortPage.portRadio(ports.lowestoft)).toBeVisible();
         });
 
         await test.step('No port option is selected', async () => {
@@ -107,7 +100,7 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('The "Add port" link is displayed alongside the port options', async () => {
           await expect(departurePortPage.addPortLink()).toBeVisible();
-          await expect(departurePortPage.portRadio(plymouth)).toBeVisible();
+          await expect(departurePortPage.portRadio(ports.plymouth)).toBeVisible();
         });
 
         await test.step('The "Add port" link is displayed below the port options', async () => {
@@ -133,7 +126,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('I search for and select "Hastings"', async () => {
-          await addPortPage.searchAndSelectPort(hastings);
+          await addPortPage.searchAndSelectPort(ports.hastings);
         });
 
         await test.step('I select "Save and continue"', async () => {
@@ -148,7 +141,9 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('"Hastings" is recorded as the departure port', async () => {
           await checkAnswersPage.goto('/check-answers');
-          await expect(checkAnswersPage.summaryValue(departurePortKey)).toHaveText(hastings);
+          await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort)).toHaveText(
+            ports.hastings
+          );
         });
       }
     );
@@ -168,13 +163,13 @@ test.describe('Select a previously used port or add another port', () => {
         let reference = '';
 
         await test.step('I have started a new same-day catch record for "ACHILLES"', async () => {
-          reference = await catchRecordFlow.startRecord(vesselName);
+          reference = await catchRecordFlow.startRecord(vessels.achilles);
           createdRecords.push(reference);
           await catchRecordFlow.enterSameDayTrip();
         });
 
         await test.step('I select "Plymouth" as the port I set off from', async () => {
-          await departurePortPage.selectPort(plymouth);
+          await departurePortPage.selectPort(ports.plymouth);
         });
 
         await test.step('I select "Save and continue"', async () => {
@@ -191,8 +186,8 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('"Plymouth" and "Lowestoft" are displayed as port options', async () => {
-          await expect(returnPortPage.portRadio(plymouth)).toBeVisible();
-          await expect(returnPortPage.portRadio(lowestoft)).toBeVisible();
+          await expect(returnPortPage.portRadio(ports.plymouth)).toBeVisible();
+          await expect(returnPortPage.portRadio(ports.lowestoft)).toBeVisible();
         });
 
         await test.step('No port option is selected', async () => {
@@ -201,7 +196,7 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('The "Add port" link is displayed alongside the port options', async () => {
           await expect(returnPortPage.addPortLink()).toBeVisible();
-          await expect(returnPortPage.portRadio(plymouth)).toBeVisible();
+          await expect(returnPortPage.portRadio(ports.plymouth)).toBeVisible();
         });
 
         await test.step('The "Add port" link is displayed below the port options', async () => {
@@ -227,7 +222,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('I search for and select "Hastings"', async () => {
-          await addPortPage.searchAndSelectPort(hastings);
+          await addPortPage.searchAndSelectPort(ports.hastings);
         });
 
         await test.step('I select "Save and continue"', async () => {
@@ -241,11 +236,13 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('"Plymouth" is recorded as the departure port', async () => {
           await checkAnswersPage.goto('/check-answers');
-          await expect(checkAnswersPage.summaryValue(departurePortKey)).toHaveText(plymouth);
+          await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort)).toHaveText(
+            ports.plymouth
+          );
         });
 
         await test.step('"Hastings" is recorded as the return port', async () => {
-          await expect(checkAnswersPage.summaryValue(returnPortKey)).toHaveText(hastings);
+          await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnPort)).toHaveText(ports.hastings);
         });
       }
     );
@@ -267,16 +264,16 @@ test.describe('Select a previously used port or add another port', () => {
       { tag: ['@ui', '@regression', '@favouritePorts'] },
       async ({ createdRecords, catchRecordFlow, returnPortPage, gearSelectionPage, checkAnswersPage }) => {
         await test.step('I have started a new same-day catch record for "ACHILLES"', async () => {
-          createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+          createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
           await catchRecordFlow.enterSameDayTrip();
         });
 
         await test.step('I have selected "Plymouth" as the port I set off from', async () => {
-          await catchRecordFlow.selectDeparturePort(plymouth);
+          await catchRecordFlow.selectDeparturePort(ports.plymouth);
         });
 
         await test.step('I select "Plymouth" as the port I returned to', async () => {
-          await returnPortPage.selectPort(plymouth);
+          await returnPortPage.selectPort(ports.plymouth);
         });
 
         await test.step('I select "Save and continue"', async () => {
@@ -290,11 +287,13 @@ test.describe('Select a previously used port or add another port', () => {
 
         await test.step('"Plymouth" is recorded as the departure port', async () => {
           await checkAnswersPage.goto('/check-answers');
-          await expect(checkAnswersPage.summaryValue(departurePortKey)).toHaveText(plymouth);
+          await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort)).toHaveText(
+            ports.plymouth
+          );
         });
 
         await test.step('"Plymouth" is recorded as the return port', async () => {
-          await expect(checkAnswersPage.summaryValue(returnPortKey)).toHaveText(plymouth);
+          await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnPort)).toHaveText(ports.plymouth);
         });
       }
     );
@@ -304,7 +303,7 @@ test.describe('Select a previously used port or add another port', () => {
       { tag: ['@ui', '@regression', '@favouritePorts'] },
       async ({ createdRecords, catchRecordFlow, departurePortPage, returnPortPage }) => {
         await test.step('I have started a new same-day catch record for "ACHILLES"', async () => {
-          createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+          createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
           await catchRecordFlow.enterSameDayTrip();
         });
 
@@ -322,7 +321,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('The inline error "Select the port you left from" is displayed', async () => {
-          await expect(departurePortPage.common.errorMessage()).toContainText(departurePortRequiredError);
+          await expect(departurePortPage.common.errorMessage()).toContainText(errorMessages.ports.departureRequired);
         });
       }
     );
@@ -332,12 +331,12 @@ test.describe('Select a previously used port or add another port', () => {
       { tag: ['@ui', '@regression', '@favouritePorts'] },
       async ({ createdRecords, catchRecordFlow, returnPortPage, gearSelectionPage }) => {
         await test.step('I have started a new same-day catch record for "ACHILLES"', async () => {
-          createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+          createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
           await catchRecordFlow.enterSameDayTrip();
         });
 
         await test.step('I have selected "Plymouth" as the port I set off from', async () => {
-          await catchRecordFlow.selectDeparturePort(plymouth);
+          await catchRecordFlow.selectDeparturePort(ports.plymouth);
         });
 
         await test.step('I select "Save and continue" without selecting a port', async () => {
@@ -354,7 +353,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('The inline error "Select the port you returned to" is displayed', async () => {
-          await expect(returnPortPage.common.errorMessage()).toContainText(returnPortRequiredError);
+          await expect(returnPortPage.common.errorMessage()).toContainText(errorMessages.ports.returnRequired);
         });
       }
     );
@@ -364,28 +363,28 @@ test.describe('Select a previously used port or add another port', () => {
       { tag: ['@ui', '@regression', '@favouritePorts'] },
       async ({ createdRecords, catchRecordFlow, departurePortPage }) => {
         await test.step('I have started a new same-day catch record for "ACHILLES"', async () => {
-          createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+          createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
           await catchRecordFlow.enterSameDayTrip();
         });
 
         await test.step('I select "Plymouth" as the port I set off from', async () => {
-          await departurePortPage.selectPort(plymouth);
+          await departurePortPage.selectPort(ports.plymouth);
         });
 
         await test.step('"Plymouth" is selected', async () => {
-          await expect(departurePortPage.portRadio(plymouth)).toBeChecked();
+          await expect(departurePortPage.portRadio(ports.plymouth)).toBeChecked();
         });
 
         await test.step('I select "Lowestoft" as the port I set off from', async () => {
-          await departurePortPage.selectPort(lowestoft);
+          await departurePortPage.selectPort(ports.lowestoft);
         });
 
         await test.step('"Lowestoft" is selected', async () => {
-          await expect(departurePortPage.portRadio(lowestoft)).toBeChecked();
+          await expect(departurePortPage.portRadio(ports.lowestoft)).toBeChecked();
         });
 
         await test.step('"Plymouth" is no longer selected', async () => {
-          await expect(departurePortPage.portRadio(plymouth)).not.toBeChecked();
+          await expect(departurePortPage.portRadio(ports.plymouth)).not.toBeChecked();
         });
       }
     );
@@ -398,7 +397,7 @@ test.describe('Select a previously used port or add another port', () => {
           const previousPage = tripDates ? tripReturnDatePage : tripDatePage;
 
           await test.step(`I have started a new ${tripType} catch record for "ACHILLES"`, async () => {
-            createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+            createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
             if (tripDates) {
               await catchRecordFlow.enterMultiDayTrip(tripDates);
             } else {
@@ -423,12 +422,12 @@ test.describe('Select a previously used port or add another port', () => {
       { tag: ['@ui', '@regression', '@favouritePorts'] },
       async ({ createdRecords, catchRecordFlow, departurePortPage, returnPortPage }) => {
         await test.step('I have started a new same-day catch record for "ACHILLES"', async () => {
-          createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+          createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
           await catchRecordFlow.enterSameDayTrip();
         });
 
         await test.step('I have selected "Plymouth" as the port I set off from', async () => {
-          await catchRecordFlow.selectDeparturePort(plymouth);
+          await catchRecordFlow.selectDeparturePort(ports.plymouth);
         });
 
         await test.step('I select "Back"', async () => {
@@ -447,23 +446,23 @@ test.describe('Select a previously used port or add another port', () => {
       { tag: ['@ui', '@regression', '@favouritePorts'] },
       async ({ createdRecords, catchRecordFlow, departurePortPage }) => {
         await test.step('I have recorded "Plymouth" as the port I set off from on a new same-day catch record for "ACHILLES"', async () => {
-          createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+          createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
           await catchRecordFlow.enterSameDayTrip();
-          await catchRecordFlow.selectDeparturePort(plymouth);
+          await catchRecordFlow.selectDeparturePort(ports.plymouth);
         });
 
         await test.step('I start another new same-day catch record for "ACHILLES"', async () => {
-          createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+          createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
           await catchRecordFlow.enterSameDayTrip();
         });
 
         await test.step('"Plymouth" is displayed as a port option on the "Select the port you set off from" screen', async () => {
           await expect(departurePortPage.pageHeading()).toBeVisible();
-          await expect(departurePortPage.portRadio(plymouth)).toBeVisible();
+          await expect(departurePortPage.portRadio(ports.plymouth)).toBeVisible();
         });
 
         await test.step('"Plymouth" is not selected', async () => {
-          await expect(departurePortPage.portRadio(plymouth)).not.toBeChecked();
+          await expect(departurePortPage.portRadio(ports.plymouth)).not.toBeChecked();
         });
       }
     );
@@ -477,9 +476,9 @@ test.describe('Select a previously used port or add another port', () => {
           const portPage = isReturnScreen ? returnPortPage : departurePortPage;
 
           await test.step(`I am on the "${portScreen}" screen of a new same-day catch record for "ACHILLES"`, async () => {
-            createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+            createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
             await catchRecordFlow.enterSameDayTrip();
-            if (isReturnScreen) await catchRecordFlow.selectDeparturePort(plymouth);
+            if (isReturnScreen) await catchRecordFlow.selectDeparturePort(ports.plymouth);
             await expect(portPage.pageHeading()).toBeVisible();
           });
 
@@ -493,8 +492,8 @@ test.describe('Select a previously used port or add another port', () => {
           });
 
           await test.step('"Plymouth" and "Lowestoft" are still displayed as port options', async () => {
-            await expect(portPage.portRadio(plymouth)).toBeVisible();
-            await expect(portPage.portRadio(lowestoft)).toBeVisible();
+            await expect(portPage.portRadio(ports.plymouth)).toBeVisible();
+            await expect(portPage.portRadio(ports.lowestoft)).toBeVisible();
           });
         }
       );

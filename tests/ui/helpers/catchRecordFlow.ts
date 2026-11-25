@@ -16,6 +16,7 @@ import { type TripDepartureDatePage } from '../../../pages/tripDepartureDatePage
 import { type TripReturnDatePage } from '../../../pages/tripReturnDatePage';
 import { type FavouritesFlow } from './favouritesFlow';
 import { type NavigationFlow } from './navigationFlow';
+import { recordStatuses } from '../../../test-data/testData';
 
 export type SpeciesCatch = { name: string; code: string; weight: string };
 // Gear measurements are saved with the favourite gear, so catch recording only selects the gear
@@ -310,7 +311,7 @@ export class CatchRecordFlow {
       await recordsPage.goto('/records');
       await expect(recordsPage.catchRecordsTable()).toBeVisible();
       if ((await recordsPage.recordRow(reference).count()) === 0) continue;
-      if ((await recordsPage.recordStatus(reference).innerText()).trim() !== 'Draft') continue;
+      if ((await recordsPage.recordStatus(reference).innerText()).trim() !== recordStatuses.draft) continue;
 
       await recordsPage.openRecord(reference);
       await expect(draftRecordPage.pageHeading()).toBeVisible();

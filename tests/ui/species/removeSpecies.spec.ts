@@ -7,13 +7,11 @@
  * @since 2026-11-11
  */
 import { expect, test } from '../../../fixtures/commonfixture';
+import { catchSpecies } from '../../../test-data/testData';
 
 type SpeciesData = { name: string; code: string; weight: string };
 
-const cod: SpeciesData = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
-const mackerel: SpeciesData = { name: 'Atlantic mackerel (MAC)', code: 'MAC', weight: '50' };
 // A third vessel species, so removing two species never removes all of them (confirmed in the live catalogue)
-const shads: SpeciesData = { name: 'Allis and twaite shads (SHD)', code: 'SHD', weight: '25' };
 
 test.describe('Remove species', () => {
   // Removing species here updates the vessel's saved species, so restore them around every test
@@ -23,11 +21,11 @@ test.describe('Remove species', () => {
         requiredCredentialsMessage:
           'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Remove species UI tests'
       });
-      for (const species of [cod, mackerel]) {
+      for (const species of [catchSpecies.cod, catchSpecies.mackerel]) {
         await favouritesFlow.ensureSpeciesAdded(species.name);
       }
       await navigationFlow.openSpeciesSelectionForNewRecord();
-      for (const species of [cod, mackerel]) {
+      for (const species of [catchSpecies.cod, catchSpecies.mackerel]) {
         await speciesSelectionPage.selectSpecies(species.name);
         await speciesSelectionPage.enterSpeciesWeights(species.code, species.weight);
       }
@@ -37,10 +35,10 @@ test.describe('Remove species', () => {
 
   test.afterEach(async ({ navigationFlow, favouritesFlow, catchRecordFlow }) => {
     await navigationFlow.openAccount();
-    for (const species of [cod, mackerel]) {
+    for (const species of [catchSpecies.cod, catchSpecies.mackerel]) {
       await favouritesFlow.ensureSpeciesAdded(species.name);
     }
-    await favouritesFlow.removeSpeciesFromAccount(shads.name);
+    await favouritesFlow.removeSpeciesFromAccount(catchSpecies.shads.name);
     await catchRecordFlow.deleteCreatedDrafts();
   });
 
@@ -57,15 +55,15 @@ test.describe('Remove species', () => {
       });
 
       await test.step('All selected species are displayed', async () => {
-        await expect(removeSpeciesPage.speciesCheckbox(cod.name)).toBeVisible();
-        await expect(removeSpeciesPage.speciesCheckbox(mackerel.name)).toBeVisible();
+        await expect(removeSpeciesPage.speciesCheckbox(catchSpecies.cod.name)).toBeVisible();
+        await expect(removeSpeciesPage.speciesCheckbox(catchSpecies.mackerel.name)).toBeVisible();
       });
 
       await test.step('The user can select one or more species to remove', async () => {
-        await removeSpeciesPage.selectSpeciesToRemove(cod.name);
-        await removeSpeciesPage.selectSpeciesToRemove(mackerel.name);
-        await expect(removeSpeciesPage.speciesCheckbox(cod.name)).toBeChecked();
-        await expect(removeSpeciesPage.speciesCheckbox(mackerel.name)).toBeChecked();
+        await removeSpeciesPage.selectSpeciesToRemove(catchSpecies.cod.name);
+        await removeSpeciesPage.selectSpeciesToRemove(catchSpecies.mackerel.name);
+        await expect(removeSpeciesPage.speciesCheckbox(catchSpecies.cod.name)).toBeChecked();
+        await expect(removeSpeciesPage.speciesCheckbox(catchSpecies.mackerel.name)).toBeChecked();
       });
     }
   );
@@ -77,20 +75,20 @@ test.describe('Remove species', () => {
       await test.step('The user has multiple species selected', async () => {
         // The Remove Species page lists the vessel's saved species, so the third species is saved to the account first
         await navigationFlow.openAccount();
-        await favouritesFlow.ensureSpeciesAdded(shads.name);
+        await favouritesFlow.ensureSpeciesAdded(catchSpecies.shads.name);
         await navigationFlow.openSpeciesSelection();
-        await speciesSelectionPage.selectSpecies(shads.name);
-        await speciesSelectionPage.enterSpeciesWeights(shads.code, shads.weight);
+        await speciesSelectionPage.selectSpecies(catchSpecies.shads.name);
+        await speciesSelectionPage.enterSpeciesWeights(catchSpecies.shads.code, catchSpecies.shads.weight);
         await speciesSelectionPage.saveAndReturn();
-        for (const species of [cod, mackerel, shads]) {
+        for (const species of [catchSpecies.cod, catchSpecies.mackerel, catchSpecies.shads]) {
           await expect(speciesSelectionPage.weightAboveMinimumInput(species.code)).toHaveValue(species.weight);
         }
       });
 
       await test.step('The user selects more than one species for removal', async () => {
         await speciesSelectionPage.clickRemoveSpecies();
-        await removeSpeciesPage.selectSpeciesToRemove(cod.name);
-        await removeSpeciesPage.selectSpeciesToRemove(shads.name);
+        await removeSpeciesPage.selectSpeciesToRemove(catchSpecies.cod.name);
+        await removeSpeciesPage.selectSpeciesToRemove(catchSpecies.shads.name);
       });
 
       await test.step('The user confirms removal', async () => {
@@ -98,15 +96,17 @@ test.describe('Remove species', () => {
       });
 
       await test.step('All selected species are removed from the catch record', async () => {
-        await expect(speciesSelectionPage.speciesCheckbox(cod.name)).toBeHidden();
-        await expect(speciesSelectionPage.speciesCheckbox(shads.name)).toBeHidden();
-        await expect(speciesSelectionPage.speciesCheckbox(mackerel.name)).toBeVisible();
+        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name)).toBeHidden();
+        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.shads.name)).toBeHidden();
+        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.mackerel.name)).toBeVisible();
       });
 
       await test.step('Associated catch-weight data is removed', async () => {
-        await expect(speciesSelectionPage.weightAboveMinimumInput(cod.code)).toBeHidden();
-        await expect(speciesSelectionPage.weightAboveMinimumInput(shads.code)).toBeHidden();
-        await expect(speciesSelectionPage.weightAboveMinimumInput(mackerel.code)).toHaveValue(mackerel.weight);
+        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toBeHidden();
+        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.shads.code)).toBeHidden();
+        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.mackerel.code)).toHaveValue(
+          catchSpecies.mackerel.weight
+        );
       });
     }
   );
@@ -121,13 +121,17 @@ test.describe('Remove species', () => {
       });
 
       await test.step('The user selects Cancel or Back', async () => {
-        await removeSpeciesPage.selectSpeciesToRemove(cod.name);
+        await removeSpeciesPage.selectSpeciesToRemove(catchSpecies.cod.name);
         await removeSpeciesPage.common.backLink().click();
       });
 
       await test.step('No species are removed', async () => {
-        await expect(speciesSelectionPage.weightAboveMinimumInput(cod.code)).toHaveValue(cod.weight);
-        await expect(speciesSelectionPage.weightAboveMinimumInput(mackerel.code)).toHaveValue(mackerel.weight);
+        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toHaveValue(
+          catchSpecies.cod.weight
+        );
+        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.mackerel.code)).toHaveValue(
+          catchSpecies.mackerel.weight
+        );
       });
 
       await test.step('The user returns to the previous page', async () => {
@@ -141,7 +145,9 @@ test.describe('Remove species', () => {
     { tag: ['@ui', '@regression', '@removeSpecies'] },
     async ({ speciesSelectionPage, removeSpeciesPage }) => {
       await test.step('The user has previously selected species', async () => {
-        await expect(speciesSelectionPage.weightAboveMinimumInput(cod.code)).toHaveValue(cod.weight);
+        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toHaveValue(
+          catchSpecies.cod.weight
+        );
       });
 
       await test.step('The user returns to the species page', async () => {
@@ -149,16 +155,20 @@ test.describe('Remove species', () => {
       });
 
       await test.step('Previously selected species are displayed', async () => {
-        await expect(speciesSelectionPage.weightAboveMinimumInput(cod.code)).toHaveValue(cod.weight);
-        await expect(speciesSelectionPage.weightAboveMinimumInput(mackerel.code)).toHaveValue(mackerel.weight);
+        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toHaveValue(
+          catchSpecies.cod.weight
+        );
+        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.mackerel.code)).toHaveValue(
+          catchSpecies.mackerel.weight
+        );
       });
 
       await test.step('The user can remove existing species', async () => {
         await speciesSelectionPage.clickRemoveSpecies();
-        await removeSpeciesPage.selectSpeciesToRemove(cod.name);
+        await removeSpeciesPage.selectSpeciesToRemove(catchSpecies.cod.name);
         await removeSpeciesPage.clickSaveAndContinue();
-        await expect(speciesSelectionPage.speciesCheckbox(cod.name)).toBeHidden();
-        await expect(speciesSelectionPage.speciesCheckbox(mackerel.name)).toBeVisible();
+        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name)).toBeHidden();
+        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.mackerel.name)).toBeVisible();
       });
     }
   );

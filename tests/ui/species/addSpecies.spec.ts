@@ -7,16 +7,11 @@
  * @since 2026-11-16
  */
 import { expect, test } from '../../../fixtures/commonfixture';
+import { catchSpecies, errorMessages } from '../../../test-data/testData';
 
 // Approved species are discovered from the live catalogue at runtime using these search terms
-const firstSpeciesSearchTerm = 'at';
-const secondSpeciesSearchTerm = 'ha';
-const weightAboveMinimum = '5';
-const unapprovedSpeciesPrefix = 'Not an approved species';
 
-const duplicateSpeciesError = (species: string): string => `${species} has already been added.`;
-const noSpeciesSelectedError = 'Select at least one species';
-const unapprovedSpeciesError = 'Enter the species you want to add';
+const duplicateSpeciesError = (species: string): string => `${species}${errorMessages.species.duplicateSuffix}`;
 
 const speciesCodeOf = (speciesName: string): string => {
   const speciesCode = speciesName.match(/\((\w+)\)$/)?.[1];
@@ -64,7 +59,7 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The user can search for a species by name', async () => {
-        species = await speciesFlow.findSpecies(firstSpeciesSearchTerm);
+        species = await speciesFlow.findSpecies(catchSpecies.searchTerms.first);
       });
 
       await test.step('The user can select a species from the available list', async () => {
@@ -88,7 +83,7 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('The user is on the Add Species page', async () => {
         await navigationFlow.openAddSpecies();
-        species = await speciesFlow.findSpecies(firstSpeciesSearchTerm);
+        species = await speciesFlow.findSpecies(catchSpecies.searchTerms.first);
         searchTerm = species.slice(0, 2);
       });
 
@@ -117,7 +112,7 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('The user has already added one species', async () => {
         await navigationFlow.openAddSpecies();
-        firstSpecies = await speciesFlow.saveSpeciesFromSearch(firstSpeciesSearchTerm);
+        firstSpecies = await speciesFlow.saveSpeciesFromSearch(catchSpecies.searchTerms.first);
       });
 
       await test.step('The user selects Add Species again', async () => {
@@ -125,7 +120,10 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The user can select another species', async () => {
-        secondSpecies = await speciesFlow.findSpecies(secondSpeciesSearchTerm, (species) => species !== firstSpecies);
+        secondSpecies = await speciesFlow.findSpecies(
+          catchSpecies.searchTerms.second,
+          (species) => species !== firstSpecies
+        );
         await addSpeciesPage.selectSpeciesFromSuggestions(secondSpecies);
       });
 
@@ -149,7 +147,7 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('A species has already been added', async () => {
         await navigationFlow.openAddSpecies();
-        species = await speciesFlow.saveSpeciesFromSearch(firstSpeciesSearchTerm);
+        species = await speciesFlow.saveSpeciesFromSearch(catchSpecies.searchTerms.first);
       });
 
       await test.step('The user attempts to add the same species again', async () => {
@@ -181,11 +179,13 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('The user has previously selected species', async () => {
         await navigationFlow.openAddSpecies();
-        firstSpecies = await speciesFlow.saveSpeciesFromSearch(firstSpeciesSearchTerm);
+        firstSpecies = await speciesFlow.saveSpeciesFromSearch(catchSpecies.searchTerms.first);
 
         // A weight is required to persist the selection; weight entry itself is out of scope for this story
         await speciesSelectionPage.speciesCheckbox(firstSpecies).check();
-        await speciesSelectionPage.weightAboveMinimumInput(speciesCodeOf(firstSpecies)).fill(weightAboveMinimum);
+        await speciesSelectionPage
+          .weightAboveMinimumInput(speciesCodeOf(firstSpecies))
+          .fill(catchSpecies.weights.aboveMinimum);
         await speciesSelectionPage.clickSaveAndContinue();
         await speciesSelectionPage.expectUrl(/\/catch-not-landed$/);
       });
@@ -201,7 +201,7 @@ test.describe('Add species to a catch record', () => {
       await test.step('The user can add additional species', async () => {
         await navigationFlow.openAddSpecies();
         secondSpecies = await speciesFlow.saveSpeciesFromSearch(
-          secondSpeciesSearchTerm,
+          catchSpecies.searchTerms.second,
           (species) => species !== firstSpecies
         );
 
@@ -225,8 +225,8 @@ test.describe('Add species to a catch record', () => {
         await speciesSelectionPage.clickSaveAndContinue();
       });
 
-      await test.step(`An error message is displayed: "${noSpeciesSelectedError}."`, async () => {
-        await expect(speciesSelectionPage.errorSummary()).toContainText(noSpeciesSelectedError);
+      await test.step(`An error message is displayed: "${errorMessages.species.noneSelected}."`, async () => {
+        await expect(speciesSelectionPage.errorSummary()).toContainText(errorMessages.species.noneSelected);
         await speciesSelectionPage.expectUrl(/\/species-selection$/);
       });
     }
@@ -243,10 +243,10 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('The user is on the Add Species page', async () => {
         await navigationFlow.openAddSpecies();
-        firstSpecies = await speciesFlow.findSpecies(firstSpeciesSearchTerm);
+        firstSpecies = await speciesFlow.findSpecies(catchSpecies.searchTerms.first);
         firstSearchTerm = firstSpecies.slice(0, 2);
         secondSpecies = await speciesFlow.findSpecies(
-          secondSpeciesSearchTerm,
+          catchSpecies.searchTerms.second,
           (species) =>
             species !== firstSpecies && species.slice(0, 2).toLocaleLowerCase() !== firstSearchTerm.toLocaleLowerCase()
         );
@@ -292,7 +292,7 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('The user is on the Add Species page', async () => {
         await navigationFlow.openAddSpecies();
-        unapprovedSpecies = `${unapprovedSpeciesPrefix} ${Date.now()}`;
+        unapprovedSpecies = `${catchSpecies.unapprovedPrefix} ${Date.now()}`;
       });
 
       await test.step('The user enters text that is not an approved species and submits it', async () => {
@@ -300,8 +300,8 @@ test.describe('Add species to a catch record', () => {
         await addSpeciesPage.speciesInput().press('Enter');
       });
 
-      await test.step(`An error message is displayed: "${unapprovedSpeciesError}"`, async () => {
-        await expect(addSpeciesPage.errorSummary()).toContainText(unapprovedSpeciesError);
+      await test.step(`An error message is displayed: "${errorMessages.species.unapproved}"`, async () => {
+        await expect(addSpeciesPage.errorSummary()).toContainText(errorMessages.species.unapproved);
         await addSpeciesPage.expectUrl(/\/add-species/);
       });
 

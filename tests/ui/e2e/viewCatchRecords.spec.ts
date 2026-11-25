@@ -6,9 +6,8 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
+import { vessels, recordStatuses } from '../../../test-data/testData';
 
-const vesselName = 'ACHILLES';
-const draftStatus = 'Draft';
 // Table statuses seen in the test environment plus those listed in the status guidance (OQ-5)
 // The tag text is wrapped in line breaks, so surrounding whitespace is allowed
 const recordStatusPattern = /^\s*(Draft|Unsent|Submitted|Amended|Late)\s*$/;
@@ -25,7 +24,7 @@ test.describe('View Catch Records', () => {
     });
 
     await test.step('I have existing catch records', async () => {
-      draftReference = await catchRecordFlow.startRecord(vesselName);
+      draftReference = await catchRecordFlow.startRecord(vessels.achilles);
     });
   });
 
@@ -57,7 +56,7 @@ test.describe('View Catch Records', () => {
       });
 
       await test.step('I should identify records requiring action', async () => {
-        await expect(recordsPage.recordStatus(draftReference)).toHaveText(draftStatus);
+        await expect(recordsPage.recordStatus(draftReference)).toHaveText(recordStatuses.draft);
         for (const draftLink of await recordsPage.draftRecordLinks().all()) {
           await expect(draftLink).toHaveAttribute('href', draftRecordHref);
         }

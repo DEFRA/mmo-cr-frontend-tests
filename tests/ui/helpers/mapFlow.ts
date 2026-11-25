@@ -7,6 +7,7 @@
 import { expect } from '@playwright/test';
 import { type MapLabel, type StatisticalAreaPage } from '../../../pages/statisticalAreaPage';
 import { type NavigationFlow } from './navigationFlow';
+import { ports, vessels } from '../../../test-data/testData';
 
 type Point = [number, number];
 type MapPolygon = { exterior: Point[]; holes: Point[][] };
@@ -29,7 +30,7 @@ export class MapFlow {
     await this.mapPage.installCanvasProbe();
   }
 
-  async openMap(portName = 'Plymouth', vesselName = 'ACHILLES'): Promise<string> {
+  async openMap(portName = ports.plymouth, vesselName = vessels.achilles): Promise<string> {
     await this.installCanvasProbe();
     await this.navigationFlow.openStatisticalAreaMap({
       portName,

@@ -4,15 +4,7 @@
  * @since 2026-11-13
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-
-const unregisteredCredentials = { email: 'not-registered@example.com', password: 'IncorrectPassword1!' };
-const invalidEmailFormat = 'invalid-email-format';
-const messages = {
-  emailRequired: 'Please enter your email address.',
-  emailInvalid: 'Please enter a valid email address.',
-  passwordRequired: 'Please enter your password.',
-  invalidCredentials: 'Invalid email address or password. Please try again.'
-} as const;
+import { errorMessages, signInData } from '../../../test-data/testData';
 
 test.describe.skip('Sign in error scenarios', () => {
   test.beforeEach(async ({ signInPage }) => {
@@ -26,11 +18,11 @@ test.describe.skip('Sign in error scenarios', () => {
     { tag: ['@ui', '@regression', '@signIn'] },
     async ({ signInPage }) => {
       await test.step('The user taps Sign in with the email field empty', async () => {
-        await signInPage.login('', unregisteredCredentials.password);
+        await signInPage.login('', signInData.unregisteredCredentials.password);
       });
 
-      await test.step(`"${messages.emailRequired}" is displayed`, async () => {
-        await expect(signInPage.errorMessage()).toContainText(messages.emailRequired);
+      await test.step(`"${errorMessages.signIn.emailRequired}" is displayed`, async () => {
+        await expect(signInPage.errorMessage()).toContainText(errorMessages.signIn.emailRequired);
       });
     }
   );
@@ -40,11 +32,11 @@ test.describe.skip('Sign in error scenarios', () => {
     { tag: ['@ui', '@regression', '@signIn'] },
     async ({ signInPage }) => {
       await test.step('The user taps Sign in with the password field empty', async () => {
-        await signInPage.login(unregisteredCredentials.email, '');
+        await signInPage.login(signInData.unregisteredCredentials.email, '');
       });
 
-      await test.step(`"${messages.passwordRequired}" is displayed`, async () => {
-        await expect(signInPage.errorMessage()).toContainText(messages.passwordRequired);
+      await test.step(`"${errorMessages.signIn.passwordRequired}" is displayed`, async () => {
+        await expect(signInPage.errorMessage()).toContainText(errorMessages.signIn.passwordRequired);
       });
     }
   );
@@ -58,8 +50,8 @@ test.describe.skip('Sign in error scenarios', () => {
       });
 
       await test.step('Both validation messages are displayed', async () => {
-        await expect(signInPage.errorMessage()).toContainText(messages.emailRequired);
-        await expect(signInPage.errorMessage()).toContainText(messages.passwordRequired);
+        await expect(signInPage.errorMessage()).toContainText(errorMessages.signIn.emailRequired);
+        await expect(signInPage.errorMessage()).toContainText(errorMessages.signIn.passwordRequired);
       });
     }
   );
@@ -69,11 +61,11 @@ test.describe.skip('Sign in error scenarios', () => {
     { tag: ['@ui', '@regression', '@signIn'] },
     async ({ signInPage }) => {
       await test.step('The user taps Sign in with an incorrectly formatted email', async () => {
-        await signInPage.login(invalidEmailFormat, unregisteredCredentials.password);
+        await signInPage.login(signInData.invalidEmailFormat, signInData.unregisteredCredentials.password);
       });
 
-      await test.step(`"${messages.emailInvalid}" is displayed`, async () => {
-        await expect(signInPage.errorMessage()).toContainText(messages.emailInvalid);
+      await test.step(`"${errorMessages.signIn.emailInvalid}" is displayed`, async () => {
+        await expect(signInPage.errorMessage()).toContainText(errorMessages.signIn.emailInvalid);
       });
     }
   );

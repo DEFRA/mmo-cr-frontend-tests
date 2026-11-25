@@ -6,26 +6,17 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { type Favourites, type GearCatch, type GearData, type SpeciesCatch } from '../helpers/catchRecordFlow';
+import { type Favourites, type GearCatch } from '../helpers/catchRecordFlow';
+import { vessels, ports, gears, catchSpecies, areas, checkAnswers } from '../../../test-data/testData';
 
-const vesselName = 'ACHILLES';
-const plymouth = 'Plymouth';
-const areaCode = '46D86';
-const pots: GearData = { name: 'Pots' };
-const trollingLines: GearData = { name: 'Trolling lines' };
-const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
-const codWithTrollingLines: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '50' };
 const sameSpeciesCatches: GearCatch[] = [
-  { gear: pots, areaCode, species: [cod] },
-  { gear: trollingLines, areaCode, species: [codWithTrollingLines] }
+  { gear: gears.pots, areaCode: areas.validCode, species: [catchSpecies.cod] },
+  { gear: gears.trollingLines, areaCode: areas.validCode, species: [catchSpecies.codWithTrollingLines] }
 ];
-const areaKey = 'Area majority caught';
-const speciesCaughtKey = 'Species caught';
-const weightRetainedKey = 'Weight above minimum size retained';
 const testFavourites: Favourites = {
-  ports: [plymouth],
-  gears: [pots.name, trollingLines.name],
-  species: [cod.name]
+  ports: [ports.plymouth],
+  gears: [gears.pots.name, gears.trollingLines.name],
+  species: [catchSpecies.cod.name]
 };
 
 test.describe('Species and Weight', () => {
@@ -39,32 +30,38 @@ test.describe('Species and Weight', () => {
     },
     async ({ createdRecords, catchRecordFlow, speciesSelectionPage, checkAnswersPage }) => {
       await test.step('I have recorded the fishing gear and catch area', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
         await catchRecordFlow.enterSameDayTrip();
-        await catchRecordFlow.selectPorts(plymouth, plymouth);
-        await catchRecordFlow.selectGears([pots]);
-        await catchRecordFlow.selectAreaForCurrentGear(areaCode);
+        await catchRecordFlow.selectPorts(ports.plymouth, ports.plymouth);
+        await catchRecordFlow.selectGears([gears.pots]);
+        await catchRecordFlow.selectAreaForCurrentGear(areas.validCode);
       });
 
       await test.step('I select a species', async () => {
-        await speciesSelectionPage.selectSpecies(cod.name);
+        await speciesSelectionPage.selectSpecies(catchSpecies.cod.name);
       });
 
       await test.step('I enter its catch weight', async () => {
-        await speciesSelectionPage.enterSpeciesWeights(cod.code, cod.weight);
+        await speciesSelectionPage.enterSpeciesWeights(catchSpecies.cod.code, catchSpecies.cod.weight);
         await speciesSelectionPage.clickSaveAndContinue();
       });
 
       await test.step('The species and weight should be recorded', async () => {
         await checkAnswersPage.goto('/check-answers');
-        await expect(checkAnswersPage.speciesSummaryValue(cod.name, pots.name, weightRetainedKey)).toHaveText(
-          `${cod.weight} kg`
-        );
+        await expect(
+          checkAnswersPage.speciesSummaryValue(
+            catchSpecies.cod.name,
+            gears.pots.name,
+            checkAnswers.summaryKeys.weightRetained
+          )
+        ).toHaveText(`${catchSpecies.cod.weight} kg`);
       });
 
       await test.step('They should be linked to the correct fishing gear', async () => {
-        await expect(checkAnswersPage.gearSummaryValue(pots.name, speciesCaughtKey)).toContainText(cod.name);
-        await expect(checkAnswersPage.speciesSection(cod.name, pots.name)).toBeVisible();
+        await expect(
+          checkAnswersPage.gearSummaryValue(gears.pots.name, checkAnswers.summaryKeys.speciesCaught)
+        ).toContainText(catchSpecies.cod.name);
+        await expect(checkAnswersPage.speciesSection(catchSpecies.cod.name, gears.pots.name)).toBeVisible();
       });
     }
   );
@@ -77,9 +74,9 @@ test.describe('Species and Weight', () => {
     },
     async ({ createdRecords, catchRecordFlow, checkAnswersPage }) => {
       await test.step('I used more than one fishing gear', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
         await catchRecordFlow.enterSameDayTrip();
-        await catchRecordFlow.selectPorts(plymouth, plymouth);
+        await catchRecordFlow.selectPorts(ports.plymouth, ports.plymouth);
         await catchRecordFlow.selectGears(sameSpeciesCatches.map(({ gear }) => gear));
       });
 
@@ -91,18 +88,22 @@ test.describe('Species and Weight', () => {
         await checkAnswersPage.goto('/check-answers');
         for (const { gear, species } of sameSpeciesCatches) {
           for (const caught of species) {
-            await expect(checkAnswersPage.speciesSummaryValue(caught.name, gear.name, weightRetainedKey)).toHaveText(
-              `${caught.weight} kg`
-            );
+            await expect(
+              checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained)
+            ).toHaveText(`${caught.weight} kg`);
           }
         }
       });
 
       await test.step('The review should display the correct values', async () => {
         for (const { gear, species } of sameSpeciesCatches) {
-          await expect(checkAnswersPage.gearSummaryValue(gear.name, areaKey)).toHaveText(areaCode);
+          await expect(
+            checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.areaMajorityCaught)
+          ).toHaveText(areas.validCode);
           for (const caught of species) {
-            await expect(checkAnswersPage.gearSummaryValue(gear.name, speciesCaughtKey)).toContainText(caught.name);
+            await expect(
+              checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.speciesCaught)
+            ).toContainText(caught.name);
           }
         }
       });

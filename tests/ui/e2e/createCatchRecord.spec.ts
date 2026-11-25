@@ -9,26 +9,19 @@ import { expect, test } from '../../../fixtures/commonfixture';
 import {
   type Favourites,
   type GearCatch,
-  type GearData,
-  type SpeciesCatch,
   type TripDates,
   daysAgo,
   noFavourites,
   recordReferencePattern,
   recordsListDate
 } from '../helpers/catchRecordFlow';
+import { vessels, ports, gears, catchSpecies, recordStatuses } from '../../../test-data/testData';
 
-const vesselName = 'ACHILLES';
-const departurePort = 'Hastings';
-const returnPort = 'Dover';
-const setLonglines: GearData = { name: 'Set longlines' };
-const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
-const gearCatches: GearCatch[] = [{ gear: setLonglines, species: [cod] }];
-const submittedStatus = 'Submitted';
+const gearCatches: GearCatch[] = [{ gear: gears.setLonglines, species: [catchSpecies.cod] }];
 const testFavourites: Favourites = {
-  ports: [departurePort, returnPort],
-  gears: [setLonglines.name],
-  species: [cod.name]
+  ports: [ports.hastings, ports.dover],
+  gears: [gears.setLonglines.name],
+  species: [catchSpecies.cod.name]
 };
 
 type TripScenario = { tripType: string; uat: string; tripDates?: TripDates; tripStepTitle: string };
@@ -79,7 +72,7 @@ test.describe('Create Catch Record', () => {
         });
 
         await test.step('I create a new catch record', async () => {
-          reference = await catchRecordFlow.startRecord(vesselName);
+          reference = await catchRecordFlow.startRecord(vessels.achilles);
           createdRecords.push(reference);
         });
 
@@ -92,7 +85,7 @@ test.describe('Create Catch Record', () => {
         });
 
         await test.step('I enter ports and catch details', async () => {
-          await catchRecordFlow.selectPorts(departurePort, returnPort);
+          await catchRecordFlow.selectPorts(ports.hastings, ports.dover);
           await catchRecordFlow.selectGears(gearCatches.map(({ gear }) => gear));
           await catchRecordFlow.enterCatchDetailsForEachGear(gearCatches);
           await catchRecordFlow.confirmAllCatchLanded();
@@ -105,7 +98,7 @@ test.describe('Create Catch Record', () => {
         await test.step(`The ${tripType} trip should be recorded successfully`, async () => {
           const tripEndDate = tripDates?.returnDate ?? new Date();
           await recordsPage.goto('/records');
-          await expect(recordsPage.recordStatus(reference)).toHaveText(submittedStatus);
+          await expect(recordsPage.recordStatus(reference)).toHaveText(recordStatuses.submitted);
           await expect(recordsPage.recordRow(reference)).toContainText(recordsListDate(tripEndDate));
         });
 

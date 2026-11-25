@@ -9,11 +9,11 @@
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type MapLabel } from '../../../pages/statisticalAreaPage';
 import { type LandFeature, MapFlow, type SubrectangleReference } from '../helpers/mapFlow';
+import { ports, areas, checkAnswers, errorMessages } from '../../../test-data/testData';
 
 type ViewportSize = { width: number; height: number };
 type PanScenario = { scenario: string; direction: string; dragStep: string; offsetX: number; offsetY: number };
 
-const departurePort = 'Hastings';
 const mapSignInOptions = {
   requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for map UI tests'
 };
@@ -26,10 +26,6 @@ const zoomInClicks = 8;
 const panZoomInClicks = 2;
 const largerScreen: ViewportSize = { width: 1600, height: 1000 };
 const narrowScreen: ViewportSize = { width: 700, height: 900 };
-const mapErrorText = 'The map could not be loaded';
-const zoomInName = 'Zoom in';
-const zoomOutName = 'Zoom out';
-const statisticalSubAreaKey = 'Statistical sub area';
 
 const panScenarios: PanScenario[] = [
   {
@@ -80,7 +76,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('The user has declared a departure port for the trip', async () => {
         await navigationFlow.signIn(mapSignInOptions);
         await navigationFlow.startCatchRecord();
-        await navigationFlow.selectDepartureAndReturnPorts(departurePort);
+        await navigationFlow.selectDepartureAndReturnPorts(ports.hastings);
         await mapFlow.installCanvasProbe();
       });
 
@@ -91,7 +87,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('The map is positioned around the declared departure port', async () => {
         await expect(statisticalAreaPage.pageHeading()).toBeVisible();
         await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
-        await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-departure-port', departurePort);
+        await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-departure-port', ports.hastings);
       });
 
       await test.step('At least the 9 nearest relevant sub-rectangles are displayed', async () => {
@@ -408,7 +404,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
         await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', code);
 
         await checkAnswersPage.goto(checkAnswersPath);
-        expect(await checkAnswersPage.getSummaryValueText(statisticalSubAreaKey)).toContain(code);
+        expect(await checkAnswersPage.getSummaryValueText(checkAnswers.summaryKeys.statisticalSubArea)).toContain(code);
       });
     }
   );
@@ -443,7 +439,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('The user opens the web map', async () => {
         await navigationFlow.signIn(mapSignInOptions);
         await navigationFlow.startCatchRecord();
-        await navigationFlow.selectDepartureAndReturnPorts(departurePort);
+        await navigationFlow.selectDepartureAndReturnPorts(ports.hastings);
       });
 
       await test.step('The required map or reference data cannot be loaded', async () => {
@@ -454,7 +450,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
 
       await test.step('The system displays a clear error message', async () => {
         await expect(statisticalAreaPage.mapError()).toBeVisible();
-        await expect(statisticalAreaPage.mapError()).toContainText(mapErrorText);
+        await expect(statisticalAreaPage.mapError()).toContainText(errorMessages.map.loadFailed);
       });
 
       await test.step('The user is not allowed to submit an unverified map selection', async () => {
@@ -609,8 +605,8 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('The zoom controls are labelled "Zoom in" and "Zoom out"', async () => {
-        await expect(statisticalAreaPage.zoomInButton()).toHaveAccessibleName(zoomInName);
-        await expect(statisticalAreaPage.zoomOutButton()).toHaveAccessibleName(zoomOutName);
+        await expect(statisticalAreaPage.zoomInButton()).toHaveAccessibleName(areas.mapControls.zoomIn);
+        await expect(statisticalAreaPage.zoomOutButton()).toHaveAccessibleName(areas.mapControls.zoomOut);
       });
 
       await test.step('The user activates "Zoom in" using the keyboard', async () => {

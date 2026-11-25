@@ -7,12 +7,9 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, daysAgo } from '../helpers/catchRecordFlow';
+import { vessels, ports, errorMessages } from '../../../test-data/testData';
 
-const vesselName = 'ACHILLES';
-const plymouth = 'Plymouth';
-const testFavourites: Favourites = { ports: [plymouth], gears: [], species: [] };
-const futureDepartureError = 'Date you left for your trip must be today or in the past';
-const returnBeforeDepartureError = 'Date you returned from your trip must be the same as or after the date you left';
+const testFavourites: Favourites = { ports: [ports.plymouth], gears: [], species: [] };
 
 test.describe('Trip Dates', () => {
   test.use({ testFavourites });
@@ -35,7 +32,7 @@ test.describe('Trip Dates', () => {
       const returnDate = daysAgo(1);
 
       await test.step('My trip did not start and finish today', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
         await tripDatePage.selectSameDate(false);
         await tripDatePage.clickSaveAndContinue();
       });
@@ -64,7 +61,7 @@ test.describe('Trip Dates', () => {
       const tomorrow = daysAgo(-1);
 
       await test.step('My trip did not start and finish today', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
         await tripDatePage.selectSameDate(false);
         await tripDatePage.clickSaveAndContinue();
       });
@@ -76,8 +73,12 @@ test.describe('Trip Dates', () => {
 
       await test.step('A future date should not be accepted', async () => {
         await tripDepartureDatePage.expectUrl(/\/trip-departure-date$/);
-        await expect(tripDepartureDatePage.common.errorSummary()).toContainText(futureDepartureError);
-        await expect(tripDepartureDatePage.common.errorMessage()).toContainText(futureDepartureError);
+        await expect(tripDepartureDatePage.common.errorSummary()).toContainText(
+          errorMessages.tripDates.futureDeparture
+        );
+        await expect(tripDepartureDatePage.common.errorMessage()).toContainText(
+          errorMessages.tripDates.futureDeparture
+        );
       });
     }
   );
@@ -93,7 +94,7 @@ test.describe('Trip Dates', () => {
       const earlierReturnDate = daysAgo(3);
 
       await test.step('My trip did not start and finish today', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
         await tripDatePage.selectSameDate(false);
         await tripDatePage.clickSaveAndContinue();
       });
@@ -110,8 +111,12 @@ test.describe('Trip Dates', () => {
 
       await test.step('The return date should not be before the departure date', async () => {
         await tripReturnDatePage.expectUrl(/\/trip-return-date$/);
-        await expect(tripReturnDatePage.common.errorSummary()).toContainText(returnBeforeDepartureError);
-        await expect(tripReturnDatePage.common.errorMessage()).toContainText(returnBeforeDepartureError);
+        await expect(tripReturnDatePage.common.errorSummary()).toContainText(
+          errorMessages.tripDates.returnBeforeDeparture
+        );
+        await expect(tripReturnDatePage.common.errorMessage()).toContainText(
+          errorMessages.tripDates.returnBeforeDeparture
+        );
       });
     }
   );

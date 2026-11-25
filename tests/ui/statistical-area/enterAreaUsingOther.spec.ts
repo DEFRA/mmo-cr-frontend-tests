@@ -6,16 +6,12 @@
  * @since 2026-11-16
  */
 import { expect, test } from '../../../fixtures/commonfixture';
+import { areas, checkAnswers, errorMessages } from '../../../test-data/testData';
 
-const validAreaCode: string = '46D86';
-const searchTerm: string = validAreaCode.slice(0, 2);
-const additionalCharacters: string = validAreaCode.slice(2);
-const invalidAreaCode: string = 'ZZZZZ';
+const searchTerm: string = areas.validCode.slice(0, 2);
+const additionalCharacters: string = areas.validCode.slice(2);
 const areaCodePattern: RegExp = /\d{2}[A-Z]\d{2}/;
 const coordinatesPattern: RegExp = /[-\u2212]?\d+\.\d+,\s*[-\u2212]?\d+\.\d+/;
-const checkAnswersAreaKey: string = 'Statistical sub area';
-const invalidAreaMessage: string = 'Enter a statistical subrectangle in the correct format, for example 38E84';
-const otherOption: string = 'Other';
 
 test.describe('Enter statistical sub area using the Other option', () => {
   test.beforeEach(async ({ navigationFlow }) => {
@@ -37,11 +33,11 @@ test.describe('Enter statistical sub area using the Other option', () => {
 
       await test.step('The required statistical sub area is not displayed in the list', async () => {
         // Precondition guard: suggestions depend on the departure port, so confirm the test area is not a suggestion
-        await expect(statisticalAreaOtherPage.areaRadio(validAreaCode)).toHaveCount(0);
+        await expect(statisticalAreaOtherPage.areaRadio(areas.validCode)).toHaveCount(0);
       });
 
       await test.step('The fisher selects the "Other" radio button', async () => {
-        await statisticalAreaOtherPage.selectAreaRadio(otherOption);
+        await statisticalAreaOtherPage.selectAreaRadio(areas.otherOption);
       });
 
       await test.step('A type-ahead input field is displayed', async () => {
@@ -51,8 +47,8 @@ test.describe('Enter statistical sub area using the Other option', () => {
       });
 
       await test.step('The fisher can manually enter a statistical sub area code', async () => {
-        await statisticalAreaOtherPage.alternativeAreaInput().fill(validAreaCode);
-        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toHaveValue(validAreaCode);
+        await statisticalAreaOtherPage.alternativeAreaInput().fill(areas.validCode);
+        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toHaveValue(areas.validCode);
       });
     }
   );
@@ -67,7 +63,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
       });
 
       await test.step('The fisher has selected "Other"', async () => {
-        await statisticalAreaOtherPage.selectAreaRadio(otherOption);
+        await statisticalAreaOtherPage.selectAreaRadio(areas.otherOption);
       });
 
       await test.step('The fisher enters two or more characters into the type-ahead field', async () => {
@@ -76,11 +72,11 @@ test.describe('Enter statistical sub area using the Other option', () => {
 
       await test.step('Matching statistical sub area codes are displayed in a dropdown list', async () => {
         await expect(statisticalAreaOtherPage.alternativeAreaResultsList()).toBeVisible();
-        await expect(statisticalAreaOtherPage.alternativeAreaResultItem(validAreaCode)).toBeVisible();
+        await expect(statisticalAreaOtherPage.alternativeAreaResultItem(areas.validCode)).toBeVisible();
       });
 
       await test.step('Each matching result displays the statistical sub area code, associated coordinates and related ICES rectangle (where applicable)', async () => {
-        await expect(statisticalAreaOtherPage.coordinatesDisplay(validAreaCode)).toContainText(coordinatesPattern);
+        await expect(statisticalAreaOtherPage.coordinatesDisplay(areas.validCode)).toContainText(coordinatesPattern);
 
         for (const resultItem of await statisticalAreaOtherPage.alternativeAreaResultItems().all()) {
           await expect(resultItem).toContainText(searchTerm);
@@ -98,7 +94,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
       let initialCoordinates: string | undefined;
 
       await test.step('The fisher is entering a statistical sub area code', async () => {
-        await statisticalAreaOtherPage.selectAreaRadio(otherOption);
+        await statisticalAreaOtherPage.selectAreaRadio(areas.otherOption);
         await statisticalAreaOtherPage.alternativeAreaInput().focus();
       });
 
@@ -107,7 +103,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
       });
 
       await test.step('The corresponding coordinates are displayed automatically', async () => {
-        const coordinates = statisticalAreaOtherPage.coordinatesDisplay(validAreaCode);
+        const coordinates = statisticalAreaOtherPage.coordinatesDisplay(areas.validCode);
         await expect(coordinates).toBeVisible();
         await expect(coordinates).toContainText(coordinatesPattern);
         initialCoordinates = (await coordinates.innerText()).match(coordinatesPattern)?.[0];
@@ -115,10 +111,10 @@ test.describe('Enter statistical sub area using the Other option', () => {
 
       await test.step('The coordinates update dynamically as additional characters are entered', async () => {
         await statisticalAreaOtherPage.alternativeAreaInput().pressSequentially(additionalCharacters);
-        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toHaveValue(validAreaCode);
+        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toHaveValue(areas.validCode);
 
-        await expect(statisticalAreaOtherPage.alternativeAreaResultItems().first()).toContainText(validAreaCode);
-        const coordinates = statisticalAreaOtherPage.coordinatesDisplay(validAreaCode);
+        await expect(statisticalAreaOtherPage.alternativeAreaResultItems().first()).toContainText(areas.validCode);
+        const coordinates = statisticalAreaOtherPage.coordinatesDisplay(areas.validCode);
         await expect(coordinates).toBeVisible();
         expect(initialCoordinates).toBeDefined();
         await expect(coordinates).toContainText(initialCoordinates ?? '');
@@ -137,15 +133,15 @@ test.describe('Enter statistical sub area using the Other option', () => {
 
       await test.step('One or more matching statistical sub areas are displayed', async () => {
         await statisticalAreaOtherPage.typeInAlternativeArea(searchTerm);
-        await statisticalAreaOtherPage.alternativeAreaResultItem(validAreaCode).waitFor({ state: 'visible' });
+        await statisticalAreaOtherPage.alternativeAreaResultItem(areas.validCode).waitFor({ state: 'visible' });
       });
 
       await test.step('The fisher selects a result from the dropdown', async () => {
-        await statisticalAreaOtherPage.alternativeAreaResultItem(validAreaCode).click();
+        await statisticalAreaOtherPage.alternativeAreaResultItem(areas.validCode).click();
       });
 
       await test.step('The statistical sub area code is populated into the field', async () => {
-        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toHaveValue(new RegExp(validAreaCode));
+        await expect(statisticalAreaOtherPage.alternativeAreaInput()).toHaveValue(new RegExp(areas.validCode));
       });
 
       await test.step('The corresponding coordinates are saved against the catch record', async () => {
@@ -153,7 +149,9 @@ test.describe('Enter statistical sub area using the Other option', () => {
         await expect(statisticalAreaOtherPage.page).not.toHaveURL(/\/statistical-area-other/);
 
         await checkAnswersPage.goto('/check-answers');
-        await expect(checkAnswersPage.summaryValue(checkAnswersAreaKey)).toContainText(validAreaCode);
+        await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.statisticalSubArea)).toContainText(
+          areas.validCode
+        );
       });
     }
   );
@@ -163,17 +161,17 @@ test.describe('Enter statistical sub area using the Other option', () => {
     { tag: ['@ui', '@regression', '@statisticalAreaManualEntry'] },
     async ({ statisticalAreaOtherPage }) => {
       await test.step('The fisher has entered a statistical sub area code', async () => {
-        await statisticalAreaOtherPage.typeInAlternativeArea(invalidAreaCode);
+        await statisticalAreaOtherPage.typeInAlternativeArea(areas.invalidCode);
       });
 
       await test.step('The code does not exist in the reference dataset', async () => {
         await statisticalAreaOtherPage.clickSaveAndContinue();
       });
 
-      await test.step(`An error message is displayed stating: "${invalidAreaMessage}"`, async () => {
+      await test.step(`An error message is displayed stating: "${errorMessages.areas.invalidFormat}"`, async () => {
         await expect(statisticalAreaOtherPage.errorSummary()).toBeVisible();
-        await expect(statisticalAreaOtherPage.errorSummary()).toContainText(invalidAreaMessage);
-        await expect(statisticalAreaOtherPage.fieldErrorMessage()).toContainText(invalidAreaMessage);
+        await expect(statisticalAreaOtherPage.errorSummary()).toContainText(errorMessages.areas.invalidFormat);
+        await expect(statisticalAreaOtherPage.fieldErrorMessage()).toContainText(errorMessages.areas.invalidFormat);
       });
     }
   );

@@ -1,6 +1,6 @@
 ---
 description: 'Record Your Catch Playwright test conventions: team rules, spec structure, Gherkin-to-test.step mapping, test data and constraints. Used by the BDD planner and spec author agents.'
-applyTo: 'tests/**/*.ts,pages/**/*.ts,fixtures/**/*.ts,services/**/*.ts,test-cases/**/*.md'
+applyTo: 'tests/**/*.ts,pages/**/*.ts,fixtures/**/*.ts,services/**/*.ts,test-data/**/*.ts,test-cases/**/*.md'
 ---
 
 # Record Your Catch Playwright test conventions
@@ -67,19 +67,17 @@ Feature: Favourite ports
 
   Scenario: Save a port found by partial name as a favourite
     When I click "Add port"
-    And I search for "Plym" and select "Plymouth"
+    And I search for "Lowe" and select "Lowestoft"
     And I click "Save and continue"
     Then I am returned to the account page
-    And "Plymouth" is shown in Ports used
+    And "Lowestoft" is shown in Ports used
 ```
 
 Produce:
 
 ```ts
 import { expect, test } from '../../../fixtures/commonfixture';
-
-const portSearchTerm = 'Plym';
-const favouritePort = 'Plymouth';
+import { ports } from '../../../test-data/testData';
 
 test.describe('Favourite ports', () => {
   test.beforeEach(async ({ navigationFlow }) => {
@@ -96,11 +94,11 @@ test.describe('Favourite ports', () => {
         await accountPage.addPortLink().click();
       });
 
-      await test.step('I search for "Plym" and select "Plymouth"', async () => {
-        await addPortPage.searchPorts(portSearchTerm);
+      await test.step('I search for "Lowe" and select "Lowestoft"', async () => {
+        await addPortPage.searchPorts(ports.searchTerms.lowestoft);
         await addPortPage
-          .portResultItem(favouritePort)
-          .getByRole('option', { name: favouritePort, exact: true })
+          .portResultItem(ports.lowestoft)
+          .getByRole('option', { name: ports.lowestoft, exact: true })
           .click();
       });
 
@@ -112,8 +110,8 @@ test.describe('Favourite ports', () => {
         await accountPage.expectUrl(/\/account$/);
       });
 
-      await test.step('"Plymouth" is shown in Ports used', async () => {
-        await expect(accountPage.portsUsedValue()).toContainText(favouritePort);
+      await test.step('"Lowestoft" is shown in Ports used', async () => {
+        await expect(accountPage.portsUsedValue()).toContainText(ports.lowestoft);
       });
     }
   );
@@ -135,7 +133,9 @@ Mapping rules:
 
 - Sign in via `navigationFlow.signIn()` / `signInAndOpenAccount()`, which read `CATCH_RECORDING_EMAIL` / `CATCH_RECORDING_PASSWORD` from `.env`. Never place credentials in code, logs, or chat, and never print `.env` contents.
 - Use only test data already in existing specs or confirmed in the live app (e.g. `Cod (COD)`, `Plymouth`).
-- Declare test data as typed constants at the top of the spec (e.g. `const cod: SpeciesData = { name: 'Cod (COD)', code: 'COD', weight: '100' };`) and reference them in steps; no hardcoded names, codes, or values inside test bodies.
+- Keep test data in `test-data/testData.ts`, not in specs or helpers. It exports one object per area: `vessels`, `ports`, `gears`, `catchSpecies` (named so because `species` is a common local name), `areas`, `checkAnswers` (summary-list keys, change links, Yes/No answers), `recordStatuses`, `errorMessages` and `signInData`. Import only what the file uses, e.g. `import { vessels, ports } from '../../../test-data/testData';`.
+- Reference values directly in steps (e.g. `catchRecordFlow.startRecord(vessels.achilles)`, `checkAnswers.summaryKeys.departurePort`, `errorMessages.ports.departureRequired`). Do not declare per-spec string constants such as `const plymouth = 'Plymouth';`; add a new value to the right export in `testData.ts` first, reusing an existing key when the value already exists.
+- Spec-level constants are only for values composed from `testData.ts` data (e.g. `const testFavourites: Favourites = { ports: [ports.plymouth], gears: [], species: [] };`), Scenario Outline example tables, and values that do not belong in shared data (`RegExp` URL patterns, dates computed with `daysAgo`).
 - For date entry use the `DateInputPage` helpers and compute dates at runtime from `new Date()`.
 - Use `test.fixme('<reason>')` only when implementation is intentionally incomplete (e.g. a blocked selector).
 

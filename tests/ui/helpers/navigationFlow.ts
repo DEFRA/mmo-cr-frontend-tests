@@ -18,10 +18,7 @@ import { type SpeciesSelectionPage } from '../../../pages/speciesSelectionPage';
 import { type StatisticalAreaOtherPage } from '../../../pages/statisticalAreaOtherPage';
 import { type StatisticalAreaPage } from '../../../pages/statisticalAreaPage';
 import { type TripDatePage } from '../../../pages/tripDatePage';
-
-const defaultDeparturePort = 'Plymouth';
-const defaultReturnPort = 'Hastings';
-const defaultVessel = 'ACHILLES';
+import { vessels, ports } from '../../../test-data/testData';
 
 export type SignInOptions = {
   email?: string;
@@ -102,9 +99,9 @@ export class NavigationFlow {
 
   // Requires a signed-in user; reaches species selection through a new catch record
   async openSpeciesSelectionForNewRecord(
-    portName = defaultDeparturePort,
-    vesselName = defaultVessel,
-    returnPortName = defaultReturnPort
+    portName = ports.plymouth,
+    vesselName = vessels.achilles,
+    returnPortName = ports.hastings
   ): Promise<void> {
     const { statisticalAreaPage, speciesSelectionPage } = this.pages;
 
@@ -127,7 +124,7 @@ export class NavigationFlow {
   }
 
   // Creates a draft for the vessel and stops on the trip-date question
-  async openNewRecord(vesselName = defaultVessel): Promise<void> {
+  async openNewRecord(vesselName = vessels.achilles): Promise<void> {
     const { recordsPage, selectVesselPage, tripDatePage } = this.pages;
 
     await recordsPage.goto('/records');
@@ -138,7 +135,7 @@ export class NavigationFlow {
     this.createdRecordReferences.add(await tripDatePage.getRecordReference());
   }
 
-  async startCatchRecord(vesselName = defaultVessel): Promise<void> {
+  async startCatchRecord(vesselName = vessels.achilles): Promise<void> {
     const { tripDatePage } = this.pages;
 
     await this.openNewRecord(vesselName);
@@ -152,9 +149,9 @@ export class NavigationFlow {
   ): Promise<void> {
     const { statisticalAreaPage } = this.pages;
     const {
-      portName = defaultDeparturePort,
-      returnPortName = defaultReturnPort,
-      vesselName = defaultVessel,
+      portName = ports.plymouth,
+      returnPortName = ports.hastings,
+      vesselName = vessels.achilles,
       signInOptions
     } = options;
 
@@ -165,7 +162,7 @@ export class NavigationFlow {
     await statisticalAreaPage.expectUrl(/\/statistical-area$/);
   }
 
-  async openStatisticalAreaOther(portName = 'Hamble', vesselName = defaultVessel): Promise<void> {
+  async openStatisticalAreaOther(portName = ports.hamble, vesselName = vessels.achilles): Promise<void> {
     const { statisticalAreaPage } = this.pages;
 
     await this.openStatisticalAreaMap({
@@ -180,7 +177,7 @@ export class NavigationFlow {
   }
 
   // Selects the departure and return ports, then lands on gear selection
-  async selectDepartureAndReturnPorts(portName: string, returnPortName = defaultReturnPort): Promise<void> {
+  async selectDepartureAndReturnPorts(portName: string, returnPortName = ports.hastings): Promise<void> {
     const { addPortPage, confirmSamePortPage, returnPortPage } = this.pages;
 
     await addPortPage.goto('/add-port?for=departure&entry=1');

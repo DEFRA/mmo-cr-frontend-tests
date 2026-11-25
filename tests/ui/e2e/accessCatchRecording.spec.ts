@@ -6,18 +6,15 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
+import { errorMessages, signInData } from '../../../test-data/testData';
 
 const validCredentials = {
   email: process.env.CATCH_RECORDING_EMAIL ?? '',
   password: process.env.CATCH_RECORDING_PASSWORD ?? ''
 };
 const missingCredentialsReason = 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD must be set in .env';
-const unregisteredCredentials = { email: 'not-registered@example.com', password: 'IncorrectPassword1!' };
-const invalidCredentialsMessage = 'Invalid email address or password. Please try again.';
 const signInUrl = /\/sign-in/;
-const signInHeading = 'Sign in';
 const recordsUrl = /\/records$/;
-const recordsPageTitle = 'Your catch records | Record your catch';
 
 test.describe('Access Catch Recording', () => {
   test(
@@ -46,7 +43,7 @@ test.describe('Access Catch Recording', () => {
 
       await test.step('I should access the Catch Recording service', async () => {
         await recordsPage.expectUrl(recordsUrl);
-        await recordsPage.expectTitle(recordsPageTitle);
+        await recordsPage.expectTitle(signInData.recordsPageTitle);
       });
 
       await test.step('I should see my catch records', async () => {
@@ -71,8 +68,8 @@ test.describe('Access Catch Recording', () => {
       });
 
       await test.step('I enter incorrect sign-in details', async () => {
-        await signInPage.emailInput().fill(unregisteredCredentials.email);
-        await signInPage.passwordInput().fill(unregisteredCredentials.password);
+        await signInPage.emailInput().fill(signInData.unregisteredCredentials.email);
+        await signInPage.passwordInput().fill(signInData.unregisteredCredentials.password);
       });
 
       await test.step('I select Sign in', async () => {
@@ -81,11 +78,11 @@ test.describe('Access Catch Recording', () => {
 
       await test.step('I should remain on the Sign in screen', async () => {
         await signInPage.expectUrl(signInUrl);
-        await expect(signInPage.signInHeading()).toHaveText(signInHeading);
+        await expect(signInPage.signInHeading()).toHaveText(signInData.signInHeading);
       });
 
       await test.step('I should see a clear error message', async () => {
-        await expect(signInPage.errorMessage()).toContainText(invalidCredentialsMessage);
+        await expect(signInPage.errorMessage()).toContainText(errorMessages.signIn.invalidCredentials);
       });
 
       await test.step('I should be able to correct my details and try again', async () => {

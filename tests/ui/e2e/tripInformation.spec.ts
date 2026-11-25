@@ -7,13 +7,9 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites } from '../helpers/catchRecordFlow';
+import { vessels, ports, checkAnswers } from '../../../test-data/testData';
 
-const vesselName = 'ACHILLES';
-const plymouth = 'Plymouth';
-const lowestoft = 'Lowestoft';
-const departurePortKey = 'Departure port';
-const returnPortKey = 'Return port';
-const testFavourites: Favourites = { ports: [plymouth, lowestoft], gears: [], species: [] };
+const testFavourites: Favourites = { ports: [ports.plymouth, ports.lowestoft], gears: [], species: [] };
 
 test.describe('Trip Information', () => {
   test.use({ testFavourites });
@@ -33,24 +29,24 @@ test.describe('Trip Information', () => {
       gearSelectionPage
     }) => {
       await test.step('I am creating a catch record', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
         await catchRecordFlow.enterSameDayTrip();
       });
 
       await test.step('I select a departure port', async () => {
-        await departurePortPage.selectPort(plymouth);
+        await departurePortPage.selectPort(ports.plymouth);
         await departurePortPage.clickSaveAndContinue();
       });
 
       await test.step('I select a different return port', async () => {
-        await returnPortPage.selectPort(lowestoft);
+        await returnPortPage.selectPort(ports.lowestoft);
         await returnPortPage.clickSaveAndContinue();
       });
 
       await test.step('Both ports should be saved against the trip', async () => {
         await checkAnswersPage.goto('/check-answers');
-        await expect(checkAnswersPage.summaryValue(departurePortKey)).toHaveText(plymouth);
-        await expect(checkAnswersPage.summaryValue(returnPortKey)).toHaveText(lowestoft);
+        await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort)).toHaveText(ports.plymouth);
+        await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnPort)).toHaveText(ports.lowestoft);
       });
 
       await test.step('I should be able to continue', async () => {

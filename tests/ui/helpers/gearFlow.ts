@@ -8,6 +8,7 @@ import { expect } from '@playwright/test';
 import { type AccountPage } from '../../../pages/accountPage';
 import { type AddGearPage } from '../../../pages/addGearPage';
 import { type RemoveGearPage } from '../../../pages/removeGearPage';
+import { gears } from '../../../test-data/testData';
 
 export class GearFlow {
   constructor(
@@ -54,7 +55,7 @@ export class GearFlow {
   async savePots(gearDimension: string): Promise<void> {
     const { addGearPage } = this.pages;
 
-    await addGearPage.searchAndSelectGear('Pots');
+    await addGearPage.searchAndSelectGear(gears.pots.name);
     await addGearPage.clickSaveAndContinue();
     await expect(addGearPage.measurementsHeading('pots')).toBeVisible();
     await addGearPage.gearDimensionInput().fill(gearDimension);

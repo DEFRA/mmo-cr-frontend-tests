@@ -6,6 +6,7 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
+import { catchSpecies } from '../../../test-data/testData';
 
 type Species = {
   name: string;
@@ -29,12 +30,6 @@ type OptionalWeightCase = {
   value: string;
   field: 'belowMinimum' | 'discarded';
 };
-
-const cod: Species = { name: 'Atlantic cod (COD)', code: 'COD' };
-
-const initialWeights = { aboveMinimum: '100', belowMinimum: '10', discarded: '5' };
-const editedWeights = { aboveMinimum: '120', belowMinimum: '15', discarded: '6' };
-const requiredWeight = '100';
 
 const validWeightCases: WeightValidationCase[] = [
   { name: 'a whole number', value: '1' },
@@ -73,7 +68,11 @@ test.describe('Species catch weight entry', () => {
         requiredCredentialsMessage:
           'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for catch weight UI tests'
       });
-      addedFavourites = await catchRecordFlow.ensureFavourites({ ports: [], gears: [], species: [cod.name] });
+      addedFavourites = await catchRecordFlow.ensureFavourites({
+        ports: [],
+        gears: [],
+        species: [catchSpecies.cod.name]
+      });
       await navigationFlow.openSpeciesSelectionForNewRecord();
     });
   });
@@ -88,31 +87,31 @@ test.describe('Species catch weight entry', () => {
     'Displays editable catch-weight fields when a species is selected',
     { tag: ['@ui', '@regression', '@catchWeightRecording'] },
     async ({ speciesSelectionPage }) => {
-      await test.step(`The user selects ${cod.name}`, async () => {
-        await speciesSelectionPage.selectSpecies(cod.name);
+      await test.step(`The user selects ${catchSpecies.cod.name}`, async () => {
+        await speciesSelectionPage.selectSpecies(catchSpecies.cod.name);
       });
 
       await test.step('The selected species and required weight field are displayed', async () => {
-        await expect(speciesSelectionPage.speciesCheckbox(cod.name)).toBeChecked();
-        await expect(speciesSelectionPage.weightAboveMinimumInput(cod.code)).toBeVisible();
-        await expect(speciesSelectionPage.weightAboveMinimumInput(cod.code)).toBeEditable();
+        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name)).toBeChecked();
+        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toBeVisible();
+        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toBeEditable();
       });
 
       await test.step('The optional weight fields are initially hidden', async () => {
-        await expect(speciesSelectionPage.weightBelowMinimumInput(cod.code)).toBeHidden();
-        await expect(speciesSelectionPage.weightDiscardedInput(cod.code)).toBeHidden();
+        await expect(speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code)).toBeHidden();
+        await expect(speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code)).toBeHidden();
       });
 
       await test.step('The user reveals the optional weight fields', async () => {
-        await speciesSelectionPage.addWeightBelowMinimumLink(cod.code).click();
-        await speciesSelectionPage.addWeightDiscardedLink(cod.code).click();
+        await speciesSelectionPage.addWeightBelowMinimumLink(catchSpecies.cod.code).click();
+        await speciesSelectionPage.addWeightDiscardedLink(catchSpecies.cod.code).click();
       });
 
       await test.step('The optional weight fields are displayed and editable', async () => {
-        await expect(speciesSelectionPage.weightBelowMinimumInput(cod.code)).toBeVisible();
-        await expect(speciesSelectionPage.weightBelowMinimumInput(cod.code)).toBeEditable();
-        await expect(speciesSelectionPage.weightDiscardedInput(cod.code)).toBeVisible();
-        await expect(speciesSelectionPage.weightDiscardedInput(cod.code)).toBeEditable();
+        await expect(speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code)).toBeVisible();
+        await expect(speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code)).toBeEditable();
+        await expect(speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code)).toBeVisible();
+        await expect(speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code)).toBeEditable();
       });
     }
   );
@@ -121,13 +120,13 @@ test.describe('Species catch weight entry', () => {
     'Preserves saved catch weights when the species page is reopened',
     { tag: ['@ui', '@smoke', '@catchWeightRecording'] },
     async ({ speciesSelectionPage }) => {
-      await test.step(`The user selects ${cod.name} and enters all three weights`, async () => {
-        await speciesSelectionPage.selectSpecies(cod.name);
+      await test.step(`The user selects ${catchSpecies.cod.name} and enters all three weights`, async () => {
+        await speciesSelectionPage.selectSpecies(catchSpecies.cod.name);
         await speciesSelectionPage.enterSpeciesWeights(
-          cod.code,
-          initialWeights.aboveMinimum,
-          initialWeights.belowMinimum,
-          initialWeights.discarded
+          catchSpecies.cod.code,
+          catchSpecies.weights.initial.aboveMinimum,
+          catchSpecies.weights.initial.belowMinimum,
+          catchSpecies.weights.initial.discarded
         );
       });
 
@@ -141,10 +140,16 @@ test.describe('Species catch weight entry', () => {
       });
 
       await test.step('The species and saved weights are displayed', async () => {
-        await expect(speciesSelectionPage.speciesCheckbox(cod.name)).toBeChecked();
-        await expect(speciesSelectionPage.weightAboveMinimumInput(cod.code)).toHaveValue(initialWeights.aboveMinimum);
-        await expect(speciesSelectionPage.weightBelowMinimumInput(cod.code)).toHaveValue(initialWeights.belowMinimum);
-        await expect(speciesSelectionPage.weightDiscardedInput(cod.code)).toHaveValue(initialWeights.discarded);
+        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name)).toBeChecked();
+        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toHaveValue(
+          catchSpecies.weights.initial.aboveMinimum
+        );
+        await expect(speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code)).toHaveValue(
+          catchSpecies.weights.initial.belowMinimum
+        );
+        await expect(speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code)).toHaveValue(
+          catchSpecies.weights.initial.discarded
+        );
       });
     }
   );
@@ -154,20 +159,26 @@ test.describe('Species catch weight entry', () => {
     { tag: ['@ui', '@regression', '@catchWeightRecording'] },
     async ({ speciesSelectionPage }) => {
       await test.step('The user has saved all three weights for Cod', async () => {
-        await speciesSelectionPage.selectSpecies(cod.name);
+        await speciesSelectionPage.selectSpecies(catchSpecies.cod.name);
         await speciesSelectionPage.enterSpeciesWeights(
-          cod.code,
-          initialWeights.aboveMinimum,
-          initialWeights.belowMinimum,
-          initialWeights.discarded
+          catchSpecies.cod.code,
+          catchSpecies.weights.initial.aboveMinimum,
+          catchSpecies.weights.initial.belowMinimum,
+          catchSpecies.weights.initial.discarded
         );
         await speciesSelectionPage.saveAndReturn();
       });
 
       await test.step('The user edits each weight', async () => {
-        await speciesSelectionPage.weightAboveMinimumInput(cod.code).fill(editedWeights.aboveMinimum);
-        await speciesSelectionPage.weightBelowMinimumInput(cod.code).fill(editedWeights.belowMinimum);
-        await speciesSelectionPage.weightDiscardedInput(cod.code).fill(editedWeights.discarded);
+        await speciesSelectionPage
+          .weightAboveMinimumInput(catchSpecies.cod.code)
+          .fill(catchSpecies.weights.edited.aboveMinimum);
+        await speciesSelectionPage
+          .weightBelowMinimumInput(catchSpecies.cod.code)
+          .fill(catchSpecies.weights.edited.belowMinimum);
+        await speciesSelectionPage
+          .weightDiscardedInput(catchSpecies.cod.code)
+          .fill(catchSpecies.weights.edited.discarded);
       });
 
       await test.step('The user saves the edited weights and returns to the species page', async () => {
@@ -177,9 +188,15 @@ test.describe('Species catch weight entry', () => {
       });
 
       await test.step('The edited values are displayed', async () => {
-        await expect(speciesSelectionPage.weightAboveMinimumInput(cod.code)).toHaveValue(editedWeights.aboveMinimum);
-        await expect(speciesSelectionPage.weightBelowMinimumInput(cod.code)).toHaveValue(editedWeights.belowMinimum);
-        await expect(speciesSelectionPage.weightDiscardedInput(cod.code)).toHaveValue(editedWeights.discarded);
+        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toHaveValue(
+          catchSpecies.weights.edited.aboveMinimum
+        );
+        await expect(speciesSelectionPage.weightBelowMinimumInput(catchSpecies.cod.code)).toHaveValue(
+          catchSpecies.weights.edited.belowMinimum
+        );
+        await expect(speciesSelectionPage.weightDiscardedInput(catchSpecies.cod.code)).toHaveValue(
+          catchSpecies.weights.edited.discarded
+        );
       });
     }
   );
@@ -188,14 +205,14 @@ test.describe('Species catch weight entry', () => {
     'Displays an error when a selected species has no above-minimum weight',
     { tag: ['@ui', '@regression', '@catchWeightRecording'] },
     async ({ speciesSelectionPage }) => {
-      await test.step(`The user selects ${cod.name} without entering an above-minimum weight`, async () => {
-        await speciesSelectionPage.selectSpecies(cod.name);
+      await test.step(`The user selects ${catchSpecies.cod.name} without entering an above-minimum weight`, async () => {
+        await speciesSelectionPage.selectSpecies(catchSpecies.cod.name);
         await speciesSelectionPage.clickSaveAndContinue();
       });
 
       await test.step('The page shows the validation error for the required weight', async () => {
         await expect(speciesSelectionPage.errorSummary()).toBeVisible();
-        await expect(speciesSelectionPage.weightAboveMinimumError(cod.code)).toBeVisible();
+        await expect(speciesSelectionPage.weightAboveMinimumError(catchSpecies.cod.code)).toBeVisible();
       });
     }
   );
@@ -206,9 +223,9 @@ test.describe('Species catch weight entry', () => {
       { tag: ['@ui', '@regression', '@catchWeightRecording'] },
       async ({ speciesSelectionPage }) => {
         await test.step('The user enters above-minimum and discarded weights', async () => {
-          await speciesSelectionPage.selectSpecies(cod.name);
+          await speciesSelectionPage.selectSpecies(catchSpecies.cod.name);
           await speciesSelectionPage.enterSpeciesWeights(
-            cod.code,
+            catchSpecies.cod.code,
             comparison.aboveMinimum,
             undefined,
             comparison.discarded
@@ -233,8 +250,8 @@ test.describe('Species catch weight entry', () => {
       { tag: ['@ui', '@regression', '@catchWeightRecording'] },
       async ({ speciesSelectionPage }) => {
         await test.step('The user enters the weight and saves', async () => {
-          await speciesSelectionPage.selectSpecies(cod.name);
-          await speciesSelectionPage.enterSpeciesWeights(cod.code, weightCase.value);
+          await speciesSelectionPage.selectSpecies(catchSpecies.cod.name);
+          await speciesSelectionPage.enterSpeciesWeights(catchSpecies.cod.code, weightCase.value);
           await speciesSelectionPage.clickSaveAndContinue();
         });
 
@@ -251,14 +268,14 @@ test.describe('Species catch weight entry', () => {
       { tag: ['@ui', '@regression', '@catchWeightRecording'] },
       async ({ speciesSelectionPage }) => {
         await test.step('The user enters the weight and saves', async () => {
-          await speciesSelectionPage.selectSpecies(cod.name);
-          await speciesSelectionPage.enterSpeciesWeights(cod.code, weightCase.value);
+          await speciesSelectionPage.selectSpecies(catchSpecies.cod.name);
+          await speciesSelectionPage.enterSpeciesWeights(catchSpecies.cod.code, weightCase.value);
           await speciesSelectionPage.clickSaveAndContinue();
         });
 
         await test.step('The page shows a validation error', async () => {
           await expect(speciesSelectionPage.errorSummary()).toBeVisible();
-          await expect(speciesSelectionPage.weightAboveMinimumError(cod.code)).toBeVisible();
+          await expect(speciesSelectionPage.weightAboveMinimumError(catchSpecies.cod.code)).toBeVisible();
         });
       }
     );
@@ -270,14 +287,18 @@ test.describe('Species catch weight entry', () => {
       { tag: ['@ui', '@regression', '@catchWeightRecording'] },
       async ({ speciesSelectionPage }) => {
         await test.step('The user enters the optional weight and saves', async () => {
-          await speciesSelectionPage.selectSpecies(cod.name);
+          await speciesSelectionPage.selectSpecies(catchSpecies.cod.name);
 
           if (optionalWeightCase.field === 'belowMinimum') {
-            await speciesSelectionPage.enterSpeciesWeights(cod.code, requiredWeight, optionalWeightCase.value);
+            await speciesSelectionPage.enterSpeciesWeights(
+              catchSpecies.cod.code,
+              catchSpecies.weights.required,
+              optionalWeightCase.value
+            );
           } else {
             await speciesSelectionPage.enterSpeciesWeights(
-              cod.code,
-              requiredWeight,
+              catchSpecies.cod.code,
+              catchSpecies.weights.required,
               undefined,
               optionalWeightCase.value
             );
@@ -290,9 +311,9 @@ test.describe('Species catch weight entry', () => {
           await expect(speciesSelectionPage.errorSummary()).toBeVisible();
 
           if (optionalWeightCase.field === 'belowMinimum') {
-            await expect(speciesSelectionPage.weightBelowMinimumError(cod.code)).toBeVisible();
+            await expect(speciesSelectionPage.weightBelowMinimumError(catchSpecies.cod.code)).toBeVisible();
           } else {
-            await expect(speciesSelectionPage.weightDiscardedError(cod.code)).toBeVisible();
+            await expect(speciesSelectionPage.weightDiscardedError(catchSpecies.cod.code)).toBeVisible();
           }
         });
       }

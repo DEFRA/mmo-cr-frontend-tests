@@ -6,19 +6,10 @@
  * @since 2026-11-16
  */
 import { expect, test } from '../../../fixtures/commonfixture';
+import { ports, gears, catchSpecies, errorMessages } from '../../../test-data/testData';
 
-const favouriteSpecies = 'Atlantic cod (COD)';
-const favouriteSpeciesCode = 'COD';
-const favouriteGear = 'Pots';
-const favouritePort = 'Plymouth';
-const replacementPort = 'Lowestoft';
-const portSearchTerm = 'Lowe';
-const gearSearchTerm = 'tra';
-const gearSearchResult = 'Traps (not specified)';
-const speciesSearchTerm = 'ha';
-const unapprovedGear = 'Not a catalogue gear';
-const duplicateSpeciesError = `${favouriteSpecies} has already been added.`;
-const duplicateGearError = `${favouriteGear} has already been added to your gear`;
+const duplicateSpeciesError = `${catchSpecies.cod.name}${errorMessages.species.duplicateSuffix}`;
+const duplicateGearError = `${gears.pots.name}${errorMessages.gears.duplicateSuffix}`;
 
 test.describe('Create and amend favourites', () => {
   test.beforeEach(async ({ navigationFlow }) => {
@@ -33,10 +24,10 @@ test.describe('Create and amend favourites', () => {
   // Page fixtures are per test, so clean-up runs after each test rather than in afterAll
   test.afterEach(async ({ navigationFlow, favouritesFlow, catchRecordFlow }) => {
     await navigationFlow.openAccount();
-    await favouritesFlow.removeSpeciesFromAccount(favouriteSpecies);
-    await favouritesFlow.removeGearFromAccount(favouriteGear);
-    await favouritesFlow.removePortFromAccount(favouritePort);
-    await favouritesFlow.removePortFromAccount(replacementPort);
+    await favouritesFlow.removeSpeciesFromAccount(catchSpecies.cod.name);
+    await favouritesFlow.removeGearFromAccount(gears.pots.name);
+    await favouritesFlow.removePortFromAccount(ports.plymouth);
+    await favouritesFlow.removePortFromAccount(ports.lowestoft);
     await catchRecordFlow.deleteCreatedDrafts();
   });
 
@@ -57,15 +48,15 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@smoke', '@favouriteSpecies'] },
     async ({ favouritesFlow, accountPage }) => {
       await test.step('The species is not already a favourite', async () => {
-        await favouritesFlow.removeSpeciesFromAccount(favouriteSpecies);
+        await favouritesFlow.removeSpeciesFromAccount(catchSpecies.cod.name);
       });
 
       await test.step('I search for and save an approved species', async () => {
-        await favouritesFlow.addSpeciesToAccount(favouriteSpecies);
+        await favouritesFlow.addSpeciesToAccount(catchSpecies.cod.name);
       });
 
       await test.step('The species is saved in my favourites', async () => {
-        await expect(accountPage.speciesCaughtValue()).toContainText(favouriteSpecies);
+        await expect(accountPage.speciesCaughtValue()).toContainText(catchSpecies.cod.name);
       });
     }
   );
@@ -75,13 +66,13 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@regression', '@favouriteSpecies'] },
     async ({ favouritesFlow, accountPage, addSpeciesPage }) => {
       await test.step('I already have a favourite species', async () => {
-        await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
+        await favouritesFlow.ensureSpeciesAdded(catchSpecies.cod.name);
       });
 
       await test.step('I attempt to add the same species again', async () => {
         await accountPage.addSpeciesLink().click();
-        await addSpeciesPage.speciesInput().fill(favouriteSpecies);
-        const duplicateOption = addSpeciesPage.suggestionOption(favouriteSpecies);
+        await addSpeciesPage.speciesInput().fill(catchSpecies.cod.name);
+        const duplicateOption = addSpeciesPage.suggestionOption(catchSpecies.cod.name);
         await expect(duplicateOption.or(addSpeciesPage.noResultsMessage())).toBeVisible();
         if (await duplicateOption.isVisible()) {
           await duplicateOption.click();
@@ -99,7 +90,9 @@ test.describe('Create and amend favourites', () => {
       await test.step('Exactly one copy remains saved after reloading the account', async () => {
         await accountPage.goto('/account');
         await expect
-          .poll(async () => (await accountPage.getSpeciesCaught()).filter((name) => name === favouriteSpecies).length)
+          .poll(
+            async () => (await accountPage.getSpeciesCaught()).filter((name) => name === catchSpecies.cod.name).length
+          )
           .toBe(1);
       });
     }
@@ -110,15 +103,15 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@smoke', '@favouriteGear'] },
     async ({ favouritesFlow, accountPage }) => {
       await test.step('The gear is not already a favourite', async () => {
-        await favouritesFlow.removeGearFromAccount(favouriteGear);
+        await favouritesFlow.removeGearFromAccount(gears.pots.name);
       });
 
       await test.step('I search for and save approved gear with its required measurements', async () => {
-        await favouritesFlow.addGearToAccount(favouriteGear);
+        await favouritesFlow.addGearToAccount(gears.pots.name);
       });
 
       await test.step('The gear is saved in my favourites', async () => {
-        await expect(accountPage.gearOnboardValue()).toContainText(favouriteGear);
+        await expect(accountPage.gearOnboardValue()).toContainText(gears.pots.name);
       });
     }
   );
@@ -128,15 +121,15 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@smoke', '@favouritePorts'] },
     async ({ favouritesFlow, accountPage }) => {
       await test.step('The port is not already a favourite', async () => {
-        await favouritesFlow.removePortFromAccount(favouritePort);
+        await favouritesFlow.removePortFromAccount(ports.plymouth);
       });
 
       await test.step('I search for and save an approved port', async () => {
-        await favouritesFlow.addPortToAccount(favouritePort);
+        await favouritesFlow.addPortToAccount(ports.plymouth);
       });
 
       await test.step('The port is saved in my favourites', async () => {
-        await expect(accountPage.portsUsedValue()).toContainText(favouritePort);
+        await expect(accountPage.portsUsedValue()).toContainText(ports.plymouth);
       });
     }
   );
@@ -146,12 +139,12 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@regression', '@favouriteGear'] },
     async ({ favouritesFlow, accountPage, addGearPage, removeGearPage }) => {
       await test.step('I already have favourite gear', async () => {
-        await favouritesFlow.ensureGearAdded(favouriteGear);
+        await favouritesFlow.ensureGearAdded(gears.pots.name);
       });
 
       await test.step('I attempt to add the same gear again', async () => {
         await accountPage.clickAddGear();
-        await addGearPage.gearInput().fill(favouriteGear);
+        await addGearPage.gearInput().fill(gears.pots.name);
         await addGearPage.clickSaveAndContinue();
       });
 
@@ -163,7 +156,7 @@ test.describe('Create and amend favourites', () => {
       await test.step('Exactly one copy remains saved', async () => {
         await accountPage.goto('/account');
         await accountPage.clickRemoveGear();
-        await expect(removeGearPage.gearCheckbox(favouriteGear)).toHaveCount(1);
+        await expect(removeGearPage.gearCheckbox(gears.pots.name)).toHaveCount(1);
       });
     }
   );
@@ -173,12 +166,12 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@regression', '@favouritePorts'] },
     async ({ favouritesFlow, accountPage, addPortPage }) => {
       await test.step('I already have a favourite port', async () => {
-        await favouritesFlow.ensurePortAdded(favouritePort);
+        await favouritesFlow.ensurePortAdded(ports.plymouth);
       });
 
       await test.step('I attempt to add the same port again', async () => {
         await accountPage.addPortLink().click();
-        await addPortPage.searchAndSelectPort(favouritePort);
+        await addPortPage.searchAndSelectPort(ports.plymouth);
         await addPortPage.clickSaveAndContinue();
       });
 
@@ -190,7 +183,7 @@ test.describe('Create and amend favourites', () => {
       await test.step('Exactly one copy remains saved after reloading the account', async () => {
         await accountPage.goto('/account');
         await expect
-          .poll(async () => (await accountPage.getPortsUsed()).filter((name) => name === favouritePort).length)
+          .poll(async () => (await accountPage.getPortsUsed()).filter((name) => name === ports.plymouth).length)
           .toBe(1);
       });
     }
@@ -201,12 +194,12 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@regression', '@favouriteSpecies'] },
     async ({ favouritesFlow, accountPage, removeSpeciesPage }) => {
       await test.step('I have a favourite species', async () => {
-        await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
+        await favouritesFlow.ensureSpeciesAdded(catchSpecies.cod.name);
       });
 
       await test.step('I choose the species to remove', async () => {
         await accountPage.removeSpeciesLink().click();
-        await removeSpeciesPage.selectSpeciesToRemove(favouriteSpecies);
+        await removeSpeciesPage.selectSpeciesToRemove(catchSpecies.cod.name);
       });
 
       await test.step('I explicitly confirm removal by continuing', async () => {
@@ -216,7 +209,7 @@ test.describe('Create and amend favourites', () => {
       await test.step('The species is no longer saved as a favourite', async () => {
         await accountPage.expectUrl(/\/account$/);
         await accountPage.reload();
-        await expect(accountPage.speciesCaughtValue()).not.toContainText(favouriteSpecies);
+        await expect(accountPage.speciesCaughtValue()).not.toContainText(catchSpecies.cod.name);
       });
     }
   );
@@ -226,12 +219,12 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@regression', '@favouriteGear'] },
     async ({ favouritesFlow, accountPage, removeGearPage }) => {
       await test.step('I have favourite gear', async () => {
-        await favouritesFlow.ensureGearAdded(favouriteGear);
+        await favouritesFlow.ensureGearAdded(gears.pots.name);
       });
 
       await test.step('I choose the gear to remove', async () => {
         await accountPage.clickRemoveGear();
-        await removeGearPage.selectGearToRemove(favouriteGear);
+        await removeGearPage.selectGearToRemove(gears.pots.name);
       });
 
       await test.step('I explicitly confirm removal by continuing', async () => {
@@ -241,7 +234,7 @@ test.describe('Create and amend favourites', () => {
       await test.step('The gear is no longer saved as a favourite', async () => {
         await accountPage.expectUrl(/\/account$/);
         await accountPage.reload();
-        await expect(accountPage.gearOnboardValue()).not.toContainText(favouriteGear);
+        await expect(accountPage.gearOnboardValue()).not.toContainText(gears.pots.name);
       });
     }
   );
@@ -251,12 +244,12 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@regression', '@favouritePorts'] },
     async ({ favouritesFlow, accountPage, removePortPage }) => {
       await test.step('I have a favourite port', async () => {
-        await favouritesFlow.ensurePortAdded(favouritePort);
+        await favouritesFlow.ensurePortAdded(ports.plymouth);
       });
 
       await test.step('I choose the port to remove', async () => {
         await accountPage.removePortLink().click();
-        await removePortPage.portCheckbox(favouritePort).check();
+        await removePortPage.portCheckbox(ports.plymouth).check();
       });
 
       await test.step('I explicitly confirm removal by continuing', async () => {
@@ -266,7 +259,7 @@ test.describe('Create and amend favourites', () => {
       await test.step('The port is no longer saved as a favourite', async () => {
         await accountPage.expectUrl(/\/account$/);
         await accountPage.reload();
-        await expect(accountPage.portsUsedValue()).not.toContainText(favouritePort);
+        await expect(accountPage.portsUsedValue()).not.toContainText(ports.plymouth);
       });
     }
   );
@@ -276,17 +269,17 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@regression', '@favouritePorts'] },
     async ({ favouritesFlow, accountPage }) => {
       await test.step('I have a favourite port', async () => {
-        await favouritesFlow.ensurePortAdded(favouritePort);
+        await favouritesFlow.ensurePortAdded(ports.plymouth);
       });
 
       await test.step('I replace it with a different favourite port', async () => {
-        await favouritesFlow.removePortFromAccount(favouritePort);
-        await favouritesFlow.ensurePortAdded(replacementPort);
+        await favouritesFlow.removePortFromAccount(ports.plymouth);
+        await favouritesFlow.ensurePortAdded(ports.lowestoft);
       });
 
       await test.step('Only the replacement port is saved', async () => {
-        await expect(accountPage.portsUsedValue()).not.toContainText(favouritePort);
-        await expect(accountPage.portsUsedValue()).toContainText(replacementPort);
+        await expect(accountPage.portsUsedValue()).not.toContainText(ports.plymouth);
+        await expect(accountPage.portsUsedValue()).toContainText(ports.lowestoft);
       });
     }
   );
@@ -296,7 +289,7 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@smoke', '@favouriteGear'] },
     async ({ favouritesFlow, navigationFlow, gearSelectionPage, addGearPage }) => {
       await test.step('I have previously saved favourite gear', async () => {
-        await favouritesFlow.ensureGearAdded(favouriteGear);
+        await favouritesFlow.ensureGearAdded(gears.pots.name);
       });
 
       await test.step('I open gear selection during catch recording', async () => {
@@ -306,14 +299,14 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('My favourite is displayed before I search the wider catalogue', async () => {
-        await expect(gearSelectionPage.gearCheckbox(favouriteGear)).toBeVisible();
+        await expect(gearSelectionPage.gearCheckbox(gears.pots.name)).toBeVisible();
       });
 
       await test.step('I can still search the wider gear catalogue', async () => {
         await gearSelectionPage.addGearLink().click();
         await expect(addGearPage.gearInput()).toBeEmpty();
-        await addGearPage.searchGearOptions(gearSearchTerm);
-        await expect(addGearPage.gearOption(gearSearchResult)).toBeVisible();
+        await addGearPage.searchGearOptions(gears.traps.searchTerm);
+        await expect(addGearPage.gearOption(gears.traps.name)).toBeVisible();
       });
     }
   );
@@ -323,7 +316,7 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@smoke', '@favouriteSpecies'] },
     async ({ favouritesFlow, speciesSelectionPage, navigationFlow, addSpeciesPage }) => {
       await test.step('I have previously saved a favourite species', async () => {
-        await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
+        await favouritesFlow.ensureSpeciesAdded(catchSpecies.cod.name);
       });
 
       await test.step('I open species selection during catch recording', async () => {
@@ -331,13 +324,13 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('My favourite is displayed before I search the wider catalogue', async () => {
-        await expect(speciesSelectionPage.speciesCheckbox(favouriteSpecies)).toBeVisible();
+        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name)).toBeVisible();
       });
 
       await test.step('I can still search the wider species catalogue', async () => {
         await navigationFlow.openAddSpecies();
         await expect(addSpeciesPage.speciesInput()).toBeEmpty();
-        await addSpeciesPage.speciesInput().fill(speciesSearchTerm);
+        await addSpeciesPage.speciesInput().fill(catchSpecies.searchTerms.second);
         await expect(addSpeciesPage.searchResults().first()).toBeVisible();
       });
     }
@@ -348,7 +341,7 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@regression', '@favouriteSpecies'] },
     async ({ favouritesFlow, navigationFlow, speciesSelectionPage }) => {
       await test.step('I have a saved favourite species', async () => {
-        await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
+        await favouritesFlow.ensureSpeciesAdded(catchSpecies.cod.name);
       });
 
       await test.step('I open species selection during catch recording', async () => {
@@ -356,24 +349,24 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('My favourite is available without searching the catalogue', async () => {
-        await expect(speciesSelectionPage.speciesCheckbox(favouriteSpecies)).toBeVisible();
+        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name)).toBeVisible();
       });
 
       await test.step('I select the favourite and continue without entering its catch weight', async () => {
         for (const checkbox of await speciesSelectionPage.speciesCheckboxes().all()) {
           await checkbox.uncheck();
         }
-        await speciesSelectionPage.speciesCheckbox(favouriteSpecies).check();
-        await speciesSelectionPage.weightAboveMinimumInput(favouriteSpeciesCode).clear();
+        await speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name).check();
+        await speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code).clear();
         await speciesSelectionPage.clickSaveAndContinue();
       });
 
       await test.step('Mandatory catch-weight validation prevents progression', async () => {
         await speciesSelectionPage.expectUrl(/\/species-selection$/);
-        await expect(speciesSelectionPage.speciesCheckbox(favouriteSpecies)).toBeChecked();
-        await expect(speciesSelectionPage.weightAboveMinimumInput(favouriteSpeciesCode)).toBeEmpty();
+        await expect(speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name)).toBeChecked();
+        await expect(speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code)).toBeEmpty();
         await expect(speciesSelectionPage.errorSummary()).toBeVisible();
-        await expect(speciesSelectionPage.weightAboveMinimumError(favouriteSpeciesCode)).toBeVisible();
+        await expect(speciesSelectionPage.weightAboveMinimumError(catchSpecies.cod.code)).toBeVisible();
       });
     }
   );
@@ -386,7 +379,7 @@ test.describe('Create and amend favourites', () => {
         const portPage = portType === 'departure' ? departurePortPage : returnPortPage;
 
         await test.step('I have a saved favourite port', async () => {
-          await favouritesFlow.ensurePortAdded(favouritePort);
+          await favouritesFlow.ensurePortAdded(ports.plymouth);
         });
 
         await test.step(`I start a new catch record and reach ${portType}-port selection`, async () => {
@@ -394,21 +387,21 @@ test.describe('Create and amend favourites', () => {
           await departurePortPage.expectUrl(/\/departure-port$/);
 
           if (portType === 'return') {
-            await departurePortPage.selectPort(favouritePort);
+            await departurePortPage.selectPort(ports.plymouth);
             await departurePortPage.clickSaveAndContinue();
             await returnPortPage.expectUrl(/\/return-port$/);
           }
         });
 
         await test.step('My favourite port is displayed before I enter a search', async () => {
-          await expect(portPage.portRadio(favouritePort)).toBeVisible();
+          await expect(portPage.portRadio(ports.plymouth)).toBeVisible();
         });
 
         await test.step('I can search the wider port catalogue', async () => {
           await addPortPage.goto(`/add-port?for=${portType}&entry=1`);
           await expect(addPortPage.portInput()).toBeEmpty();
-          await addPortPage.searchPorts(portSearchTerm);
-          await expect(addPortPage.portResultItem(replacementPort).getByRole('option')).toBeVisible();
+          await addPortPage.searchPorts(ports.searchTerms.lowestoft);
+          await expect(addPortPage.portResultItem(ports.lowestoft).getByRole('option')).toBeVisible();
         });
       }
     );
@@ -423,11 +416,11 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('I enter part of a port name', async () => {
-        await addPortPage.searchPorts(favouritePort.slice(0, 2));
+        await addPortPage.searchPorts(ports.plymouth.slice(0, 2));
       });
 
       await test.step('Matching approved ports are suggested', async () => {
-        await expect(addPortPage.portResultItem(favouritePort).getByRole('option')).toBeVisible();
+        await expect(addPortPage.portResultItem(ports.plymouth).getByRole('option')).toBeVisible();
       });
     }
   );
@@ -441,7 +434,7 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('I try to save gear outside the approved catalogue', async () => {
-        await addGearPage.gearInput().fill(unapprovedGear);
+        await addGearPage.gearInput().fill(gears.unapproved);
         await addGearPage.clickSaveAndContinue();
       });
 
@@ -499,9 +492,9 @@ test.describe('Create and amend favourites', () => {
     { tag: ['@ui', '@regression', '@favourites'] },
     async ({ favouritesFlow, accountPage }) => {
       await test.step('I have saved species, gear and port favourites', async () => {
-        await favouritesFlow.ensureSpeciesAdded(favouriteSpecies);
-        await favouritesFlow.ensureGearAdded(favouriteGear);
-        await favouritesFlow.ensurePortAdded(favouritePort);
+        await favouritesFlow.ensureSpeciesAdded(catchSpecies.cod.name);
+        await favouritesFlow.ensureGearAdded(gears.pots.name);
+        await favouritesFlow.ensurePortAdded(ports.plymouth);
       });
 
       await test.step('I reload my account', async () => {
@@ -509,9 +502,9 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('All three favourites remain saved', async () => {
-        await expect(accountPage.speciesCaughtValue()).toContainText(favouriteSpecies);
-        await expect(accountPage.gearOnboardValue()).toContainText(favouriteGear);
-        await expect(accountPage.portsUsedValue()).toContainText(favouritePort);
+        await expect(accountPage.speciesCaughtValue()).toContainText(catchSpecies.cod.name);
+        await expect(accountPage.gearOnboardValue()).toContainText(gears.pots.name);
+        await expect(accountPage.portsUsedValue()).toContainText(ports.plymouth);
       });
     }
   );

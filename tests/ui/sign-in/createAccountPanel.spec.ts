@@ -5,13 +5,7 @@
  * @since 2026-11-13
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-
-const createAccountGuidance = {
-  vesselOwnerHeading: /Vessel owner/i,
-  vesselOwnerText: 'You will receive an email invitation to register when your vessel is added to the system.',
-  skipperOrAgentHeading: /Skipper or agent/i,
-  skipperOrAgentText: 'Ask your vessel owner to add you. They can do this from their account.'
-} as const;
+import { signInData } from '../../../test-data/testData';
 
 test.describe('Create an account information panel', () => {
   test.beforeEach(async ({ signInPage }) => {
@@ -51,13 +45,19 @@ test.describe('Create an account information panel', () => {
       });
 
       await test.step('The Vessel Owner guidance is displayed', async () => {
-        await expect(signInPage.registrationGuidance()).toContainText(createAccountGuidance.vesselOwnerHeading);
-        await expect(signInPage.registrationGuidance()).toContainText(createAccountGuidance.vesselOwnerText);
+        await expect(signInPage.registrationGuidance()).toContainText(
+          new RegExp(signInData.createAccountGuidance.vesselOwnerHeading, 'i')
+        );
+        await expect(signInPage.registrationGuidance()).toContainText(signInData.createAccountGuidance.vesselOwnerText);
       });
 
       await test.step('The Skipper or Agent guidance is displayed', async () => {
-        await expect(signInPage.registrationGuidance()).toContainText(createAccountGuidance.skipperOrAgentHeading);
-        await expect(signInPage.registrationGuidance()).toContainText(createAccountGuidance.skipperOrAgentText);
+        await expect(signInPage.registrationGuidance()).toContainText(
+          new RegExp(signInData.createAccountGuidance.skipperOrAgentHeading, 'i')
+        );
+        await expect(signInPage.registrationGuidance()).toContainText(
+          signInData.createAccountGuidance.skipperOrAgentText
+        );
       });
     }
   );

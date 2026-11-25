@@ -4,6 +4,7 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
+import { vessels } from '../../../test-data/testData';
 
 type DateParts = {
   day: string;
@@ -20,8 +21,6 @@ type TripDates = {
   start: DateParts;
   end: DateParts;
 };
-
-const vesselName = 'ACHILLES';
 
 const dateOffsets = {
   validTrip: { start: -10, end: -5 },
@@ -63,7 +62,7 @@ test.describe('Trip date validation', () => {
 
     await test.step('The user starts a new catch record', async () => {
       await recordsPage.createNewRecordButton().click();
-      await selectVesselPage.selectVessel(vesselName);
+      await selectVesselPage.selectVessel(vessels.achilles);
       await selectVesselPage.clickSaveAndContinue();
     });
 

@@ -6,18 +6,14 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { type Favourites, type GearData, type SpeciesCatch } from '../helpers/catchRecordFlow';
+import { type Favourites } from '../helpers/catchRecordFlow';
+import { vessels, ports, gears, catchSpecies, areas, checkAnswers } from '../../../test-data/testData';
 
-const vesselName = 'ACHILLES';
-const plymouth = 'Plymouth';
-const areaCode = '46D86';
-const pots: GearData = { name: 'Pots' };
-const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
-const notLandedKey = 'Not landed';
-const notLandedSpeciesKey = 'Species';
-const weightKeptOnboardKey = 'Weight above minimum size kept onboard or in keep pots (kg)';
-const noAnswer = 'No';
-const testFavourites: Favourites = { ports: [plymouth], gears: [pots.name], species: [cod.name] };
+const testFavourites: Favourites = {
+  ports: [ports.plymouth],
+  gears: [gears.pots.name],
+  species: [catchSpecies.cod.name]
+};
 
 test.describe('Landing Information', () => {
   test.use({ testFavourites });
@@ -30,11 +26,13 @@ test.describe('Landing Information', () => {
     },
     async ({ createdRecords, catchRecordFlow, catchNotLandedPage, checkAnswersPage }) => {
       await test.step('I am completing my catch record', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
         await catchRecordFlow.enterSameDayTrip();
-        await catchRecordFlow.selectPorts(plymouth, plymouth);
-        await catchRecordFlow.selectGears([pots]);
-        await catchRecordFlow.enterCatchDetailsForEachGear([{ gear: pots, areaCode, species: [cod] }]);
+        await catchRecordFlow.selectPorts(ports.plymouth, ports.plymouth);
+        await catchRecordFlow.selectGears([gears.pots]);
+        await catchRecordFlow.enterCatchDetailsForEachGear([
+          { gear: gears.pots, areaCode: areas.validCode, species: [catchSpecies.cod] }
+        ]);
       });
 
       await test.step('I confirm that no catch is being kept onboard or in keep pots', async () => {
@@ -49,9 +47,11 @@ test.describe('Landing Information', () => {
 
       // UNVERIFIED (OQ-8): the live review still shows a "Species not landed" section with "Not landed: No"
       await test.step('No catch-not-landed section should be displayed', async () => {
-        await expect(checkAnswersPage.notLandedValue(notLandedKey)).toHaveText(noAnswer);
-        await expect(checkAnswersPage.notLandedValue(notLandedSpeciesKey)).toHaveCount(0);
-        await expect(checkAnswersPage.notLandedValue(weightKeptOnboardKey)).toHaveCount(0);
+        await expect(checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.notLanded)).toHaveText(
+          checkAnswers.answers.no
+        );
+        await expect(checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.notLandedSpecies)).toHaveCount(0);
+        await expect(checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.weightKeptOnboard)).toHaveCount(0);
       });
     }
   );
