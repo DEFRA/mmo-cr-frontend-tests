@@ -5,22 +5,16 @@
  * @since 2026-11-13
  */
 import { expect, test } from '../../../fixtures/commonfixture';
+import { errorMessages, signInData } from '../../../test-data/testData';
 
 const validCredentials = {
   email: process.env.CATCH_RECORDING_EMAIL ?? '',
   password: process.env.CATCH_RECORDING_PASSWORD ?? ''
 };
-const unregisteredCredentials = { email: 'not-registered@example.com', password: 'IncorrectPassword1!' };
 const missingCredentialsReason = 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD must be set in .env';
 const signInUrl = /\/sign-in/;
 const homeScreenUrl = /\/records$/;
 const forgottenPasswordUrl = /\/forgotten-password$/;
-const messages = {
-  emailRequired: 'Please enter your email address.',
-  emailInvalid: 'Please enter a valid email address.',
-  passwordRequired: 'Please enter your password.',
-  invalidCredentials: 'Invalid email address or password. Please try again.'
-} as const;
 
 test.describe.skip('Sign in form', () => {
   test.beforeEach(async ({ signInPage }) => {
@@ -31,29 +25,32 @@ test.describe.skip('Sign in form', () => {
 
   test('Sign-in page displays the required controls', { tag: ['@ui', '@smoke', '@signIn'] }, async ({ signInPage }) => {
     await test.step('The application logo is displayed', async () => {
-      await expect(signInPage.appLogo()).toBeVisible();
+      await expect(signInPage.appLogo(), 'App logo to be visible').toBeVisible();
     });
 
     await test.step('The "Sign in" heading is displayed', async () => {
-      await expect(signInPage.signInHeading()).toHaveText('Sign in');
+      await expect(signInPage.signInHeading(), 'Sign in heading to have text Sign in').toHaveText('Sign in');
     });
 
     await test.step('The Email address and Password fields are displayed', async () => {
-      await expect(signInPage.emailInput()).toBeVisible();
-      await expect(signInPage.passwordInput()).toBeVisible();
+      await expect(signInPage.emailInput(), 'Email input to be visible').toBeVisible();
+      await expect(signInPage.passwordInput(), 'Password input to be visible').toBeVisible();
     });
 
     await test.step('The Sign in button is displayed', async () => {
-      await expect(signInPage.signInButton()).toBeVisible();
+      await expect(signInPage.signInButton(), 'Sign in button to be visible').toBeVisible();
     });
 
     await test.step('The "Having trouble signing in?" section is displayed', async () => {
-      await expect(signInPage.troubleHeading()).toBeVisible();
+      await expect(signInPage.troubleHeading(), 'Trouble heading to be visible').toBeVisible();
     });
 
     await test.step('The "Forgotten your password?" and "Create an account" links are displayed', async () => {
-      await expect(signInPage.forgotPasswordLink()).toHaveAttribute('href', '/forgotten-password');
-      await expect(signInPage.registerLink()).toBeVisible();
+      await expect(signInPage.forgotPasswordLink(), 'Forgot password link to have attribute').toHaveAttribute(
+        'href',
+        '/forgotten-password'
+      );
+      await expect(signInPage.registerLink(), 'Register link to be visible').toBeVisible();
     });
   });
 
@@ -62,11 +59,14 @@ test.describe.skip('Sign in form', () => {
     { tag: ['@ui', '@regression', '@signIn'] },
     async ({ signInPage }) => {
       await test.step('The user enters an email address', async () => {
-        await signInPage.emailInput().fill(unregisteredCredentials.email);
+        await signInPage.emailInput().fill(signInData.unregisteredCredentials.email);
       });
 
       await test.step('The entered value is displayed in the Email field', async () => {
-        await expect(signInPage.emailInput()).toHaveValue(unregisteredCredentials.email);
+        await expect(
+          signInPage.emailInput(),
+          `Email input to have value ${signInData.unregisteredCredentials.email}`
+        ).toHaveValue(signInData.unregisteredCredentials.email);
       });
     }
   );
@@ -89,11 +89,11 @@ test.describe.skip('Sign in form', () => {
 
   test('Password is masked when entered', { tag: ['@ui', '@regression', '@signIn'] }, async ({ signInPage }) => {
     await test.step('The user enters a password', async () => {
-      await signInPage.passwordInput().fill(unregisteredCredentials.password);
+      await signInPage.passwordInput().fill(signInData.unregisteredCredentials.password);
     });
 
     await test.step('The password is masked', async () => {
-      await expect(signInPage.passwordInput()).toHaveAttribute('type', 'password');
+      await expect(signInPage.passwordInput(), 'Password input to have attribute').toHaveAttribute('type', 'password');
     });
   });
 
@@ -118,16 +118,19 @@ test.describe.skip('Sign in form', () => {
     { tag: ['@ui', '@regression', '@signIn'] },
     async ({ signInPage }) => {
       await test.step('The user enters incorrect credentials and taps Sign in', async () => {
-        await signInPage.login(unregisteredCredentials.email, unregisteredCredentials.password);
+        await signInPage.login(signInData.unregisteredCredentials.email, signInData.unregisteredCredentials.password);
       });
 
       await test.step('The user remains on the Sign In screen', async () => {
         await signInPage.expectUrl(signInUrl);
-        await expect(signInPage.signInHeading()).toBeVisible();
+        await expect(signInPage.signInHeading(), 'Sign in heading to be visible').toBeVisible();
       });
 
-      await test.step(`"${messages.invalidCredentials}" is displayed`, async () => {
-        await expect(signInPage.errorMessage()).toContainText(messages.invalidCredentials);
+      await test.step(`"${errorMessages.signIn.invalidCredentials}" is displayed`, async () => {
+        await expect(
+          signInPage.errorMessage(),
+          `Error message to contain text ${errorMessages.signIn.invalidCredentials}`
+        ).toContainText(errorMessages.signIn.invalidCredentials);
       });
     }
   );

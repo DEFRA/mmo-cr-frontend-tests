@@ -48,13 +48,13 @@ export class AddGearPage extends BasePage {
     await this.page.waitForLoadState('load');
     await this.gearInput().fill(searchTerm);
     const options = this.gearResultsList().getByRole('option');
-    await expect(options.first()).toBeVisible({ timeout: 10_000 });
+    await expect(options.first(), 'First to be visible').toBeVisible({ timeout: 10_000 });
     return (await options.allTextContents()).map((name) => name.trim());
   }
 
   async searchAndSelectGear(gearName: string): Promise<void> {
     await this.searchGearOptions(gearName.slice(0, 2));
     await this.gearOption(gearName).click();
-    await expect(this.gearInput()).toHaveValue(gearName);
+    await expect(this.gearInput(), `Gear input to have value ${gearName}`).toHaveValue(gearName);
   }
 }

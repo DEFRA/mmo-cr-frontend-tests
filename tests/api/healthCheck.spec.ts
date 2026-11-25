@@ -19,7 +19,7 @@ test.describe('API health check', () => {
           console.error(`Health check failed with status ${response.status()}: ${await response.text()}`);
         }
 
-        expect(response.ok()).toBeTruthy();
+        expect(response.ok(), 'Ok to be truthy').toBeTruthy();
       });
     }
   );

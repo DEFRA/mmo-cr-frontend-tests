@@ -6,26 +6,17 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { type Favourites, type GearCatch, type GearData, type SpeciesCatch } from '../helpers/catchRecordFlow';
+import { type Favourites, type GearCatch } from '../helpers/catchRecordFlow';
+import { vessels, ports, gears, catchSpecies, areas, checkAnswers } from '../../../test-data/testData';
 
-const vesselName = 'ACHILLES';
-const plymouth = 'Plymouth';
-const areaCode = '46D86';
-const pots: GearData = { name: 'Pots' };
-const trollingLines: GearData = { name: 'Trolling lines' };
-const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
-const mackerel: SpeciesCatch = { name: 'Atlantic mackerel (MAC)', code: 'MAC', weight: '50' };
 const multiGearCatches: GearCatch[] = [
-  { gear: pots, areaCode, species: [cod] },
-  { gear: trollingLines, areaCode, species: [mackerel] }
+  { gear: gears.pots, areaCode: areas.validCode, species: [catchSpecies.cod] },
+  { gear: gears.trollingLines, areaCode: areas.validCode, species: [catchSpecies.mackerel] }
 ];
-const gearTypeKey = 'Gear type';
-const speciesCaughtKey = 'Species caught';
-const weightRetainedKey = 'Weight above minimum size retained';
 const testFavourites: Favourites = {
-  ports: [plymouth],
-  gears: [pots.name, trollingLines.name],
-  species: [cod.name, mackerel.name]
+  ports: [ports.first],
+  gears: [gears.pots.name, gears.trollingLines.name],
+  species: [catchSpecies.cod.name, catchSpecies.mackerel.name]
 };
 
 test.describe('Fishing Gear', () => {
@@ -39,9 +30,9 @@ test.describe('Fishing Gear', () => {
     },
     async ({ createdRecords, catchRecordFlow, checkAnswersPage }) => {
       await test.step('I am creating a catch record', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.testVessel));
         await catchRecordFlow.enterSameDayTrip();
-        await catchRecordFlow.selectPorts(plymouth, plymouth);
+        await catchRecordFlow.selectPorts(ports.first, ports.first);
       });
 
       await test.step('I select more than one fishing gear', async () => {
@@ -55,18 +46,25 @@ test.describe('Fishing Gear', () => {
       await test.step('Each gear should be recorded separately', async () => {
         await checkAnswersPage.goto('/check-answers');
         for (const { gear } of multiGearCatches) {
-          await expect(checkAnswersPage.gearSection(gear.name)).toBeVisible();
-          await expect(checkAnswersPage.gearSummaryValue(gear.name, gearTypeKey)).toHaveText(gear.name);
+          await expect(checkAnswersPage.gearSection(gear.name), 'Gear section to be visible').toBeVisible();
+          await expect(
+            checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.gearType),
+            `Gear summary value to have text ${gear.name}`
+          ).toHaveText(gear.name);
         }
       });
 
       await test.step('Each catch should remain linked to the correct gear', async () => {
         for (const { gear, species } of multiGearCatches) {
           for (const caught of species) {
-            await expect(checkAnswersPage.gearSummaryValue(gear.name, speciesCaughtKey)).toContainText(caught.name);
-            await expect(checkAnswersPage.speciesSummaryValue(caught.name, gear.name, weightRetainedKey)).toHaveText(
-              `${caught.weight} kg`
-            );
+            await expect(
+              checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.speciesCaught),
+              `Gear summary value to contain text ${caught.name}`
+            ).toContainText(caught.name);
+            await expect(
+              checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained),
+              'Species summary value to have text'
+            ).toHaveText(`${caught.weight} kg`);
           }
         }
       });

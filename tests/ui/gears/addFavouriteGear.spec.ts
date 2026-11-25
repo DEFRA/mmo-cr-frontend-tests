@@ -7,6 +7,7 @@
  * @since 2026-11-16
  */
 import { expect, test } from '../../../fixtures/commonfixture';
+import { gears, errorMessages } from '../../../test-data/testData';
 
 type FavouriteGearData = {
   name: string;
@@ -17,17 +18,8 @@ type MeasuredGearData = FavouriteGearData & {
 };
 
 // Gear names and measurements confirmed by existing gear specs; validation messages confirmed on the live app
-const pots: MeasuredGearData = { name: 'Pots', gearDimension: '45' };
-const traps: FavouriteGearData = { name: 'Traps (not specified)' };
-const seineNets = 'Seine nets (not specified)';
-const testFavouriteGears = [pots.name, traps.name, seineNets];
-const seineNetsSearchTerm = 'se';
-const isSeineNets = (name: string): boolean => name === seineNets;
-
-const invalidMeasurement = '1.5';
-const missingMeshSizeError = 'Enter the mesh size';
-const missingGearDimensionError = 'Enter the gear dimension by length or width of the gear';
-const invalidMeasurementError = 'Enter a whole number';
+const testFavouriteGears = [gears.pots.name, gears.traps.name, gears.seineNets.name];
+const isSeineNets = (name: string): boolean => name === gears.seineNets.name;
 
 test.describe('Add favourite gear', () => {
   test.beforeEach(async ({ navigationFlow, gearFlow }) => {
@@ -56,12 +48,12 @@ test.describe('Add favourite gear', () => {
 
       await test.step('I search for and select a gear type', async () => {
         await accountPage.clickAddGear();
-        await addGearPage.searchAndSelectGear(pots.name);
+        await addGearPage.searchAndSelectGear(gears.pots.name);
       });
 
       await test.step('I provide any required measurements', async () => {
         await addGearPage.clickSaveAndContinue();
-        await addGearPage.gearDimensionInput().fill(pots.gearDimension);
+        await addGearPage.gearDimensionInput().fill(gears.pots.gearDimension);
       });
 
       await test.step('I select "Save and continue"', async () => {
@@ -70,9 +62,12 @@ test.describe('Add favourite gear', () => {
 
       await test.step('The gear is saved to my favourites', async () => {
         await accountPage.expectUrl(/\/account$/);
-        await expect(accountPage.gearOnboardValue()).toContainText(pots.name);
-        await expect(accountPage.gearOnboardValue()).toContainText(
-          new RegExp(`Gear dimension by number.*: ${pots.gearDimension}`)
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value to contain text ${gears.pots.name}`
+        ).toContainText(gears.pots.name);
+        await expect(accountPage.gearOnboardValue(), 'Gear onboard value to contain text').toContainText(
+          new RegExp(`Gear dimension by number.*: ${gears.pots.gearDimension}`)
         );
       });
 
@@ -80,7 +75,7 @@ test.describe('Add favourite gear', () => {
         // Favourites are saved per vessel, so a record must be started to give gear selection its vessel
         await navigationFlow.startCatchRecord();
         await gearSelectionPage.goto('/gear-selection');
-        await expect(gearSelectionPage.gearCheckbox(pots.name)).toBeVisible();
+        await expect(gearSelectionPage.gearCheckbox(gears.pots.name), 'Gear checkbox to be visible').toBeVisible();
       });
     }
   );
@@ -91,18 +86,24 @@ test.describe('Add favourite gear', () => {
     async ({ navigationFlow, gearFlow, accountPage }) => {
       await test.step('I already have saved gear', async () => {
         await navigationFlow.openAddGear();
-        await gearFlow.savePots(pots.gearDimension);
+        await gearFlow.savePots(gears.pots.gearDimension);
       });
 
       await test.step('I add a different gear type', async () => {
         await navigationFlow.openAddGear();
-        await gearFlow.saveGearFromAddPage(traps.name);
+        await gearFlow.saveGearFromAddPage(gears.traps.name);
       });
 
       await test.step('Both gears appear in my favourites list', async () => {
         await accountPage.expectUrl(/\/account$/);
-        await expect(accountPage.gearOnboardValue()).toContainText(pots.name);
-        await expect(accountPage.gearOnboardValue()).toContainText(traps.name);
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value to contain text ${gears.pots.name}`
+        ).toContainText(gears.pots.name);
+        await expect(
+          accountPage.gearOnboardValue(),
+          `Gear onboard value to contain text ${gears.traps.name}`
+        ).toContainText(gears.traps.name);
       });
     }
   );
@@ -117,7 +118,7 @@ test.describe('Add favourite gear', () => {
         await navigationFlow.openAccount();
         gearBefore = await accountPage.getGearOnboardText();
         await accountPage.clickAddGear();
-        await gearFlow.selectGearWithMeasurements(seineNetsSearchTerm, isSeineNets);
+        await gearFlow.selectGearWithMeasurements(gears.seineNets.searchTerm, isSeineNets);
       });
 
       await test.step('I do not enter the mandatory values', async () => {
@@ -131,14 +132,22 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('The system displays a validation message', async () => {
-        await expect(addGearPage.errorSummary()).toContainText(missingMeshSizeError);
-        await expect(addGearPage.errorSummary()).toContainText(missingGearDimensionError);
+        await expect(
+          addGearPage.errorSummary(),
+          `Error summary to contain text ${errorMessages.gears.missingMeshSize}`
+        ).toContainText(errorMessages.gears.missingMeshSize);
+        await expect(
+          addGearPage.errorSummary(),
+          `Error summary to contain text ${errorMessages.gears.missingGearDimension}`
+        ).toContainText(errorMessages.gears.missingGearDimension);
       });
 
       await test.step('The gear is not saved', async () => {
         await addGearPage.expectUrl(/\/add-gear/);
         await accountPage.goto('/account');
-        await expect(accountPage.gearOnboardValue()).toHaveText(gearBefore);
+        await expect(accountPage.gearOnboardValue(), `Gear onboard value to have text ${gearBefore}`).toHaveText(
+          gearBefore
+        );
       });
     }
   );
@@ -153,22 +162,27 @@ test.describe('Add favourite gear', () => {
         await navigationFlow.openAccount();
         gearBefore = await accountPage.getGearOnboardText();
         await accountPage.clickAddGear();
-        await gearFlow.selectGearWithMeasurements(seineNetsSearchTerm, isSeineNets);
+        await gearFlow.selectGearWithMeasurements(gears.seineNets.searchTerm, isSeineNets);
       });
 
       await test.step('I enter an invalid measurement value', async () => {
-        await addGearPage.measurementInputs().first().fill(invalidMeasurement);
+        await addGearPage.measurementInputs().first().fill(gears.measurements.invalid);
         await addGearPage.clickSaveAndContinue();
       });
 
       await test.step('The system displays an appropriate validation message', async () => {
-        await expect(addGearPage.errorSummary()).toContainText(invalidMeasurementError);
+        await expect(
+          addGearPage.errorSummary(),
+          `Error summary to contain text ${errorMessages.gears.invalidMeasurement}`
+        ).toContainText(errorMessages.gears.invalidMeasurement);
       });
 
       await test.step('Prevents submission', async () => {
         await addGearPage.expectUrl(/\/add-gear/);
         await accountPage.goto('/account');
-        await expect(accountPage.gearOnboardValue()).toHaveText(gearBefore);
+        await expect(accountPage.gearOnboardValue(), `Gear onboard value to have text ${gearBefore}`).toHaveText(
+          gearBefore
+        );
       });
     }
   );
@@ -179,7 +193,7 @@ test.describe('Add favourite gear', () => {
     async ({ navigationFlow, gearFlow, gearSelectionPage }) => {
       await test.step('I previously saved a favourite gear', async () => {
         await navigationFlow.openAddGear();
-        await gearFlow.savePots(pots.gearDimension);
+        await gearFlow.savePots(gears.pots.gearDimension);
       });
 
       await test.step('I start a new catch record', async () => {
@@ -188,7 +202,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('The gear appears in my available gear list', async () => {
-        await expect(gearSelectionPage.gearCheckbox(pots.name)).toBeVisible();
+        await expect(gearSelectionPage.gearCheckbox(gears.pots.name), 'Gear checkbox to be visible').toBeVisible();
       });
     }
   );

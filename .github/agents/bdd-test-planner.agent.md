@@ -88,8 +88,8 @@ Before doing anything else, read [playwright-tests.instructions.md](../instructi
 
 ## Test data
 
-| Constant | Value | Evidence (existing spec, page object or live app) |
-| -------- | ----- | ------------------------------------------------- |
+| Test data key (`test-data/testData.ts`) | Value | New / Existing | Evidence (existing spec, page object or live app) |
+| --------------------------------------- | ----- | -------------- | ------------------------------------------------- |
 
 ## Step mapping
 

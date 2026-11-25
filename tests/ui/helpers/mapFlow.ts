@@ -7,6 +7,7 @@
 import { expect } from '@playwright/test';
 import { type MapLabel, type StatisticalAreaPage } from '../../../pages/statisticalAreaPage';
 import { type NavigationFlow } from './navigationFlow';
+import { ports, vessels } from '../../../test-data/testData';
 
 type Point = [number, number];
 type MapPolygon = { exterior: Point[]; holes: Point[][] };
@@ -29,7 +30,7 @@ export class MapFlow {
     await this.mapPage.installCanvasProbe();
   }
 
-  async openMap(portName = 'Plymouth', vesselName = 'ACHILLES'): Promise<string> {
+  async openMap(portName = ports.first, vesselName = vessels.testVessel): Promise<string> {
     await this.installCanvasProbe();
     await this.navigationFlow.openStatisticalAreaMap({
       portName,
@@ -38,8 +39,8 @@ export class MapFlow {
         requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for map UI tests'
       }
     });
-    await expect(this.mapPage.pageHeading()).toBeVisible();
-    await expect(this.mapPage.mapCanvas()).toBeVisible();
+    await expect(this.mapPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+    await expect(this.mapPage.mapCanvas(), 'Map canvas to be visible').toBeVisible();
     await expect.poll(() => this.mapPage.readMapSubrectangleCount()).toBeGreaterThanOrEqual(9);
     return portName;
   }
@@ -54,7 +55,7 @@ export class MapFlow {
 
   private async fetchMapData<T>(file: string): Promise<T> {
     const response = await this.mapPage.page.request.get(`/public/offline-map/${file}`);
-    expect(response.ok()).toBeTruthy();
+    expect(response.ok(), 'Ok to be truthy').toBeTruthy();
     return (await response.json()) as T;
   }
 

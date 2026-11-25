@@ -4,6 +4,7 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
+import { vessels } from '../../../test-data/testData';
 
 type DateParts = {
   day: string;
@@ -20,8 +21,6 @@ type TripDates = {
   start: DateParts;
   end: DateParts;
 };
-
-const vesselName = 'ACHILLES';
 
 const dateOffsets = {
   validTrip: { start: -10, end: -5 },
@@ -63,7 +62,7 @@ test.describe('Trip date validation', () => {
 
     await test.step('The user starts a new catch record', async () => {
       await recordsPage.createNewRecordButton().click();
-      await selectVesselPage.selectVessel(vesselName);
+      await selectVesselPage.selectVessel(vessels.testVessel);
       await selectVesselPage.clickSaveAndContinue();
     });
 
@@ -108,11 +107,11 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('The trip dates are accepted', async () => {
-        await expect(tripReturnDatePage.errorSummary()).toBeHidden();
+        await expect(tripReturnDatePage.errorSummary(), 'Error summary to be hidden').toBeHidden();
       });
 
       await test.step('The user is allowed to proceed', async () => {
-        await expect(tripReturnDatePage.page).not.toHaveURL(/\/trip-(departure|return)-date$/);
+        await expect(tripReturnDatePage.page, 'Page not to have url').not.toHaveURL(/\/trip-(departure|return)-date$/);
       });
     }
   );
@@ -137,8 +136,10 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('A validation message explains the 365-day limit', async () => {
-        await expect(tripDepartureDatePage.errorSummary()).toBeVisible();
-        await expect(tripDepartureDatePage.errorSummaryLink()).toContainText(/365|year/i);
+        await expect(tripDepartureDatePage.errorSummary(), 'Error summary to be visible').toBeVisible();
+        await expect(tripDepartureDatePage.errorSummaryLink(), 'Error summary link to contain text').toContainText(
+          /365|year/i
+        );
       });
     }
   );
@@ -166,8 +167,10 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('A validation message explains the 30-day limit', async () => {
-        await expect(tripReturnDatePage.errorSummary()).toBeVisible();
-        await expect(tripReturnDatePage.errorSummaryLink()).toContainText(/30 days/i);
+        await expect(tripReturnDatePage.errorSummary(), 'Error summary to be visible').toBeVisible();
+        await expect(tripReturnDatePage.errorSummaryLink(), 'Error summary link to contain text').toContainText(
+          /30 days/i
+        );
       });
     }
   );
@@ -195,8 +198,10 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('A validation message explains the end-date ordering rule', async () => {
-        await expect(tripReturnDatePage.errorSummary()).toBeVisible();
-        await expect(tripReturnDatePage.errorSummaryLink()).toContainText(/before|earlier|after/i);
+        await expect(tripReturnDatePage.errorSummary(), 'Error summary to be visible').toBeVisible();
+        await expect(tripReturnDatePage.errorSummaryLink(), 'Error summary link to contain text').toContainText(
+          /before|earlier|after/i
+        );
       });
     }
   );
@@ -221,10 +226,11 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('A validation message explains that the start date cannot be in the future', async () => {
-        await expect(tripDepartureDatePage.errorSummary()).toBeVisible();
-        await expect(tripDepartureDatePage.errorSummaryLink()).toHaveText(
-          'Date you left for your trip must be today or in the past'
-        );
+        await expect(tripDepartureDatePage.errorSummary(), 'Error summary to be visible').toBeVisible();
+        await expect(
+          tripDepartureDatePage.errorSummaryLink(),
+          'Error summary link to have text Date you left for your trip must be today or in the past'
+        ).toHaveText('Date you left for your trip must be today or in the past');
       });
     }
   );
@@ -251,8 +257,8 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('The trip dates are accepted', async () => {
-        await expect(tripReturnDatePage.errorSummary()).toBeHidden();
-        await expect(tripReturnDatePage.page).not.toHaveURL(/\/trip-(departure|return)-date$/);
+        await expect(tripReturnDatePage.errorSummary(), 'Error summary to be hidden').toBeHidden();
+        await expect(tripReturnDatePage.page, 'Page not to have url').not.toHaveURL(/\/trip-(departure|return)-date$/);
       });
     }
   );
@@ -279,8 +285,8 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('The trip dates are accepted', async () => {
-        await expect(tripReturnDatePage.errorSummary()).toBeHidden();
-        await expect(tripReturnDatePage.page).not.toHaveURL(/\/trip-(departure|return)-date$/);
+        await expect(tripReturnDatePage.errorSummary(), 'Error summary to be hidden').toBeHidden();
+        await expect(tripReturnDatePage.page, 'Page not to have url').not.toHaveURL(/\/trip-(departure|return)-date$/);
       });
     }
   );
@@ -307,8 +313,8 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('The trip dates are accepted', async () => {
-        await expect(tripReturnDatePage.errorSummary()).toBeHidden();
-        await expect(tripReturnDatePage.page).not.toHaveURL(/\/trip-(departure|return)-date$/);
+        await expect(tripReturnDatePage.errorSummary(), 'Error summary to be hidden').toBeHidden();
+        await expect(tripReturnDatePage.page, 'Page not to have url').not.toHaveURL(/\/trip-(departure|return)-date$/);
       });
     }
   );
@@ -335,10 +341,11 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('A validation message explains that the end date cannot be in the future', async () => {
-        await expect(tripReturnDatePage.errorSummary()).toBeVisible();
-        await expect(tripReturnDatePage.errorSummaryLink()).toHaveText(
-          'Date you returned from your trip must be today or in the past'
-        );
+        await expect(tripReturnDatePage.errorSummary(), 'Error summary to be visible').toBeVisible();
+        await expect(
+          tripReturnDatePage.errorSummaryLink(),
+          'Error summary link to have text Date you returned from your trip must be today or in the past'
+        ).toHaveText('Date you returned from your trip must be today or in the past');
       });
     }
   );

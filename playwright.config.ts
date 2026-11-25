@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
+import { apiAuthHeaders } from './services/apiContext';
 
 const envFile = resolve(__dirname, '.env');
 
@@ -19,7 +20,6 @@ const baseURL = environmentUrls[environmentName as keyof typeof environmentUrls]
 
 /* Falls back to the frontend baseURL when the API is served from the same host. */
 const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL || baseURL;
-const apiToken = process.env.CATCH_RECORDING_API_TOKEN;
 
 const hdViewport = { width: 1280, height: 720 };
 
@@ -28,7 +28,7 @@ const hdViewport = { width: 1280, height: 720 };
  */
 export default defineConfig({
   testDir: './tests',
-  globalSetup: './allure-setup.ts',
+  globalSetup: ['./allure-setup.ts', './reference-data-setup.ts'],
   fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
@@ -73,7 +73,7 @@ export default defineConfig({
       testDir: './tests/api',
       use: {
         baseURL: apiBaseURL,
-        extraHTTPHeaders: apiToken ? { Authorization: `Bearer ${apiToken}` } : undefined
+        extraHTTPHeaders: apiAuthHeaders()
       }
     }
   ]

@@ -18,10 +18,7 @@ import { type SpeciesSelectionPage } from '../../../pages/speciesSelectionPage';
 import { type StatisticalAreaOtherPage } from '../../../pages/statisticalAreaOtherPage';
 import { type StatisticalAreaPage } from '../../../pages/statisticalAreaPage';
 import { type TripDatePage } from '../../../pages/tripDatePage';
-
-const defaultDeparturePort = 'Plymouth';
-const defaultReturnPort = 'Hastings';
-const defaultVessel = 'ACHILLES';
+import { vessels, ports } from '../../../test-data/testData';
 
 export type SignInOptions = {
   email?: string;
@@ -61,7 +58,7 @@ export class NavigationFlow {
 
     await signInPage.goto('/sign-in');
     await signInPage.login(email, password);
-    await expect(signInPage.page).toHaveURL(/\/records$/);
+    await expect(signInPage.page, 'Page to have url').toHaveURL(/\/records$/);
   }
 
   async openAccount(): Promise<void> {
@@ -69,7 +66,7 @@ export class NavigationFlow {
 
     await accountPage.goto('/account');
     await accountPage.expectUrl(/\/account$/);
-    await expect(accountPage.pageHeading()).toBeVisible();
+    await expect(accountPage.pageHeading(), 'Page heading to be visible').toBeVisible();
   }
 
   async signInAndOpenAccount(options: SignInOptions = {}): Promise<void> {
@@ -82,7 +79,7 @@ export class NavigationFlow {
 
     await this.signIn(options);
     await recordsPage.topMenu.yourAccount().click();
-    await expect(accountPage.vesselDetailsHeading()).toBeVisible();
+    await expect(accountPage.vesselDetailsHeading(), 'Vessel details heading to be visible').toBeVisible();
   }
 
   async openAddGear(): Promise<void> {
@@ -90,21 +87,21 @@ export class NavigationFlow {
 
     await accountPage.goto('/account');
     await accountPage.clickAddGear();
-    await expect(accountPage.page).toHaveURL(/\/add-gear\?return=/);
+    await expect(accountPage.page, 'Page to have url').toHaveURL(/\/add-gear\?return=/);
   }
 
   async openSpeciesSelection(): Promise<void> {
     const { speciesSelectionPage } = this.pages;
 
     await speciesSelectionPage.goto('/species-selection');
-    await expect(speciesSelectionPage.pageHeading()).toBeVisible();
+    await expect(speciesSelectionPage.pageHeading(), 'Page heading to be visible').toBeVisible();
   }
 
   // Requires a signed-in user; reaches species selection through a new catch record
   async openSpeciesSelectionForNewRecord(
-    portName = defaultDeparturePort,
-    vesselName = defaultVessel,
-    returnPortName = defaultReturnPort
+    portName = ports.first,
+    vesselName = vessels.testVessel,
+    returnPortName = ports.third
   ): Promise<void> {
     const { statisticalAreaPage, speciesSelectionPage } = this.pages;
 
@@ -114,20 +111,20 @@ export class NavigationFlow {
     await statisticalAreaPage.goto('/statistical-area');
     await statisticalAreaPage.selectMiddleMapArea();
     await speciesSelectionPage.expectUrl(/\/species-selection$/);
-    await expect(speciesSelectionPage.pageHeading()).toBeVisible();
+    await expect(speciesSelectionPage.pageHeading(), 'Page heading to be visible').toBeVisible();
   }
 
   async openAddSpecies(): Promise<void> {
     const { speciesSelectionPage, addSpeciesPage } = this.pages;
 
     await speciesSelectionPage.clickAddSpecies();
-    await expect(addSpeciesPage.page).toHaveURL(/\/add-species\?return=\/species-selection/);
-    await expect(addSpeciesPage.speciesInput()).toBeVisible();
-    await expect(addSpeciesPage.speciesInput()).toBeEditable();
+    await expect(addSpeciesPage.page, 'Page to have url').toHaveURL(/\/add-species\?return=\/species-selection/);
+    await expect(addSpeciesPage.speciesInput(), 'Species input to be visible').toBeVisible();
+    await expect(addSpeciesPage.speciesInput(), 'Species input to be editable').toBeEditable();
   }
 
   // Creates a draft for the vessel and stops on the trip-date question
-  async openNewRecord(vesselName = defaultVessel): Promise<void> {
+  async openNewRecord(vesselName = vessels.testVessel): Promise<void> {
     const { recordsPage, selectVesselPage, tripDatePage } = this.pages;
 
     await recordsPage.goto('/records');
@@ -138,7 +135,7 @@ export class NavigationFlow {
     this.createdRecordReferences.add(await tripDatePage.getRecordReference());
   }
 
-  async startCatchRecord(vesselName = defaultVessel): Promise<void> {
+  async startCatchRecord(vesselName = vessels.testVessel): Promise<void> {
     const { tripDatePage } = this.pages;
 
     await this.openNewRecord(vesselName);
@@ -152,9 +149,9 @@ export class NavigationFlow {
   ): Promise<void> {
     const { statisticalAreaPage } = this.pages;
     const {
-      portName = defaultDeparturePort,
-      returnPortName = defaultReturnPort,
-      vesselName = defaultVessel,
+      portName = ports.first,
+      returnPortName = ports.third,
+      vesselName = vessels.testVessel,
       signInOptions
     } = options;
 
@@ -165,7 +162,7 @@ export class NavigationFlow {
     await statisticalAreaPage.expectUrl(/\/statistical-area$/);
   }
 
-  async openStatisticalAreaOther(portName = 'Hamble', vesselName = defaultVessel): Promise<void> {
+  async openStatisticalAreaOther(portName = ports.fifth, vesselName = vessels.testVessel): Promise<void> {
     const { statisticalAreaPage } = this.pages;
 
     await this.openStatisticalAreaMap({
@@ -180,7 +177,7 @@ export class NavigationFlow {
   }
 
   // Selects the departure and return ports, then lands on gear selection
-  async selectDepartureAndReturnPorts(portName: string, returnPortName = defaultReturnPort): Promise<void> {
+  async selectDepartureAndReturnPorts(portName: string, returnPortName = ports.third): Promise<void> {
     const { addPortPage, confirmSamePortPage, returnPortPage } = this.pages;
 
     await addPortPage.goto('/add-port?for=departure&entry=1');
@@ -190,7 +187,8 @@ export class NavigationFlow {
     // Depending on the account's favourite ports, the app asks to confirm the same port,
     // lists favourite return ports, or goes straight to the return-port search
     await expect(
-      confirmSamePortPage.pageHeading().or(returnPortPage.pageHeading()).or(addPortPage.returnPortHeading())
+      confirmSamePortPage.pageHeading().or(returnPortPage.pageHeading()).or(addPortPage.returnPortHeading()),
+      'Page heading to be visible'
     ).toBeVisible();
 
     if (returnPortName === portName && (await confirmSamePortPage.pageHeading().isVisible())) {

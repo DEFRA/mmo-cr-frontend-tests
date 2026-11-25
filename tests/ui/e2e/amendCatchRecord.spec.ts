@@ -6,25 +6,14 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import {
-  type Favourites,
-  type GearData,
-  type MultiDayCatchRecordData,
-  type SpeciesCatch,
-  daysAgo,
-  reviewDate
-} from '../helpers/catchRecordFlow';
+import { type Favourites, type MultiDayCatchRecordData, daysAgo, reviewDate } from '../helpers/catchRecordFlow';
+import { vessels, ports, gears, catchSpecies, checkAnswers } from '../../../test-data/testData';
 
-const vesselName = 'ACHILLES';
-const plymouth = 'Plymouth';
-const lowestoft = 'Lowestoft';
-const seineNets: GearData = { name: 'Seine nets (not specified)' };
-const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
-const returnDateKey = 'Return date';
-const changeReturnDateLink = 'Change return date';
-const areaKey = 'Statistical sub area';
-const weightRetainedKey = 'Weight above minimum size retained';
-const testFavourites: Favourites = { ports: [plymouth, lowestoft], gears: [seineNets.name], species: [cod.name] };
+const testFavourites: Favourites = {
+  ports: [ports.first, ports.second],
+  gears: [gears.seineNets.name],
+  species: [catchSpecies.cod.name]
+};
 
 test.describe('Amend Catch Record', () => {
   test.use({ testFavourites });
@@ -33,12 +22,12 @@ test.describe('Amend Catch Record', () => {
 
   test.beforeEach(() => {
     reviewRecord = {
-      vesselName,
+      vesselName: vessels.testVessel,
       tripDates: { departureDate: daysAgo(2), returnDate: daysAgo(1) },
-      departurePort: plymouth,
-      returnPort: lowestoft,
+      departurePort: ports.first,
+      returnPort: ports.second,
       // No areaCode, so the area is selected on the map rather than under "Other"
-      gearCatches: [{ gear: seineNets, species: [cod] }]
+      gearCatches: [{ gear: gears.seineNets, species: [catchSpecies.cod] }]
     };
   });
 
@@ -57,13 +46,17 @@ test.describe('Amend Catch Record', () => {
         for (const { gear } of reviewRecord.gearCatches) {
           mapAreaByGear.set(
             gear.name,
-            (await checkAnswersPage.gearSummaryValue(gear.name, areaKey).innerText()).trim()
+            (
+              await checkAnswersPage
+                .gearSummaryValue(gear.name, checkAnswers.summaryKeys.statisticalSubArea)
+                .innerText()
+            ).trim()
           );
         }
       });
 
       await test.step('I select Change for an answer', async () => {
-        await checkAnswersPage.changeLinkNamed(changeReturnDateLink).click();
+        await checkAnswersPage.changeLinkNamed(checkAnswers.changeLinks.returnDate).click();
       });
 
       await test.step('I update the information', async () => {
@@ -76,25 +69,32 @@ test.describe('Amend Catch Record', () => {
       });
 
       await test.step('The updated information should be displayed', async () => {
-        await expect(checkAnswersPage.summaryValue(returnDateKey)).toHaveText(reviewDate(amendedReturnDate));
+        await expect(
+          checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnDate),
+          'Summary value to have text'
+        ).toHaveText(reviewDate(amendedReturnDate));
       });
 
       await test.step('All unchanged information should remain the same', async () => {
         const unchangedTripInformation: [string, string][] = [
-          ['Vessel', reviewRecord.vesselName],
-          ['Departure date', reviewDate(reviewRecord.tripDates.departureDate)],
-          ['Departure port', reviewRecord.departurePort],
-          ['Return port', reviewRecord.returnPort]
+          [checkAnswers.summaryKeys.vessel, reviewRecord.vesselName],
+          [checkAnswers.summaryKeys.departureDate, reviewDate(reviewRecord.tripDates.departureDate)],
+          [checkAnswers.summaryKeys.departurePort, reviewRecord.departurePort],
+          [checkAnswers.summaryKeys.returnPort, reviewRecord.returnPort]
         ];
         for (const [key, value] of unchangedTripInformation) {
-          await expect(checkAnswersPage.summaryValue(key)).toHaveText(value);
+          await expect(checkAnswersPage.summaryValue(key), `Summary value to have text ${value}`).toHaveText(value);
         }
         for (const { gear, species } of reviewRecord.gearCatches) {
-          await expect(checkAnswersPage.gearSummaryValue(gear.name, areaKey)).toHaveText(mapAreaByGear.get(gear.name)!);
+          await expect(
+            checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.statisticalSubArea),
+            'Gear summary value to have text'
+          ).toHaveText(mapAreaByGear.get(gear.name)!);
           for (const caught of species) {
-            await expect(checkAnswersPage.speciesSummaryValue(caught.name, gear.name, weightRetainedKey)).toHaveText(
-              `${caught.weight} kg`
-            );
+            await expect(
+              checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained),
+              'Species summary value to have text'
+            ).toHaveText(`${caught.weight} kg`);
           }
         }
       });

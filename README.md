@@ -148,6 +148,20 @@ Alongside the browser journey tests, this suite supports pure API tests using Pl
 - Configure the target with `CATCH_RECORDING_API_BASE_URL` (falls back to the frontend URL selected by `CATCH_RECORDING_ENV`
   if the API is served from the same host) and, if required, `CATCH_RECORDING_API_TOKEN` to send a bearer token on every
   request.
+- `referenceDataApi` (`services/referenceData.api.ts`) calls the reference data service
+  (`/reference-data-service/api/v1/reference-data/vessels`, `/ports`, `/gears` and `/species`, e.g. on
+  `https://mmo-cr-catch-recording-service.api.test.cdp-int.defra.cloud`). It uses its own request context built from
+  `CATCH_RECORDING_API_BASE_URL` and `CATCH_RECORDING_API_TOKEN`, so it can be used from UI specs as well as API specs.
+- Before the tests run, [reference-data-setup.ts](reference-data-setup.ts) calls the reference data service and picks:
+  - a random active vessel (the only one if just one is returned) as `vessels.testVessel`;
+  - five distinct random active GB ports as `ports.first` … `ports.fifth`. Only ports the add-port search can list are
+    chosen: the search types the first 2 characters (`searchTermFor`) and shows at most 10 matches;
+  - a random active gear as `gears.searchable`, used only by the gear catalogue search tests (tests that depend on a
+    gear's measurements keep the named gears);
+  - two random active species whose 2-character prefixes become `catchSpecies.searchTerms.first` / `.second`.
+
+  All are exposed in [test-data/testData.ts](test-data/testData.ts). If the API cannot be reached, the static fallbacks
+  there are used (`ACHILLES`; Plymouth, Falmouth, Fleetwood, Felixstowe, Pwllheli; Traps (not specified); `at` / `ha`).
 
 Run only the API tests with:
 

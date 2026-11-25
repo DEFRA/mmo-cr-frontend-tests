@@ -20,10 +20,13 @@
   },
   "include": [
     "allure-setup.ts",
+    "reference-data-setup.ts",
     "playwright.config.ts",
     "fixtures/**/*.ts",
     "pages/**/*.ts",
     "services/**/*.ts",
+    "utils/**/*.ts",
+    "test-data/**/*.ts",
     "tests/**/*.ts"
   ]
 }

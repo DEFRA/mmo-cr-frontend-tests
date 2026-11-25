@@ -8,6 +8,7 @@ import { expect } from '@playwright/test';
 import { type AccountPage } from '../../../pages/accountPage';
 import { type AddGearPage } from '../../../pages/addGearPage';
 import { type RemoveGearPage } from '../../../pages/removeGearPage';
+import { gears } from '../../../test-data/testData';
 
 export class GearFlow {
   constructor(
@@ -35,7 +36,7 @@ export class GearFlow {
 
     const gearName = await this.selectGear(searchTerm, matches);
     await addGearPage.clickSaveAndContinue();
-    await expect(addGearPage.measurementsHeading()).toBeVisible();
+    await expect(addGearPage.measurementsHeading(), 'Measurements heading to be visible').toBeVisible();
     return gearName;
   }
 
@@ -54,9 +55,9 @@ export class GearFlow {
   async savePots(gearDimension: string): Promise<void> {
     const { addGearPage } = this.pages;
 
-    await addGearPage.searchAndSelectGear('Pots');
+    await addGearPage.searchAndSelectGear(gears.pots.name);
     await addGearPage.clickSaveAndContinue();
-    await expect(addGearPage.measurementsHeading('pots')).toBeVisible();
+    await expect(addGearPage.measurementsHeading('pots'), 'Measurements heading to be visible').toBeVisible();
     await addGearPage.gearDimensionInput().fill(gearDimension);
     await addGearPage.clickSaveAndContinue();
     await addGearPage.expectUrl(/\/account$/);
@@ -67,7 +68,7 @@ export class GearFlow {
 
     await addGearPage.searchAndSelectGear(gearName);
     await addGearPage.clickSaveAndContinue();
-    await expect(addGearPage.pageHeading()).toBeHidden();
+    await expect(addGearPage.pageHeading(), 'Page heading to be hidden').toBeHidden();
 
     if (await addGearPage.measurementsHeading().isVisible()) {
       for (const input of await addGearPage.measurementInputs().all()) {

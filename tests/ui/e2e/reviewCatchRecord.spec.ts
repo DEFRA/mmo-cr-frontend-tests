@@ -6,30 +6,13 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import {
-  type Favourites,
-  type GearData,
-  type MultiDayCatchRecordData,
-  type SpeciesCatch,
-  daysAgo,
-  reviewDate
-} from '../helpers/catchRecordFlow';
+import { type Favourites, type MultiDayCatchRecordData, daysAgo, reviewDate } from '../helpers/catchRecordFlow';
+import { vessels, ports, gears, catchSpecies, areas, checkAnswers } from '../../../test-data/testData';
 
-const vesselName = 'ACHILLES';
-const plymouth = 'Plymouth';
-const lowestoft = 'Lowestoft';
-const areaCode = '46D86';
-const pots: GearData = { name: 'Pots' };
-const trollingLines: GearData = { name: 'Trolling lines' };
-const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
-const mackerel: SpeciesCatch = { name: 'Atlantic mackerel (MAC)', code: 'MAC', weight: '50' };
-const areaKey = 'Area majority caught';
-const weightRetainedKey = 'Weight above minimum size retained';
-const changeLinks = ['Change departure date', 'Change return date', 'Change departure port', 'Change return port'];
 const testFavourites: Favourites = {
-  ports: [plymouth, lowestoft],
-  gears: [pots.name, trollingLines.name],
-  species: [cod.name, mackerel.name]
+  ports: [ports.first, ports.second],
+  gears: [gears.pots.name, gears.trollingLines.name],
+  species: [catchSpecies.cod.name, catchSpecies.mackerel.name]
 };
 
 test.describe('Review Catch Record', () => {
@@ -39,13 +22,13 @@ test.describe('Review Catch Record', () => {
 
   test.beforeEach(() => {
     reviewRecord = {
-      vesselName,
+      vesselName: vessels.testVessel,
       tripDates: { departureDate: daysAgo(2), returnDate: daysAgo(1) },
-      departurePort: plymouth,
-      returnPort: lowestoft,
+      departurePort: ports.first,
+      returnPort: ports.second,
       gearCatches: [
-        { gear: pots, areaCode, species: [cod] },
-        { gear: trollingLines, areaCode, species: [mackerel] }
+        { gear: gears.pots, areaCode: areas.validCode, species: [catchSpecies.cod] },
+        { gear: gears.trollingLines, areaCode: areas.validCode, species: [catchSpecies.mackerel] }
       ]
     };
   });
@@ -67,38 +50,42 @@ test.describe('Review Catch Record', () => {
 
       await test.step('I should see the trip information', async () => {
         const tripInformation: [string, string][] = [
-          ['Vessel', reviewRecord.vesselName],
-          ['Departure date', reviewDate(reviewRecord.tripDates.departureDate)],
-          ['Return date', reviewDate(reviewRecord.tripDates.returnDate)],
-          ['Departure port', reviewRecord.departurePort],
-          ['Return port', reviewRecord.returnPort]
+          [checkAnswers.summaryKeys.vessel, reviewRecord.vesselName],
+          [checkAnswers.summaryKeys.departureDate, reviewDate(reviewRecord.tripDates.departureDate)],
+          [checkAnswers.summaryKeys.returnDate, reviewDate(reviewRecord.tripDates.returnDate)],
+          [checkAnswers.summaryKeys.departurePort, reviewRecord.departurePort],
+          [checkAnswers.summaryKeys.returnPort, reviewRecord.returnPort]
         ];
         for (const [key, value] of tripInformation) {
-          await expect(checkAnswersPage.summaryValue(key)).toHaveText(value);
+          await expect(checkAnswersPage.summaryValue(key), `Summary value to have text ${value}`).toHaveText(value);
         }
       });
 
       await test.step('I should see gear and catch areas', async () => {
         for (const { gear } of reviewRecord.gearCatches) {
-          await expect(checkAnswersPage.gearSection(gear.name)).toBeVisible();
-          await expect(checkAnswersPage.gearSummaryValue(gear.name, areaKey)).toHaveText(areaCode);
+          await expect(checkAnswersPage.gearSection(gear.name), 'Gear section to be visible').toBeVisible();
+          await expect(
+            checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.areaMajorityCaught),
+            `Gear summary value to have text ${areas.validCode}`
+          ).toHaveText(areas.validCode);
         }
       });
 
       await test.step('I should see species and weights', async () => {
         for (const { gear, species } of reviewRecord.gearCatches) {
           for (const caught of species) {
-            await expect(checkAnswersPage.speciesSummaryValue(caught.name, gear.name, weightRetainedKey)).toHaveText(
-              `${caught.weight} kg`
-            );
+            await expect(
+              checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained),
+              'Species summary value to have text'
+            ).toHaveText(`${caught.weight} kg`);
           }
         }
       });
 
       // UNVERIFIED (OQ-6): "identify anything requiring correction" is assumed to mean every answer has a Change link
       await test.step('I should be able to identify anything requiring correction', async () => {
-        for (const changeLink of changeLinks) {
-          await expect(checkAnswersPage.changeLinkNamed(changeLink)).toBeVisible();
+        for (const changeLink of Object.values(checkAnswers.changeLinks)) {
+          await expect(checkAnswersPage.changeLinkNamed(changeLink), 'Change link named to be visible').toBeVisible();
         }
       });
     }

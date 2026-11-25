@@ -5,6 +5,8 @@ import { RecordsPage } from '../pages/recordsPage';
 import { DraftRecordPage } from '../pages/draftRecordPage';
 import { SelectVesselPage } from '../pages/selectVesselPage';
 import { HealthApi } from '../services/health.api';
+import { ReferenceDataApi } from '../services/referenceData.api';
+import { createApiContext } from '../services/apiContext';
 import { TripDatePage } from '../pages/tripDatePage';
 import { TripDepartureDatePage } from '../pages/tripDepartureDatePage';
 import { TripReturnDatePage } from '../pages/tripReturnDatePage';
@@ -25,6 +27,7 @@ import { SubmittedRecordPage } from '../pages/submittedRecordPage';
 import { AccountPage } from '../pages/accountPage';
 import { RemoveGearPage } from '../pages/removeGearPage';
 import { RemovePortPage } from '../pages/removePortPage';
+import { withSteps } from '../utils/withSteps';
 import { MapFlow } from '../tests/ui/helpers/mapFlow';
 import { NavigationFlow } from '../tests/ui/helpers/navigationFlow';
 import { GearFlow } from '../tests/ui/helpers/gearFlow';
@@ -42,7 +45,9 @@ const pageObject =
 type CatchRecordSessionFixtures = {
   // Favourites the account needs for the test; set per describe block with test.use({ testFavourites })
   testFavourites: Favourites;
-  // Signs in and saves testFavourites; afterwards deletes drafts and removes the favourites it added
+  // Favourites that must not be saved during the test; removed at sign-in and restored afterwards
+  absentFavourites: Favourites;
+  // Signs in and prepares favourites; afterwards deletes the test's drafts and restores the favourites it changed
   createdRecords: string[];
 };
 
@@ -53,6 +58,7 @@ type CommonFixtures = CatchRecordSessionFixtures & {
   draftRecordPage: DraftRecordPage;
   selectVesselPage: SelectVesselPage;
   healthApi: HealthApi;
+  referenceDataApi: ReferenceDataApi;
   tripDatePage: TripDatePage;
   tripDepartureDatePage: TripDepartureDatePage;
   tripReturnDatePage: TripReturnDatePage;
@@ -84,19 +90,23 @@ type CommonFixtures = CatchRecordSessionFixtures & {
 
 export const test = base.extend<CommonFixtures>({
   testFavourites: [noFavourites, { option: true }],
-  createdRecords: async ({ navigationFlow, catchRecordFlow, testFavourites }, use) => {
+  absentFavourites: [noFavourites, { option: true }],
+  createdRecords: async ({ navigationFlow, catchRecordFlow, testFavourites, absentFavourites }, use) => {
     const createdRecords: string[] = [];
     let addedFavourites: Favourites = noFavourites;
+    let removedFavourites: Favourites = noFavourites;
 
     await base.step('Setup: I am signed in with the test favourites saved', async () => {
       await navigationFlow.signIn();
       addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
+      removedFavourites = await catchRecordFlow.removeSavedFavourites(absentFavourites);
     });
 
     await use(createdRecords);
 
     await catchRecordFlow.deleteCreatedDrafts();
     await catchRecordFlow.restoreFavourites(addedFavourites);
+    await catchRecordFlow.restoreAbsentFavourites(absentFavourites, removedFavourites);
   },
   navigationFlow: async (
     {
@@ -117,42 +127,46 @@ export const test = base.extend<CommonFixtures>({
     use
   ) => {
     await use(
-      new NavigationFlow({
-        signInPage,
-        accountPage,
-        recordsPage,
-        speciesSelectionPage,
-        addSpeciesPage,
-        statisticalAreaOtherPage,
-        addPortPage,
-        confirmSamePortPage,
-        selectVesselPage,
-        tripDatePage,
-        departurePortPage,
-        returnPortPage,
-        statisticalAreaPage
-      })
+      withSteps(
+        new NavigationFlow({
+          signInPage,
+          accountPage,
+          recordsPage,
+          speciesSelectionPage,
+          addSpeciesPage,
+          statisticalAreaOtherPage,
+          addPortPage,
+          confirmSamePortPage,
+          selectVesselPage,
+          tripDatePage,
+          departurePortPage,
+          returnPortPage,
+          statisticalAreaPage
+        })
+      )
     );
   },
   gearFlow: async ({ addGearPage, accountPage, removeGearPage }, use) => {
-    await use(new GearFlow({ addGearPage, accountPage, removeGearPage }));
+    await use(withSteps(new GearFlow({ addGearPage, accountPage, removeGearPage })));
   },
   speciesFlow: async ({ addSpeciesPage }, use) => {
-    await use(new SpeciesFlow({ addSpeciesPage }));
+    await use(withSteps(new SpeciesFlow({ addSpeciesPage })));
   },
   favouritesFlow: async (
     { accountPage, addSpeciesPage, removeSpeciesPage, removeGearPage, addPortPage, removePortPage, gearFlow },
     use
   ) => {
     await use(
-      new FavouritesFlow(
-        { accountPage, addSpeciesPage, removeSpeciesPage, removeGearPage, addPortPage, removePortPage },
-        gearFlow
+      withSteps(
+        new FavouritesFlow(
+          { accountPage, addSpeciesPage, removeSpeciesPage, removeGearPage, addPortPage, removePortPage },
+          gearFlow
+        )
       )
     );
   },
   mapFlow: async ({ statisticalAreaPage, navigationFlow }, use) => {
-    await use(new MapFlow(statisticalAreaPage, navigationFlow));
+    await use(withSteps(new MapFlow(statisticalAreaPage, navigationFlow)));
   },
   catchRecordFlow: async (
     {
@@ -177,26 +191,28 @@ export const test = base.extend<CommonFixtures>({
     use
   ) => {
     await use(
-      new CatchRecordFlow(
-        {
-          accountPage,
-          recordsPage,
-          tripDatePage,
-          tripDepartureDatePage,
-          tripReturnDatePage,
-          departurePortPage,
-          returnPortPage,
-          gearSelectionPage,
-          statisticalAreaPage,
-          statisticalAreaOtherPage,
-          speciesSelectionPage,
-          catchNotLandedPage,
-          speciesNotLandedPage,
-          checkAnswersPage,
-          draftRecordPage
-        },
-        navigationFlow,
-        favouritesFlow
+      withSteps(
+        new CatchRecordFlow(
+          {
+            accountPage,
+            recordsPage,
+            tripDatePage,
+            tripDepartureDatePage,
+            tripReturnDatePage,
+            departurePortPage,
+            returnPortPage,
+            gearSelectionPage,
+            statisticalAreaPage,
+            statisticalAreaOtherPage,
+            speciesSelectionPage,
+            catchNotLandedPage,
+            speciesNotLandedPage,
+            checkAnswersPage,
+            draftRecordPage
+          },
+          navigationFlow,
+          favouritesFlow
+        )
       )
     );
   },
@@ -228,6 +244,19 @@ export const test = base.extend<CommonFixtures>({
   removePortPage: pageObject(RemovePortPage),
   healthApi: async ({ request }: { request: APIRequestContext }, use) => {
     await use(new HealthApi(request));
+  },
+  // Own request context so UI projects (whose baseURL is the frontend) can also reach the API host
+  referenceDataApi: async ({ playwright }, use) => {
+    const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL;
+
+    if (!apiBaseURL) {
+      throw new Error('CATCH_RECORDING_API_BASE_URL must be set to use referenceDataApi');
+    }
+
+    const apiRequest = await createApiContext(playwright.request, apiBaseURL);
+
+    await use(new ReferenceDataApi(apiRequest));
+    await apiRequest.dispose();
   }
 });
 

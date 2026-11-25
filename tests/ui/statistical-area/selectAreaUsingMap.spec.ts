@@ -9,11 +9,11 @@
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type MapLabel } from '../../../pages/statisticalAreaPage';
 import { type LandFeature, MapFlow, type SubrectangleReference } from '../helpers/mapFlow';
+import { ports, areas, checkAnswers, errorMessages } from '../../../test-data/testData';
 
 type ViewportSize = { width: number; height: number };
 type PanScenario = { scenario: string; direction: string; dragStep: string; offsetX: number; offsetY: number };
 
-const departurePort = 'Hastings';
 const mapSignInOptions = {
   requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for map UI tests'
 };
@@ -26,10 +26,6 @@ const zoomInClicks = 8;
 const panZoomInClicks = 2;
 const largerScreen: ViewportSize = { width: 1600, height: 1000 };
 const narrowScreen: ViewportSize = { width: 700, height: 900 };
-const mapErrorText = 'The map could not be loaded';
-const zoomInName = 'Zoom in';
-const zoomOutName = 'Zoom out';
-const statisticalSubAreaKey = 'Statistical sub area';
 
 const panScenarios: PanScenario[] = [
   {
@@ -80,7 +76,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('The user has declared a departure port for the trip', async () => {
         await navigationFlow.signIn(mapSignInOptions);
         await navigationFlow.startCatchRecord();
-        await navigationFlow.selectDepartureAndReturnPorts(departurePort);
+        await navigationFlow.selectDepartureAndReturnPorts(ports.third);
         await mapFlow.installCanvasProbe();
       });
 
@@ -89,9 +85,12 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('The map is positioned around the declared departure port', async () => {
-        await expect(statisticalAreaPage.pageHeading()).toBeVisible();
-        await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
-        await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-departure-port', departurePort);
+        await expect(statisticalAreaPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+        await expect(statisticalAreaPage.mapCanvas(), 'Map canvas to be visible').toBeVisible();
+        await expect(statisticalAreaPage.mapRegion(), 'Map region to have attribute').toHaveAttribute(
+          'data-departure-port',
+          ports.third
+        );
       });
 
       await test.step('At least the 9 nearest relevant sub-rectangles are displayed', async () => {
@@ -116,10 +115,10 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('The system may display the additional relevant sub-rectangles', async () => {
-        await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
+        await expect(statisticalAreaPage.mapCanvas(), 'Map canvas to be visible').toBeVisible();
         const resizedBounds = await statisticalAreaPage.mapCanvas().boundingBox();
-        expect(resizedBounds?.width).toBeGreaterThan(0);
-        expect(resizedBounds?.height).toBeGreaterThan(0);
+        expect(resizedBounds?.width, 'Width to be greater than').toBeGreaterThan(0);
+        expect(resizedBounds?.height, 'Height to be greater than').toBeGreaterThan(0);
         await expect
           .poll(() => statisticalAreaPage.readMapSubrectangleCount())
           .toBeGreaterThanOrEqual(minimumSubrectangles);
@@ -153,8 +152,10 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('Additional coastline is shown', async () => {
-        await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
-        expect(await statisticalAreaPage.canvasFingerprint()).not.toBe(initialImage);
+        await expect(statisticalAreaPage.mapCanvas(), 'Map canvas to be visible').toBeVisible();
+        expect(await statisticalAreaPage.canvasFingerprint(), `Canvas fingerprint not to be ${initialImage}`).not.toBe(
+          initialImage
+        );
       });
 
       await test.step('Additional relevant sub-rectangles within the visible area are displayed', async () => {
@@ -219,8 +220,11 @@ test.describe('ICES statistical sub-rectangle map', () => {
         });
 
         await test.step('The coastline and sub-rectangles visible within the new map area are displayed', async () => {
-          await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
-          expect(await statisticalAreaPage.readMapSubrectangleCount()).toBeGreaterThan(0);
+          await expect(statisticalAreaPage.mapCanvas(), 'Map canvas to be visible').toBeVisible();
+          expect(
+            await statisticalAreaPage.readMapSubrectangleCount(),
+            'Read map subrectangle count to be greater than'
+          ).toBeGreaterThan(0);
         });
       }
     );
@@ -254,7 +258,10 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('The sub-rectangle is displayed', async () => {
         expect(partial, 'The initial map should include a sub-rectangle overlapping both land and sea').toBeDefined();
         const { subCode } = requireDefined(partial, 'No partially sea-based sub-rectangle is visible');
-        expect(visibleLabels.find(({ code }) => code === subCode)).toBeDefined();
+        expect(
+          visibleLabels.find(({ code }) => code === subCode),
+          'Find to be defined'
+        ).toBeDefined();
       });
 
       await test.step('The user can select it', async () => {
@@ -266,7 +273,10 @@ test.describe('ICES statistical sub-rectangle map', () => {
         await statisticalAreaPage.clickMapLabel(label);
         await statisticalAreaPage.expectUrl(speciesSelectionUrl);
         await statisticalAreaPage.goto(mapPath);
-        await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', subCode);
+        await expect(statisticalAreaPage.mapRegion(), 'Map region to have attribute').toHaveAttribute(
+          'data-selected-area',
+          subCode
+        );
       });
     }
   );
@@ -299,7 +309,10 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('The sub-rectangle is displayed', async () => {
         expect(whollySea, 'The map should display a wholly sea-based sub-rectangle').toBeDefined();
         const { subCode } = requireDefined(whollySea, 'No wholly sea-based sub-rectangle is visible');
-        expect(visibleLabels.find(({ code }) => code === subCode)).toBeDefined();
+        expect(
+          visibleLabels.find(({ code }) => code === subCode),
+          'Find to be defined'
+        ).toBeDefined();
       });
 
       await test.step('The user can select it', async () => {
@@ -311,7 +324,10 @@ test.describe('ICES statistical sub-rectangle map', () => {
         await statisticalAreaPage.clickMapLabel(label);
         await statisticalAreaPage.expectUrl(speciesSelectionUrl);
         await statisticalAreaPage.goto(mapPath);
-        await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', subCode);
+        await expect(statisticalAreaPage.mapRegion(), 'Map region to have attribute').toHaveAttribute(
+          'data-selected-area',
+          subCode
+        );
       });
     }
   );
@@ -336,7 +352,10 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('The land-only sub-rectangle is not shown', async () => {
-        expect(await statisticalAreaPage.readMapSubrectangleCount()).toBeGreaterThanOrEqual(minimumSubrectangles);
+        expect(
+          await statisticalAreaPage.readMapSubrectangleCount(),
+          `Read map subrectangle count to be greater than or equal ${minimumSubrectangles}`
+        ).toBeGreaterThanOrEqual(minimumSubrectangles);
         for (const code of visibleCodes) {
           expect(seaCodes.has(code), `${code} should overlap the sea`).toBeTruthy();
         }
@@ -377,7 +396,10 @@ test.describe('ICES statistical sub-rectangle map', () => {
 
       await test.step('Its identifier is captured for the fishing activity', async () => {
         const { code } = requireDefined(label, 'No sub-rectangle was chosen');
-        await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', code);
+        await expect(statisticalAreaPage.mapRegion(), 'Map region to have attribute').toHaveAttribute(
+          'data-selected-area',
+          code
+        );
       });
     }
   );
@@ -405,10 +427,16 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('The selected sub-rectangle is stored against the correct fishing activity or catch record', async () => {
         const { code } = requireDefined(label, 'No sub-rectangle was chosen');
         await statisticalAreaPage.goto(mapPath);
-        await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', code);
+        await expect(statisticalAreaPage.mapRegion(), 'Map region to have attribute').toHaveAttribute(
+          'data-selected-area',
+          code
+        );
 
         await checkAnswersPage.goto(checkAnswersPath);
-        expect(await checkAnswersPage.getSummaryValueText(statisticalSubAreaKey)).toContain(code);
+        expect(
+          await checkAnswersPage.getSummaryValueText(checkAnswers.summaryKeys.statisticalSubArea),
+          `Get summary value text to contain ${code}`
+        ).toContain(code);
       });
     }
   );
@@ -426,12 +454,12 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('The system does not calculate or display the nearest 9 sub-rectangles', async () => {
-        await expect(statisticalAreaPage.mapRegion()).toHaveCount(0);
+        await expect(statisticalAreaPage.mapRegion(), 'Map region to have count').toHaveCount(0);
       });
 
       await test.step('The user is directed to provide or select a departure port before continuing', async () => {
         await addPortPage.expectUrl(departurePortUrl);
-        await expect(addPortPage.pageHeading()).toBeVisible();
+        await expect(addPortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       });
     }
   );
@@ -443,7 +471,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('The user opens the web map', async () => {
         await navigationFlow.signIn(mapSignInOptions);
         await navigationFlow.startCatchRecord();
-        await navigationFlow.selectDepartureAndReturnPorts(departurePort);
+        await navigationFlow.selectDepartureAndReturnPorts(ports.third);
       });
 
       await test.step('The required map or reference data cannot be loaded', async () => {
@@ -453,19 +481,22 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('The system displays a clear error message', async () => {
-        await expect(statisticalAreaPage.mapError()).toBeVisible();
-        await expect(statisticalAreaPage.mapError()).toContainText(mapErrorText);
+        await expect(statisticalAreaPage.mapError(), 'Map error to be visible').toBeVisible();
+        await expect(
+          statisticalAreaPage.mapError(),
+          `Map error to contain text ${errorMessages.map.loadFailed}`
+        ).toContainText(errorMessages.map.loadFailed);
       });
 
       await test.step('The user is not allowed to submit an unverified map selection', async () => {
-        await expect(statisticalAreaPage.selectedAreaInput()).toBeDisabled();
-        await expect(statisticalAreaPage.mapCanvas()).toHaveAttribute('hidden', '');
+        await expect(statisticalAreaPage.selectedAreaInput(), 'Selected area input to be disabled').toBeDisabled();
+        await expect(statisticalAreaPage.mapCanvas(), 'Map canvas to have attribute').toHaveAttribute('hidden', '');
       });
 
       await test.step('The user is given an option to retry', async () => {
         await statisticalAreaPage.retryButton().click();
-        await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
-        await expect(statisticalAreaPage.mapError()).toBeHidden();
+        await expect(statisticalAreaPage.mapCanvas(), 'Map canvas to be visible').toBeVisible();
+        await expect(statisticalAreaPage.mapError(), 'Map error to be hidden').toBeHidden();
         await expect
           .poll(() => statisticalAreaPage.readMapSubrectangleCount())
           .toBeGreaterThanOrEqual(minimumSubrectangles);
@@ -501,7 +532,10 @@ test.describe('ICES statistical sub-rectangle map', () => {
 
       await test.step('The prior selection is shown on the map', async () => {
         const { code } = requireDefined(first, 'No first sub-rectangle was chosen');
-        await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', code);
+        await expect(statisticalAreaPage.mapRegion(), 'Map region to have attribute').toHaveAttribute(
+          'data-selected-area',
+          code
+        );
         await expect
           .poll(() => statisticalAreaPage.readMapSubrectangleCount())
           .toBeGreaterThanOrEqual(minimumSubrectangles);
@@ -521,8 +555,11 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('Only the new sub-rectangle is stored as the selection', async () => {
         const { code } = requireDefined(second, 'No second sub-rectangle was chosen');
         await statisticalAreaPage.goto(mapPath);
-        await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-selected-area', code);
-        await expect(statisticalAreaPage.selectedAreaInput()).toHaveCount(1);
+        await expect(statisticalAreaPage.mapRegion(), 'Map region to have attribute').toHaveAttribute(
+          'data-selected-area',
+          code
+        );
+        await expect(statisticalAreaPage.selectedAreaInput(), 'Selected area input to have count').toHaveCount(1);
       });
 
       await test.step('The new selection is highlighted on the map', async () => {
@@ -546,15 +583,15 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('The map is displayed within the narrow viewport', async () => {
-        await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
+        await expect(statisticalAreaPage.mapCanvas(), 'Map canvas to be visible').toBeVisible();
         const bounds = await statisticalAreaPage.mapCanvas().boundingBox();
-        expect(bounds?.width).toBeGreaterThan(0);
-        expect(bounds?.height).toBeGreaterThan(0);
+        expect(bounds?.width, 'Width to be greater than').toBeGreaterThan(0);
+        expect(bounds?.height, 'Height to be greater than').toBeGreaterThan(0);
       });
 
       await test.step('The zoom controls remain visible', async () => {
-        await expect(statisticalAreaPage.zoomInButton()).toBeVisible();
-        await expect(statisticalAreaPage.zoomOutButton()).toBeVisible();
+        await expect(statisticalAreaPage.zoomInButton(), 'Zoom in button to be visible').toBeVisible();
+        await expect(statisticalAreaPage.zoomOutButton(), 'Zoom out button to be visible').toBeVisible();
       });
 
       await test.step('At least 9 sub-rectangles are displayed', async () => {
@@ -582,15 +619,18 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('The map is reinitialised', async () => {
-        await expect(statisticalAreaPage.pageHeading()).toBeVisible();
-        await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
+        await expect(statisticalAreaPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+        await expect(statisticalAreaPage.mapCanvas(), 'Map canvas to be visible').toBeVisible();
         await expect
           .poll(() => statisticalAreaPage.readMapSubrectangleCount())
           .toBeGreaterThanOrEqual(minimumSubrectangles);
       });
 
       await test.step('The declared departure port is retained', async () => {
-        await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-departure-port', portName);
+        await expect(statisticalAreaPage.mapRegion(), 'Map region to have attribute').toHaveAttribute(
+          'data-departure-port',
+          portName
+        );
       });
     }
   );
@@ -609,8 +649,14 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('The zoom controls are labelled "Zoom in" and "Zoom out"', async () => {
-        await expect(statisticalAreaPage.zoomInButton()).toHaveAccessibleName(zoomInName);
-        await expect(statisticalAreaPage.zoomOutButton()).toHaveAccessibleName(zoomOutName);
+        await expect(
+          statisticalAreaPage.zoomInButton(),
+          `Zoom in button to have accessible name ${areas.mapControls.zoomIn}`
+        ).toHaveAccessibleName(areas.mapControls.zoomIn);
+        await expect(
+          statisticalAreaPage.zoomOutButton(),
+          `Zoom out button to have accessible name ${areas.mapControls.zoomOut}`
+        ).toHaveAccessibleName(areas.mapControls.zoomOut);
       });
 
       await test.step('The user activates "Zoom in" using the keyboard', async () => {

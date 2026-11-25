@@ -7,11 +7,9 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites } from '../helpers/catchRecordFlow';
+import { vessels, ports, errorMessages } from '../../../test-data/testData';
 
-const vesselName = 'ACHILLES';
-const plymouth = 'Plymouth';
-const testFavourites: Favourites = { ports: [plymouth], gears: [], species: [] };
-const tripDateRequiredError = 'Select yes if your trip started and finished today';
+const testFavourites: Favourites = { ports: [ports.first], gears: [], species: [] };
 const tripDateFieldAnchor = '#tripSameDate';
 
 test.describe('Complete Catch Record', () => {
@@ -25,7 +23,7 @@ test.describe('Complete Catch Record', () => {
     },
     async ({ createdRecords, catchRecordFlow, tripDatePage, departurePortPage }) => {
       await test.step('I am creating a catch record', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vesselName));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.testVessel));
       });
 
       await test.step('I leave required business information incomplete', async () => {
@@ -38,15 +36,22 @@ test.describe('Complete Catch Record', () => {
 
       await test.step('I should be told what information is required', async () => {
         await tripDatePage.expectUrl(/\/trip-date$/);
-        await expect(tripDatePage.common.errorSummary()).toContainText(tripDateRequiredError);
-        await expect(tripDatePage.common.errorMessage()).toContainText(tripDateRequiredError);
+        await expect(
+          tripDatePage.common.errorSummary(),
+          `Error summary to contain text ${errorMessages.tripDates.sameDayRequired}`
+        ).toContainText(errorMessages.tripDates.sameDayRequired);
+        await expect(
+          tripDatePage.common.errorMessage(),
+          `Error message to contain text ${errorMessages.tripDates.sameDayRequired}`
+        ).toContainText(errorMessages.tripDates.sameDayRequired);
       });
 
       await test.step('I should be able to correct it', async () => {
         await expect(
-          tripDatePage.common.errorSummary().getByRole('link', { name: tripDateRequiredError })
+          tripDatePage.common.errorSummary().getByRole('link', { name: errorMessages.tripDates.sameDayRequired }),
+          'Error summary to have attribute'
         ).toHaveAttribute('href', tripDateFieldAnchor);
-        await expect(tripDatePage.yesRadio()).toBeEnabled();
+        await expect(tripDatePage.yesRadio(), 'Yes radio to be enabled').toBeEnabled();
       });
 
       await test.step('I enter valid information and continue', async () => {
@@ -56,7 +61,7 @@ test.describe('Complete Catch Record', () => {
 
       await test.step('I should continue after entering valid information', async () => {
         await departurePortPage.expectUrl(/\/departure-port$/);
-        await expect(departurePortPage.pageHeading()).toBeVisible();
+        await expect(departurePortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       });
     }
   );

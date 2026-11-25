@@ -6,9 +6,8 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
+import { vessels, recordStatuses } from '../../../test-data/testData';
 
-const vesselName = 'ACHILLES';
-const draftStatus = 'Draft';
 // Table statuses seen in the test environment plus those listed in the status guidance (OQ-5)
 // The tag text is wrapped in line breaks, so surrounding whitespace is allowed
 const recordStatusPattern = /^\s*(Draft|Unsent|Submitted|Amended|Late)\s*$/;
@@ -25,7 +24,7 @@ test.describe('View Catch Records', () => {
     });
 
     await test.step('I have existing catch records', async () => {
-      draftReference = await catchRecordFlow.startRecord(vesselName);
+      draftReference = await catchRecordFlow.startRecord(vessels.testVessel);
     });
   });
 
@@ -45,21 +44,26 @@ test.describe('View Catch Records', () => {
       });
 
       await test.step('I should see my catch records', async () => {
-        await expect(recordsPage.catchRecordsTable()).toBeVisible();
-        await expect(recordsPage.recordRows().first()).toBeVisible();
+        await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
+        await expect(recordsPage.recordRows().first(), 'Record rows to be visible').toBeVisible();
       });
 
       await test.step('I should see the status of each record', async () => {
-        await expect(recordsPage.recordStatuses()).toHaveCount(await recordsPage.recordRows().count());
+        await expect(recordsPage.recordStatuses(), 'Record statuses to have count').toHaveCount(
+          await recordsPage.recordRows().count()
+        );
         for (const status of await recordsPage.recordStatuses().all()) {
-          await expect(status).toHaveText(recordStatusPattern);
+          await expect(status, `Status to have text ${recordStatusPattern}`).toHaveText(recordStatusPattern);
         }
       });
 
       await test.step('I should identify records requiring action', async () => {
-        await expect(recordsPage.recordStatus(draftReference)).toHaveText(draftStatus);
+        await expect(
+          recordsPage.recordStatus(draftReference),
+          `Record status to have text ${recordStatuses.draft}`
+        ).toHaveText(recordStatuses.draft);
         for (const draftLink of await recordsPage.draftRecordLinks().all()) {
-          await expect(draftLink).toHaveAttribute('href', draftRecordHref);
+          await expect(draftLink, 'Draft link to have attribute').toHaveAttribute('href', draftRecordHref);
         }
       });
     }

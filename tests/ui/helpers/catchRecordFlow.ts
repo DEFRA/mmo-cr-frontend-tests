@@ -16,6 +16,7 @@ import { type TripDepartureDatePage } from '../../../pages/tripDepartureDatePage
 import { type TripReturnDatePage } from '../../../pages/tripReturnDatePage';
 import { type FavouritesFlow } from './favouritesFlow';
 import { type NavigationFlow } from './navigationFlow';
+import { recordStatuses } from '../../../test-data/testData';
 
 export type SpeciesCatch = { name: string; code: string; weight: string };
 // Gear measurements are saved with the favourite gear, so catch recording only selects the gear
@@ -116,6 +117,32 @@ export class CatchRecordFlow {
     for (const species of added.species) await this.favouritesFlow.removeSpeciesFromAccount(species);
   }
 
+  // Removes the given favourites if saved; returns only those it removed so they can be re-added afterwards
+  async removeSavedFavourites(favourites: Favourites): Promise<Favourites> {
+    if (favourites.ports.length + favourites.gears.length + favourites.species.length === 0) return noFavourites;
+
+    const { accountPage } = this.pages;
+    await this.navigationFlow.openAccount();
+    const savedPorts = await accountPage.getPortsUsed();
+    const savedGear = await accountPage.getGearOnboardText();
+    const savedSpecies = await accountPage.getSpeciesCaught();
+    const removed: Favourites = {
+      ports: favourites.ports.filter((port) => savedPorts.includes(port)),
+      gears: favourites.gears.filter((gear) => savedGear.includes(gear)),
+      species: favourites.species.filter((species) => savedSpecies.includes(species))
+    };
+    await this.restoreFavourites(removed);
+    return removed;
+  }
+
+  // Removes absent favourites the journey saved, then re-adds those that were saved before the test
+  async restoreAbsentFavourites(absent: Favourites, removed: Favourites): Promise<void> {
+    await this.restoreFavourites(absent);
+    if (removed.ports.length + removed.gears.length + removed.species.length > 0) {
+      await this.ensureFavourites(removed);
+    }
+  }
+
   // Creates the draft and returns its reference
   async startRecord(vesselName: string): Promise<string> {
     await this.navigationFlow.openNewRecord(vesselName);
@@ -149,13 +176,20 @@ export class CatchRecordFlow {
     await departurePortPage.expectUrl(/\/departure-port$/);
   }
 
-  // Both ports must be favourites so the radio lists are shown instead of the port search
-  async selectPorts(departurePort: string, returnPort: string): Promise<void> {
-    const { departurePortPage, returnPortPage, gearSelectionPage } = this.pages;
+  // The port must be a favourite so the radio list is shown; waits for the return-port screen
+  async selectDeparturePort(departurePort: string): Promise<void> {
+    const { departurePortPage, returnPortPage } = this.pages;
 
     await departurePortPage.selectPort(departurePort);
     await departurePortPage.clickSaveAndContinue();
     await returnPortPage.expectUrl(/\/return-port$/);
+  }
+
+  // Both ports must be favourites so the radio lists are shown instead of the port search
+  async selectPorts(departurePort: string, returnPort: string): Promise<void> {
+    const { returnPortPage, gearSelectionPage } = this.pages;
+
+    await this.selectDeparturePort(departurePort);
     await returnPortPage.selectPort(returnPort);
     await returnPortPage.clickSaveAndContinue();
     await gearSelectionPage.expectUrl(/\/gear-selection$/);
@@ -223,7 +257,7 @@ export class CatchRecordFlow {
   private async currentGearCatch(gearCatches: GearCatch[]): Promise<GearCatch> {
     const { statisticalAreaPage } = this.pages;
 
-    await expect(statisticalAreaPage.pageHeadingForGear()).toBeVisible();
+    await expect(statisticalAreaPage.pageHeadingForGear(), 'Page heading for gear to be visible').toBeVisible();
     for (const gearCatch of gearCatches) {
       if (await statisticalAreaPage.pageHeadingForGear(gearCatch.gear.name).isVisible()) return gearCatch;
     }
@@ -275,15 +309,30 @@ export class CatchRecordFlow {
 
     for (const reference of references) {
       await recordsPage.goto('/records');
-      await expect(recordsPage.catchRecordsTable()).toBeVisible();
+      await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
       if ((await recordsPage.recordRow(reference).count()) === 0) continue;
-      if ((await recordsPage.recordStatus(reference).innerText()).trim() !== 'Draft') continue;
+      if ((await recordsPage.recordStatus(reference).innerText()).trim() !== recordStatuses.draft) continue;
 
       await recordsPage.openRecord(reference);
-      await expect(draftRecordPage.pageHeading()).toBeVisible();
+      await expect(draftRecordPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       await draftRecordPage.deleteDraft();
       await recordsPage.expectUrl(/\/records$/);
-      await expect(recordsPage.recordRow(reference)).toHaveCount(0);
+      await expect(recordsPage.recordRow(reference), 'Record row to have count').toHaveCount(0);
+    }
+  }
+
+  // Deletes every draft on the records list, including ones left behind by earlier runs
+  async deleteAllDrafts(): Promise<void> {
+    const { recordsPage, draftRecordPage } = this.pages;
+
+    await recordsPage.goto('/records');
+    await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
+    while ((await recordsPage.draftRecordRows().count()) > 0) {
+      await recordsPage.openFirstDraftRecord();
+      await expect(draftRecordPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+      await draftRecordPage.deleteDraft();
+      await recordsPage.expectUrl(/\/records$/);
+      await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
     }
   }
 

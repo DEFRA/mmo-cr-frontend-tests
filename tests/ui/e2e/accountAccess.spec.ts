@@ -28,7 +28,7 @@ test.describe('Account Access', () => {
 
       await test.step('I should see that I have been signed out', async () => {
         await signInPage.expectUrl(signedOutUrl);
-        await expect(signInPage.signedOutHeading()).toBeVisible();
+        await expect(signInPage.signedOutHeading(), 'Signed out heading to be visible').toBeVisible();
       });
     }
   );

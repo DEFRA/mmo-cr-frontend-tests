@@ -6,20 +6,20 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { type CatchRecordData, type Favourites, type GearData, type SpeciesCatch } from '../helpers/catchRecordFlow';
+import { type CatchRecordData, type Favourites } from '../helpers/catchRecordFlow';
+import { vessels, ports, gears, catchSpecies, areas } from '../../../test-data/testData';
 
-const vesselName = 'ACHILLES';
-const plymouth = 'Plymouth';
-const areaCode = '46D86';
-const pots: GearData = { name: 'Pots' };
-const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
 const reviewRecord: CatchRecordData = {
-  vesselName,
-  departurePort: plymouth,
-  returnPort: plymouth,
-  gearCatches: [{ gear: pots, areaCode, species: [cod] }]
+  vesselName: vessels.testVessel,
+  departurePort: ports.first,
+  returnPort: ports.first,
+  gearCatches: [{ gear: gears.pots, areaCode: areas.validCode, species: [catchSpecies.cod] }]
 };
-const testFavourites: Favourites = { ports: [plymouth], gears: [pots.name], species: [cod.name] };
+const testFavourites: Favourites = {
+  ports: [ports.first],
+  gears: [gears.pots.name],
+  species: [catchSpecies.cod.name]
+};
 
 test.describe('Submit Catch Record', () => {
   test.use({ testFavourites });
@@ -56,7 +56,9 @@ test.describe('Submit Catch Record', () => {
       });
 
       await test.step('I should receive a catch record reference', async () => {
-        await expect(submittedRecordPage.recordReference()).toHaveText(reference);
+        await expect(submittedRecordPage.recordReference(), `Record reference to have text ${reference}`).toHaveText(
+          reference
+        );
       });
     }
   );

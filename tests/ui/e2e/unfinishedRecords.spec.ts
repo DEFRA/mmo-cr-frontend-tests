@@ -9,26 +9,18 @@ import { expect, test } from '../../../fixtures/commonfixture';
 import {
   type CatchRecordData,
   type Favourites,
-  type GearData,
   type MultiDayCatchRecordData,
-  type SpeciesCatch,
   daysAgo,
   recordsListDate,
   reviewDate
 } from '../helpers/catchRecordFlow';
+import { vessels, ports, gears, catchSpecies, checkAnswers, recordStatuses } from '../../../test-data/testData';
 
-const vesselName = 'ACHILLES';
-const plymouth = 'Plymouth';
-const lowestoft = 'Lowestoft';
-const pots: GearData = { name: 'Pots' };
-const cod: SpeciesCatch = { name: 'Atlantic cod (COD)', code: 'COD', weight: '100' };
-const draftStatus = 'Draft';
-const departureDateKey = 'Departure date';
-const returnDateKey = 'Return date';
-const departurePortKey = 'Departure port';
-const returnPortKey = 'Return port';
-const weightRetainedKey = 'Weight above minimum size retained';
-const testFavourites: Favourites = { ports: [plymouth, lowestoft], gears: [pots.name], species: [cod.name] };
+const testFavourites: Favourites = {
+  ports: [ports.first, ports.second],
+  gears: [gears.pots.name],
+  species: [catchSpecies.cod.name]
+};
 
 test.describe('Unfinished Records', () => {
   test.use({ testFavourites });
@@ -40,17 +32,17 @@ test.describe('Unfinished Records', () => {
     // Completing one or two drafts to review exceeds the default 30s test timeout
     test.slow();
     firstDraft = {
-      vesselName,
+      vesselName: vessels.testVessel,
       tripDates: { departureDate: daysAgo(2), returnDate: daysAgo(1) },
-      departurePort: plymouth,
-      returnPort: lowestoft,
-      gearCatches: [{ gear: pots, species: [cod] }]
+      departurePort: ports.first,
+      returnPort: ports.second,
+      gearCatches: [{ gear: gears.pots, species: [catchSpecies.cod] }]
     };
     secondDraft = {
-      vesselName,
-      departurePort: plymouth,
-      returnPort: plymouth,
-      gearCatches: [{ gear: pots, species: [cod] }]
+      vesselName: vessels.testVessel,
+      departurePort: ports.first,
+      returnPort: ports.first,
+      gearCatches: [{ gear: gears.pots, species: [catchSpecies.cod] }]
     };
   });
 
@@ -83,25 +75,38 @@ test.describe('Unfinished Records', () => {
 
       await test.step('My previously entered information should be retained', async () => {
         await checkAnswersPage.goto('/check-answers');
-        await expect(checkAnswersPage.summaryValue(departureDateKey)).toHaveText(
-          reviewDate(firstDraft.tripDates.departureDate)
-        );
-        await expect(checkAnswersPage.summaryValue(returnDateKey)).toHaveText(
-          reviewDate(firstDraft.tripDates.returnDate)
-        );
-        await expect(checkAnswersPage.summaryValue(departurePortKey)).toHaveText(firstDraft.departurePort);
-        await expect(checkAnswersPage.summaryValue(returnPortKey)).toHaveText(firstDraft.returnPort);
-        await expect(checkAnswersPage.speciesSummaryValue(cod.name, pots.name, weightRetainedKey)).toHaveText(
-          `${cod.weight} kg`
-        );
+        await expect(
+          checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departureDate),
+          'Summary value to have text'
+        ).toHaveText(reviewDate(firstDraft.tripDates.departureDate));
+        await expect(
+          checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnDate),
+          'Summary value to have text'
+        ).toHaveText(reviewDate(firstDraft.tripDates.returnDate));
+        await expect(
+          checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort),
+          `Summary value to have text ${firstDraft.departurePort}`
+        ).toHaveText(firstDraft.departurePort);
+        await expect(
+          checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnPort),
+          `Summary value to have text ${firstDraft.returnPort}`
+        ).toHaveText(firstDraft.returnPort);
+        await expect(
+          checkAnswersPage.speciesSummaryValue(
+            catchSpecies.cod.name,
+            gears.pots.name,
+            checkAnswers.summaryKeys.weightRetained
+          ),
+          'Species summary value to have text'
+        ).toHaveText(`${catchSpecies.cod.weight} kg`);
       });
 
       // The service resumes at the trip-date question with the earlier answer selected (OQ-17)
       await test.step('I should continue from the appropriate point', async () => {
         await checkAnswersPage.goBack();
         await tripDatePage.expectUrl(/\/trip-date$/);
-        await expect(tripDatePage.pageHeading()).toContainText(reference);
-        await expect(tripDatePage.noRadio()).toBeChecked();
+        await expect(tripDatePage.pageHeading(), `Page heading to contain text ${reference}`).toContainText(reference);
+        await expect(tripDatePage.noRadio(), 'No radio to be checked').toBeChecked();
       });
     }
   );
@@ -135,12 +140,12 @@ test.describe('Unfinished Records', () => {
 
       await test.step('The draft should be removed', async () => {
         await recordsPage.expectUrl(/\/records$/);
-        await expect(recordsPage.recordRow(reference)).toHaveCount(0);
+        await expect(recordsPage.recordRow(reference), 'Record row to have count').toHaveCount(0);
       });
 
       await test.step('It should no longer appear in my catch records', async () => {
         await recordsPage.reload();
-        await expect(recordsPage.recordRow(reference)).toHaveCount(0);
+        await expect(recordsPage.recordRow(reference), 'Record row to have count').toHaveCount(0);
       });
     }
   );
@@ -171,19 +176,33 @@ test.describe('Unfinished Records', () => {
       });
 
       await test.step('Only the information for that record should be displayed', async () => {
-        await expect(tripDatePage.pageHeading()).toContainText(firstReference);
-        await expect(tripDatePage.pageHeading()).not.toContainText(secondReference);
-        await checkAnswersPage.goto('/check-answers');
-        await expect(checkAnswersPage.summaryValue(returnDateKey)).toHaveText(
-          reviewDate(firstDraft.tripDates.returnDate)
+        await expect(tripDatePage.pageHeading(), `Page heading to contain text ${firstReference}`).toContainText(
+          firstReference
         );
-        await expect(checkAnswersPage.summaryValue(returnPortKey)).toHaveText(firstDraft.returnPort);
+        await expect(
+          tripDatePage.pageHeading(),
+          `Page heading not to contain text ${secondReference}`
+        ).not.toContainText(secondReference);
+        await checkAnswersPage.goto('/check-answers');
+        await expect(
+          checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnDate),
+          'Summary value to have text'
+        ).toHaveText(reviewDate(firstDraft.tripDates.returnDate));
+        await expect(
+          checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnPort),
+          `Summary value to have text ${firstDraft.returnPort}`
+        ).toHaveText(firstDraft.returnPort);
       });
 
       await test.step('The other records should remain unchanged', async () => {
         await recordsPage.goto('/records');
-        await expect(recordsPage.recordStatus(secondReference)).toHaveText(draftStatus);
-        await expect(recordsPage.recordRow(secondReference)).toContainText(recordsListDate(secondDraftTripEnd));
+        await expect(
+          recordsPage.recordStatus(secondReference),
+          `Record status to have text ${recordStatuses.draft}`
+        ).toHaveText(recordStatuses.draft);
+        await expect(recordsPage.recordRow(secondReference), 'Record row to contain text').toContainText(
+          recordsListDate(secondDraftTripEnd)
+        );
       });
     }
   );

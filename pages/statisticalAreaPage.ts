@@ -110,7 +110,7 @@ export class StatisticalAreaPage extends BasePage {
 
   // Needs installCanvasProbe before the page loads; clicks a sub-rectangle near the middle and returns its code
   async selectMiddleMapArea(): Promise<string> {
-    await expect(this.mapCanvas()).toBeVisible();
+    await expect(this.mapCanvas(), 'Map canvas to be visible').toBeVisible();
     await expect.poll(async () => (await this.readMapLabels()).length, { timeout: 15_000 }).toBeGreaterThan(0);
     const labels = await this.readMapLabels();
     const label = labels[Math.floor(labels.length / 2)]!;

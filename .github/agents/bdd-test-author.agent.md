@@ -39,8 +39,8 @@ If a precondition fails, do not change any files. Explain what is missing and sa
    | Background                | Background statements are `test.beforeEach` steps, in order                                                   |
    | Steps                     | Each `test.step` title and order matches the Step mapping row by row; none merged or split                    |
    | Calls                     | Each step uses the page-object / flow calls in its mapping row                                                |
-   | Assertions                | New explicit assertions appear only in `Then` steps                                                           |
-   | Test data                 | Constants and values match the Test data table; nothing hardcoded in test bodies                              |
+   | Assertions                | New explicit assertions appear only in `Then` steps, and each `expect` has a descriptive message              |
+   | Test data                 | Values come from `test-data/testData.ts` keys in the Test data table; no hardcoded data constants or literals |
    | Tags                      | Tags match the Tags section                                                                                   |
    | Page objects and fixtures | New locators and methods match the planned code; new pages are registered in the fixtures                     |
    | Conventions               | Imports come from `fixtures/commonfixture.ts`; no `page.locator`/`page.getBy`, sleeps or `test.only` in specs |
