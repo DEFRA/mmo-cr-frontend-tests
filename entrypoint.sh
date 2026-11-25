@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo "run_id: $RUN_ID"
-npm test
+npm run test:pipeline
 test_exit_code=$?
 
 npm run report:publish

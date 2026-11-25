@@ -151,8 +151,11 @@ export const checkAnswers = {
 
 export const recordStatuses = {
   draft: 'Draft',
-  submitted: 'Submitted'
+  submitted: 'Submitted',
+  amended: 'Amended'
 };
+
+export const amendReason = 'Correcting the return date as requested by the office';
 
 export const errorMessages = {
   ports: {

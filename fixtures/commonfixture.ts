@@ -24,6 +24,7 @@ import { CatchNotLandedPage } from '../pages/catchNotLandedPage';
 import { RemoveSpeciesPage } from '../pages/removeSpeciesPage';
 import { CheckAnswersPage } from '../pages/checkAnswersPage';
 import { SubmittedRecordPage } from '../pages/submittedRecordPage';
+import { EditReasonPage } from '../pages/editReasonPage';
 import { AccountPage } from '../pages/accountPage';
 import { RemoveGearPage } from '../pages/removeGearPage';
 import { RemovePortPage } from '../pages/removePortPage';
@@ -76,6 +77,7 @@ type CommonFixtures = CatchRecordSessionFixtures & {
   removeSpeciesPage: RemoveSpeciesPage;
   checkAnswersPage: CheckAnswersPage;
   submittedRecordPage: SubmittedRecordPage;
+  editReasonPage: EditReasonPage;
   accountPage: AccountPage;
   removeGearPage: RemoveGearPage;
   removePortPage: RemovePortPage;
@@ -239,6 +241,7 @@ export const test = base.extend<CommonFixtures>({
   removeSpeciesPage: pageObject(RemoveSpeciesPage),
   checkAnswersPage: pageObject(CheckAnswersPage),
   submittedRecordPage: pageObject(SubmittedRecordPage),
+  editReasonPage: pageObject(EditReasonPage),
   accountPage: pageObject(AccountPage),
   removeGearPage: pageObject(RemoveGearPage),
   removePortPage: pageObject(RemovePortPage),
