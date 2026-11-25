@@ -17,7 +17,7 @@ import {
 import { vessels, ports, gears, catchSpecies, checkAnswers, recordStatuses } from '../../../test-data/testData';
 
 const testFavourites: Favourites = {
-  ports: [ports.plymouth, ports.lowestoft],
+  ports: [ports.first, ports.second],
   gears: [gears.pots.name],
   species: [catchSpecies.cod.name]
 };
@@ -32,16 +32,16 @@ test.describe('Unfinished Records', () => {
     // Completing one or two drafts to review exceeds the default 30s test timeout
     test.slow();
     firstDraft = {
-      vesselName: vessels.achilles,
+      vesselName: vessels.testVessel,
       tripDates: { departureDate: daysAgo(2), returnDate: daysAgo(1) },
-      departurePort: ports.plymouth,
-      returnPort: ports.lowestoft,
+      departurePort: ports.first,
+      returnPort: ports.second,
       gearCatches: [{ gear: gears.pots, species: [catchSpecies.cod] }]
     };
     secondDraft = {
-      vesselName: vessels.achilles,
-      departurePort: ports.plymouth,
-      returnPort: ports.plymouth,
+      vesselName: vessels.testVessel,
+      departurePort: ports.first,
+      returnPort: ports.first,
       gearCatches: [{ gear: gears.pots, species: [catchSpecies.cod] }]
     };
   });

@@ -24,7 +24,7 @@ test.describe('View Catch Records', () => {
     });
 
     await test.step('I have existing catch records', async () => {
-      draftReference = await catchRecordFlow.startRecord(vessels.achilles);
+      draftReference = await catchRecordFlow.startRecord(vessels.testVessel);
     });
   });
 

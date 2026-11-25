@@ -26,7 +26,7 @@ test.describe('Account details and selections', () => {
     savedSelections = {
       species: (await accountPage.getSpeciesCaught()).includes(catchSpecies.cod.name),
       gear: (await accountPage.getGearOnboardText()).includes(gears.pots.name),
-      port: (await accountPage.getPortsUsed()).includes(ports.plymouth)
+      port: (await accountPage.getPortsUsed()).includes(ports.first)
     };
     accountReadyForCleanup = true;
   });
@@ -37,7 +37,7 @@ test.describe('Account details and selections', () => {
     await navigationFlow.openAccount();
     if (!savedSelections.species) await favouritesFlow.removeSpeciesFromAccount(catchSpecies.cod.name);
     if (!savedSelections.gear) await favouritesFlow.removeGearFromAccount(gears.pots.name);
-    if (!savedSelections.port) await favouritesFlow.removePortFromAccount(ports.plymouth);
+    if (!savedSelections.port) await favouritesFlow.removePortFromAccount(ports.first);
     await catchRecordFlow.deleteCreatedDrafts();
   });
 
@@ -60,7 +60,7 @@ test.describe('Account details and selections', () => {
       await test.step('My account displays my personal and vessel details', async () => {
         await expect(accountPage.personalDetailsHeading()).toBeVisible();
         await expect(accountPage.vesselDetailsHeading()).toBeVisible();
-        await expect(accountPage.vesselNameHeading(vessels.achilles)).toBeVisible();
+        await expect(accountPage.vesselNameHeading(vessels.testVessel)).toBeVisible();
         await expect(accountPage.summaryRow('Ports used')).toBeVisible();
         await expect(accountPage.summaryRow('Gear onboard')).toBeVisible();
         await expect(accountPage.summaryRow('Species caught')).toBeVisible();
@@ -88,14 +88,14 @@ test.describe('Account details and selections', () => {
         if (!savedSelections.gear) await favouritesFlow.addGearToAccount(gears.pots.name);
         await expect(accountPage.gearOnboardValue()).toContainText(gears.pots.name);
 
-        if (!savedSelections.port) await favouritesFlow.addPortToAccount(ports.plymouth);
-        await expect(accountPage.portsUsedValue()).toContainText(ports.plymouth);
+        if (!savedSelections.port) await favouritesFlow.addPortToAccount(ports.first);
+        await expect(accountPage.portsUsedValue()).toContainText(ports.first);
       });
 
       await test.step('My account selections are available in a new catch-record journey', async () => {
-        await navigationFlow.startCatchRecord(vessels.achilles);
-        await expect(departurePortPage.portRadio(ports.plymouth)).toBeVisible();
-        await catchRecordFlow.selectPorts(ports.plymouth, ports.plymouth);
+        await navigationFlow.startCatchRecord(vessels.testVessel);
+        await expect(departurePortPage.portRadio(ports.first)).toBeVisible();
+        await catchRecordFlow.selectPorts(ports.first, ports.first);
 
         await expect(gearSelectionPage.pageHeading()).toBeVisible();
         await expect(gearSelectionPage.gearCheckbox(gears.pots.name)).toBeVisible();
@@ -120,8 +120,8 @@ test.describe('Account details and selections', () => {
         }
 
         if (!savedSelections.port) {
-          await favouritesFlow.removePortFromAccount(ports.plymouth);
-          await expect(accountPage.portsUsedValue()).not.toContainText(ports.plymouth);
+          await favouritesFlow.removePortFromAccount(ports.first);
+          await expect(accountPage.portsUsedValue()).not.toContainText(ports.first);
         }
 
         await expect(accountPage.getSpeciesCaught()).resolves.toEqual(originalSpecies);

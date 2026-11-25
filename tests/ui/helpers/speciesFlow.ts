@@ -37,4 +37,19 @@ export class SpeciesFlow {
     );
     expect(matchingSpecies).toContain(species);
   }
+
+  // Requires the Add Species page to be open; submits a species that may already be added (hidden from the catalogue)
+  async submitSpecies(speciesName: string): Promise<void> {
+    const { addSpeciesPage } = this.pages;
+
+    await addSpeciesPage.speciesInput().fill(speciesName);
+    const option = addSpeciesPage.suggestionOption(speciesName);
+    await expect(option.or(addSpeciesPage.noResultsMessage())).toBeVisible();
+    if (await option.isVisible()) {
+      await option.click();
+    } else {
+      await addSpeciesPage.speciesInput().press('Tab');
+    }
+    await addSpeciesPage.clickSaveAndContinue();
+  }
 }

@@ -9,7 +9,7 @@ import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites } from '../helpers/catchRecordFlow';
 import { vessels, ports, gears, checkAnswers } from '../../../test-data/testData';
 
-const testFavourites: Favourites = { ports: [ports.plymouth], gears: [gears.seineNets.name], species: [] };
+const testFavourites: Favourites = { ports: [ports.first], gears: [gears.seineNets.name], species: [] };
 
 test.describe('Catch Location', () => {
   test.use({ testFavourites });
@@ -24,9 +24,9 @@ test.describe('Catch Location', () => {
       let areaCode = '';
 
       await test.step('I am creating a catch record', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.testVessel));
         await catchRecordFlow.enterSameDayTrip();
-        await catchRecordFlow.selectPorts(ports.plymouth, ports.plymouth);
+        await catchRecordFlow.selectPorts(ports.first, ports.first);
       });
 
       await test.step('I have selected the fishing gear', async () => {

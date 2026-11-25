@@ -9,7 +9,7 @@ import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites } from '../helpers/catchRecordFlow';
 import { vessels, ports, checkAnswers } from '../../../test-data/testData';
 
-const testFavourites: Favourites = { ports: [ports.plymouth, ports.lowestoft], gears: [], species: [] };
+const testFavourites: Favourites = { ports: [ports.first, ports.second], gears: [], species: [] };
 
 test.describe('Trip Information', () => {
   test.use({ testFavourites });
@@ -29,24 +29,24 @@ test.describe('Trip Information', () => {
       gearSelectionPage
     }) => {
       await test.step('I am creating a catch record', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.testVessel));
         await catchRecordFlow.enterSameDayTrip();
       });
 
       await test.step('I select a departure port', async () => {
-        await departurePortPage.selectPort(ports.plymouth);
+        await departurePortPage.selectPort(ports.first);
         await departurePortPage.clickSaveAndContinue();
       });
 
       await test.step('I select a different return port', async () => {
-        await returnPortPage.selectPort(ports.lowestoft);
+        await returnPortPage.selectPort(ports.second);
         await returnPortPage.clickSaveAndContinue();
       });
 
       await test.step('Both ports should be saved against the trip', async () => {
         await checkAnswersPage.goto('/check-answers');
-        await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort)).toHaveText(ports.plymouth);
-        await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnPort)).toHaveText(ports.lowestoft);
+        await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort)).toHaveText(ports.first);
+        await expect(checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnPort)).toHaveText(ports.second);
       });
 
       await test.step('I should be able to continue', async () => {

@@ -19,7 +19,7 @@ import { vessels, ports, gears, catchSpecies, recordStatuses } from '../../../te
 
 const gearCatches: GearCatch[] = [{ gear: gears.setLonglines, species: [catchSpecies.cod] }];
 const testFavourites: Favourites = {
-  ports: [ports.hastings, ports.dover],
+  ports: [ports.third, ports.fourth],
   gears: [gears.setLonglines.name],
   species: [catchSpecies.cod.name]
 };
@@ -72,7 +72,7 @@ test.describe('Create Catch Record', () => {
         });
 
         await test.step('I create a new catch record', async () => {
-          reference = await catchRecordFlow.startRecord(vessels.achilles);
+          reference = await catchRecordFlow.startRecord(vessels.testVessel);
           createdRecords.push(reference);
         });
 
@@ -85,7 +85,7 @@ test.describe('Create Catch Record', () => {
         });
 
         await test.step('I enter ports and catch details', async () => {
-          await catchRecordFlow.selectPorts(ports.hastings, ports.dover);
+          await catchRecordFlow.selectPorts(ports.third, ports.fourth);
           await catchRecordFlow.selectGears(gearCatches.map(({ gear }) => gear));
           await catchRecordFlow.enterCatchDetailsForEachGear(gearCatches);
           await catchRecordFlow.confirmAllCatchLanded();

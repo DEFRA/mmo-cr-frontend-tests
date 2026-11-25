@@ -10,7 +10,7 @@ import { type Favourites, type MultiDayCatchRecordData, daysAgo, reviewDate } fr
 import { vessels, ports, gears, catchSpecies, checkAnswers } from '../../../test-data/testData';
 
 const testFavourites: Favourites = {
-  ports: [ports.plymouth, ports.lowestoft],
+  ports: [ports.first, ports.second],
   gears: [gears.seineNets.name],
   species: [catchSpecies.cod.name]
 };
@@ -22,10 +22,10 @@ test.describe('Amend Catch Record', () => {
 
   test.beforeEach(() => {
     reviewRecord = {
-      vesselName: vessels.achilles,
+      vesselName: vessels.testVessel,
       tripDates: { departureDate: daysAgo(2), returnDate: daysAgo(1) },
-      departurePort: ports.plymouth,
-      returnPort: ports.lowestoft,
+      departurePort: ports.first,
+      returnPort: ports.second,
       // No areaCode, so the area is selected on the map rather than under "Other"
       gearCatches: [{ gear: gears.seineNets, species: [catchSpecies.cod] }]
     };

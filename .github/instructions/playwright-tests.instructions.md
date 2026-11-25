@@ -95,11 +95,8 @@ test.describe('Favourite ports', () => {
       });
 
       await test.step('I search for "Lowe" and select "Lowestoft"', async () => {
-        await addPortPage.searchPorts(ports.searchTerms.lowestoft);
-        await addPortPage
-          .portResultItem(ports.lowestoft)
-          .getByRole('option', { name: ports.lowestoft, exact: true })
-          .click();
+        await addPortPage.searchPorts(ports.searchTerms.second);
+        await addPortPage.portResultItem(ports.second).getByRole('option', { name: ports.second, exact: true }).click();
       });
 
       await test.step('I click "Save and continue"', async () => {
@@ -111,7 +108,7 @@ test.describe('Favourite ports', () => {
       });
 
       await test.step('"Lowestoft" is shown in Ports used', async () => {
-        await expect(accountPage.portsUsedValue()).toContainText(ports.lowestoft);
+        await expect(accountPage.portsUsedValue()).toContainText(ports.second);
       });
     }
   );
@@ -134,8 +131,8 @@ Mapping rules:
 - Sign in via `navigationFlow.signIn()` / `signInAndOpenAccount()`, which read `CATCH_RECORDING_EMAIL` / `CATCH_RECORDING_PASSWORD` from `.env`. Never place credentials in code, logs, or chat, and never print `.env` contents.
 - Use only test data already in existing specs or confirmed in the live app (e.g. `Cod (COD)`, `Plymouth`).
 - Keep test data in `test-data/testData.ts`, not in specs or helpers. It exports one object per area: `vessels`, `ports`, `gears`, `catchSpecies` (named so because `species` is a common local name), `areas`, `checkAnswers` (summary-list keys, change links, Yes/No answers), `recordStatuses`, `errorMessages` and `signInData`. Import only what the file uses, e.g. `import { vessels, ports } from '../../../test-data/testData';`.
-- Reference values directly in steps (e.g. `catchRecordFlow.startRecord(vessels.achilles)`, `checkAnswers.summaryKeys.departurePort`, `errorMessages.ports.departureRequired`). Do not declare per-spec string constants such as `const plymouth = 'Plymouth';`; add a new value to the right export in `testData.ts` first, reusing an existing key when the value already exists.
-- Spec-level constants are only for values composed from `testData.ts` data (e.g. `const testFavourites: Favourites = { ports: [ports.plymouth], gears: [], species: [] };`), Scenario Outline example tables, and values that do not belong in shared data (`RegExp` URL patterns, dates computed with `daysAgo`).
+- Reference values directly in steps (e.g. `catchRecordFlow.startRecord(vessels.testVessel)`, `checkAnswers.summaryKeys.departurePort`, `errorMessages.ports.departureRequired`). Do not declare per-spec string constants such as `const plymouth = 'Plymouth';`; add a new value to the right export in `testData.ts` first, reusing an existing key when the value already exists.
+- Spec-level constants are only for values composed from `testData.ts` data (e.g. `const testFavourites: Favourites = { ports: [ports.first], gears: [], species: [] };`), Scenario Outline example tables, and values that do not belong in shared data (`RegExp` URL patterns, dates computed with `daysAgo`).
 - For date entry use the `DateInputPage` helpers and compute dates at runtime from `new Date()`.
 - Use `test.fixme('<reason>')` only when implementation is intentionally incomplete (e.g. a blocked selector).
 

@@ -62,7 +62,7 @@ test.describe('Trip date validation', () => {
 
     await test.step('The user starts a new catch record', async () => {
       await recordsPage.createNewRecordButton().click();
-      await selectVesselPage.selectVessel(vessels.achilles);
+      await selectVesselPage.selectVessel(vessels.testVessel);
       await selectVesselPage.clickSaveAndContinue();
     });
 

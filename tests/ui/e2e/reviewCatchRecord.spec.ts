@@ -10,7 +10,7 @@ import { type Favourites, type MultiDayCatchRecordData, daysAgo, reviewDate } fr
 import { vessels, ports, gears, catchSpecies, areas, checkAnswers } from '../../../test-data/testData';
 
 const testFavourites: Favourites = {
-  ports: [ports.plymouth, ports.lowestoft],
+  ports: [ports.first, ports.second],
   gears: [gears.pots.name, gears.trollingLines.name],
   species: [catchSpecies.cod.name, catchSpecies.mackerel.name]
 };
@@ -22,10 +22,10 @@ test.describe('Review Catch Record', () => {
 
   test.beforeEach(() => {
     reviewRecord = {
-      vesselName: vessels.achilles,
+      vesselName: vessels.testVessel,
       tripDates: { departureDate: daysAgo(2), returnDate: daysAgo(1) },
-      departurePort: ports.plymouth,
-      returnPort: ports.lowestoft,
+      departurePort: ports.first,
+      returnPort: ports.second,
       gearCatches: [
         { gear: gears.pots, areaCode: areas.validCode, species: [catchSpecies.cod] },
         { gear: gears.trollingLines, areaCode: areas.validCode, species: [catchSpecies.mackerel] }

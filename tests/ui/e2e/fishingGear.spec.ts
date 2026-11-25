@@ -14,7 +14,7 @@ const multiGearCatches: GearCatch[] = [
   { gear: gears.trollingLines, areaCode: areas.validCode, species: [catchSpecies.mackerel] }
 ];
 const testFavourites: Favourites = {
-  ports: [ports.plymouth],
+  ports: [ports.first],
   gears: [gears.pots.name, gears.trollingLines.name],
   species: [catchSpecies.cod.name, catchSpecies.mackerel.name]
 };
@@ -30,9 +30,9 @@ test.describe('Fishing Gear', () => {
     },
     async ({ createdRecords, catchRecordFlow, checkAnswersPage }) => {
       await test.step('I am creating a catch record', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.testVessel));
         await catchRecordFlow.enterSameDayTrip();
-        await catchRecordFlow.selectPorts(ports.plymouth, ports.plymouth);
+        await catchRecordFlow.selectPorts(ports.first, ports.first);
       });
 
       await test.step('I select more than one fishing gear', async () => {

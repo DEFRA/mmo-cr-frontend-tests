@@ -10,13 +10,13 @@ import { type CatchRecordData, type Favourites } from '../helpers/catchRecordFlo
 import { vessels, ports, gears, catchSpecies, areas } from '../../../test-data/testData';
 
 const reviewRecord: CatchRecordData = {
-  vesselName: vessels.achilles,
-  departurePort: ports.plymouth,
-  returnPort: ports.plymouth,
+  vesselName: vessels.testVessel,
+  departurePort: ports.first,
+  returnPort: ports.first,
   gearCatches: [{ gear: gears.pots, areaCode: areas.validCode, species: [catchSpecies.cod] }]
 };
 const testFavourites: Favourites = {
-  ports: [ports.plymouth],
+  ports: [ports.first],
   gears: [gears.pots.name],
   species: [catchSpecies.cod.name]
 };

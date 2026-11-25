@@ -5,22 +5,42 @@
  * @since 2026-11-25
  */
 
+import { searchTermFor } from '../utils/search';
+import { readSelection, selectionEnv } from './referenceDataSelection';
+
 export const vessels = {
-  achilles: 'ACHILLES'
+  testVessel: readSelection<string>(selectionEnv.vessel) ?? 'ACHILLES'
 };
 
+// Used when the reference data API is unavailable; each name is listed by its 2-character search term
+const fallbackPorts = ['Plymouth', 'Falmouth', 'Fleetwood', 'Felixstowe', 'Pwllheli'];
+const [firstPort, secondPort, thirdPort, fourthPort, fifthPort] = (readSelection<string[]>(selectionEnv.ports) ??
+  fallbackPorts) as [string, string, string, string, string];
+
+// Distinct random active ports from the reference data API
 export const ports = {
-  plymouth: 'Plymouth',
-  lowestoft: 'Lowestoft',
-  hastings: 'Hastings',
-  dover: 'Dover',
-  hamble: 'Hamble',
+  unapprovedPrefix: 'Not a port',
+  first: firstPort,
+  second: secondPort,
+  third: thirdPort,
+  fourth: fourthPort,
+  fifth: fifthPort,
   searchTerms: {
-    lowestoft: 'Lowe'
+    second: searchTermFor(secondPort)
   }
 };
 
+// Random gear for catalogue search tests only; tests that depend on a gear's measurements use the named gears below
+const searchableGear = readSelection<string>(selectionEnv.gear) ?? 'Traps (not specified)';
+
+// Display names ("<common name> (<FAO code>)") of random species whose search terms drive the species search tests
+const selectedSpecies = readSelection<[string, string]>(selectionEnv.species);
+
 export const gears = {
+  searchable: {
+    name: searchableGear,
+    searchTerm: searchTermFor(searchableGear)
+  },
   pots: {
     name: 'Pots',
     gearDimension: '45',
@@ -28,8 +48,7 @@ export const gears = {
     typedSearchTerm: 'Pot'
   },
   traps: {
-    name: 'Traps (not specified)',
-    searchTerm: 'tra'
+    name: 'Traps (not specified)'
   },
   seineNets: {
     name: 'Seine nets (not specified)',
@@ -72,8 +91,8 @@ export const catchSpecies = {
   },
   unapprovedPrefix: 'Not an approved species',
   searchTerms: {
-    first: 'at',
-    second: 'ha'
+    first: selectedSpecies ? searchTermFor(selectedSpecies[0]) : 'at',
+    second: selectedSpecies ? searchTermFor(selectedSpecies[1]) : 'ha'
   },
   weights: {
     aboveMinimum: '5',
@@ -137,6 +156,7 @@ export const recordStatuses = {
 
 export const errorMessages = {
   ports: {
+    unapproved: 'Select a port from the list',
     departureRequired: 'Select the port you left from',
     returnRequired: 'Select the port you returned to'
   },

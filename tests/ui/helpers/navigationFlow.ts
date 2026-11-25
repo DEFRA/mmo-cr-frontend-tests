@@ -99,9 +99,9 @@ export class NavigationFlow {
 
   // Requires a signed-in user; reaches species selection through a new catch record
   async openSpeciesSelectionForNewRecord(
-    portName = ports.plymouth,
-    vesselName = vessels.achilles,
-    returnPortName = ports.hastings
+    portName = ports.first,
+    vesselName = vessels.testVessel,
+    returnPortName = ports.third
   ): Promise<void> {
     const { statisticalAreaPage, speciesSelectionPage } = this.pages;
 
@@ -124,7 +124,7 @@ export class NavigationFlow {
   }
 
   // Creates a draft for the vessel and stops on the trip-date question
-  async openNewRecord(vesselName = vessels.achilles): Promise<void> {
+  async openNewRecord(vesselName = vessels.testVessel): Promise<void> {
     const { recordsPage, selectVesselPage, tripDatePage } = this.pages;
 
     await recordsPage.goto('/records');
@@ -135,7 +135,7 @@ export class NavigationFlow {
     this.createdRecordReferences.add(await tripDatePage.getRecordReference());
   }
 
-  async startCatchRecord(vesselName = vessels.achilles): Promise<void> {
+  async startCatchRecord(vesselName = vessels.testVessel): Promise<void> {
     const { tripDatePage } = this.pages;
 
     await this.openNewRecord(vesselName);
@@ -149,9 +149,9 @@ export class NavigationFlow {
   ): Promise<void> {
     const { statisticalAreaPage } = this.pages;
     const {
-      portName = ports.plymouth,
-      returnPortName = ports.hastings,
-      vesselName = vessels.achilles,
+      portName = ports.first,
+      returnPortName = ports.third,
+      vesselName = vessels.testVessel,
       signInOptions
     } = options;
 
@@ -162,7 +162,7 @@ export class NavigationFlow {
     await statisticalAreaPage.expectUrl(/\/statistical-area$/);
   }
 
-  async openStatisticalAreaOther(portName = ports.hamble, vesselName = vessels.achilles): Promise<void> {
+  async openStatisticalAreaOther(portName = ports.fifth, vesselName = vessels.testVessel): Promise<void> {
     const { statisticalAreaPage } = this.pages;
 
     await this.openStatisticalAreaMap({
@@ -177,7 +177,7 @@ export class NavigationFlow {
   }
 
   // Selects the departure and return ports, then lands on gear selection
-  async selectDepartureAndReturnPorts(portName: string, returnPortName = ports.hastings): Promise<void> {
+  async selectDepartureAndReturnPorts(portName: string, returnPortName = ports.third): Promise<void> {
     const { addPortPage, confirmSamePortPage, returnPortPage } = this.pages;
 
     await addPortPage.goto('/add-port?for=departure&entry=1');

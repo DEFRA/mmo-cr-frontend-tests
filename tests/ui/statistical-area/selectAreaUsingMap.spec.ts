@@ -76,7 +76,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('The user has declared a departure port for the trip', async () => {
         await navigationFlow.signIn(mapSignInOptions);
         await navigationFlow.startCatchRecord();
-        await navigationFlow.selectDepartureAndReturnPorts(ports.hastings);
+        await navigationFlow.selectDepartureAndReturnPorts(ports.third);
         await mapFlow.installCanvasProbe();
       });
 
@@ -87,7 +87,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('The map is positioned around the declared departure port', async () => {
         await expect(statisticalAreaPage.pageHeading()).toBeVisible();
         await expect(statisticalAreaPage.mapCanvas()).toBeVisible();
-        await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-departure-port', ports.hastings);
+        await expect(statisticalAreaPage.mapRegion()).toHaveAttribute('data-departure-port', ports.third);
       });
 
       await test.step('At least the 9 nearest relevant sub-rectangles are displayed', async () => {
@@ -439,7 +439,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       await test.step('The user opens the web map', async () => {
         await navigationFlow.signIn(mapSignInOptions);
         await navigationFlow.startCatchRecord();
-        await navigationFlow.selectDepartureAndReturnPorts(ports.hastings);
+        await navigationFlow.selectDepartureAndReturnPorts(ports.third);
       });
 
       await test.step('The required map or reference data cannot be loaded', async () => {

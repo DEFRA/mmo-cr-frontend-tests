@@ -14,7 +14,7 @@ const sameSpeciesCatches: GearCatch[] = [
   { gear: gears.trollingLines, areaCode: areas.validCode, species: [catchSpecies.codWithTrollingLines] }
 ];
 const testFavourites: Favourites = {
-  ports: [ports.plymouth],
+  ports: [ports.first],
   gears: [gears.pots.name, gears.trollingLines.name],
   species: [catchSpecies.cod.name]
 };
@@ -30,9 +30,9 @@ test.describe('Species and Weight', () => {
     },
     async ({ createdRecords, catchRecordFlow, speciesSelectionPage, checkAnswersPage }) => {
       await test.step('I have recorded the fishing gear and catch area', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.testVessel));
         await catchRecordFlow.enterSameDayTrip();
-        await catchRecordFlow.selectPorts(ports.plymouth, ports.plymouth);
+        await catchRecordFlow.selectPorts(ports.first, ports.first);
         await catchRecordFlow.selectGears([gears.pots]);
         await catchRecordFlow.selectAreaForCurrentGear(areas.validCode);
       });
@@ -74,9 +74,9 @@ test.describe('Species and Weight', () => {
     },
     async ({ createdRecords, catchRecordFlow, checkAnswersPage }) => {
       await test.step('I used more than one fishing gear', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.testVessel));
         await catchRecordFlow.enterSameDayTrip();
-        await catchRecordFlow.selectPorts(ports.plymouth, ports.plymouth);
+        await catchRecordFlow.selectPorts(ports.first, ports.first);
         await catchRecordFlow.selectGears(sameSpeciesCatches.map(({ gear }) => gear));
       });
 

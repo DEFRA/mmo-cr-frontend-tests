@@ -5,6 +5,8 @@ import { RecordsPage } from '../pages/recordsPage';
 import { DraftRecordPage } from '../pages/draftRecordPage';
 import { SelectVesselPage } from '../pages/selectVesselPage';
 import { HealthApi } from '../services/health.api';
+import { ReferenceDataApi } from '../services/referenceData.api';
+import { createApiContext } from '../services/apiContext';
 import { TripDatePage } from '../pages/tripDatePage';
 import { TripDepartureDatePage } from '../pages/tripDepartureDatePage';
 import { TripReturnDatePage } from '../pages/tripReturnDatePage';
@@ -55,6 +57,7 @@ type CommonFixtures = CatchRecordSessionFixtures & {
   draftRecordPage: DraftRecordPage;
   selectVesselPage: SelectVesselPage;
   healthApi: HealthApi;
+  referenceDataApi: ReferenceDataApi;
   tripDatePage: TripDatePage;
   tripDepartureDatePage: TripDepartureDatePage;
   tripReturnDatePage: TripReturnDatePage;
@@ -234,6 +237,19 @@ export const test = base.extend<CommonFixtures>({
   removePortPage: pageObject(RemovePortPage),
   healthApi: async ({ request }: { request: APIRequestContext }, use) => {
     await use(new HealthApi(request));
+  },
+  // Own request context so UI projects (whose baseURL is the frontend) can also reach the API host
+  referenceDataApi: async ({ playwright }, use) => {
+    const apiBaseURL = process.env.CATCH_RECORDING_API_BASE_URL;
+
+    if (!apiBaseURL) {
+      throw new Error('CATCH_RECORDING_API_BASE_URL must be set to use referenceDataApi');
+    }
+
+    const apiRequest = await createApiContext(playwright.request, apiBaseURL);
+
+    await use(new ReferenceDataApi(apiRequest));
+    await apiRequest.dispose();
   }
 });
 

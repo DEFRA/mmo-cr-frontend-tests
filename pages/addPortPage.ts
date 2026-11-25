@@ -1,5 +1,6 @@
 import { expect, type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
+import { searchTermFor } from '../utils/search';
 
 /**
  * Select a port from the catalogue.
@@ -32,7 +33,7 @@ export class AddPortPage extends BasePage {
   }
 
   async searchAndSelectPort(portName: string) {
-    await this.searchPorts(portName);
+    await this.searchPorts(searchTermFor(portName));
     await this.portResultItem(portName).getByRole('option', { name: portName, exact: true }).click();
     await expect(this.portInput()).toHaveValue(portName);
   }

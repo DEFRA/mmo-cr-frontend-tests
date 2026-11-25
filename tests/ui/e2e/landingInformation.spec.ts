@@ -10,7 +10,7 @@ import { type Favourites } from '../helpers/catchRecordFlow';
 import { vessels, ports, gears, catchSpecies, areas, checkAnswers } from '../../../test-data/testData';
 
 const testFavourites: Favourites = {
-  ports: [ports.plymouth],
+  ports: [ports.first],
   gears: [gears.pots.name],
   species: [catchSpecies.cod.name]
 };
@@ -26,9 +26,9 @@ test.describe('Landing Information', () => {
     },
     async ({ createdRecords, catchRecordFlow, catchNotLandedPage, checkAnswersPage }) => {
       await test.step('I am completing my catch record', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.testVessel));
         await catchRecordFlow.enterSameDayTrip();
-        await catchRecordFlow.selectPorts(ports.plymouth, ports.plymouth);
+        await catchRecordFlow.selectPorts(ports.first, ports.first);
         await catchRecordFlow.selectGears([gears.pots]);
         await catchRecordFlow.enterCatchDetailsForEachGear([
           { gear: gears.pots, areaCode: areas.validCode, species: [catchSpecies.cod] }

@@ -78,7 +78,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('I search the gear catalogue', async () => {
-        [firstResult] = await addGearPage.searchGearOptions(gears.pots.searchTerm);
+        [firstResult] = await addGearPage.searchGearOptions(gears.searchable.searchTerm);
       });
 
       await test.step('Matching approved gear is suggested', async () => {

@@ -9,7 +9,7 @@ import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, daysAgo } from '../helpers/catchRecordFlow';
 import { vessels, ports, errorMessages } from '../../../test-data/testData';
 
-const testFavourites: Favourites = { ports: [ports.plymouth], gears: [], species: [] };
+const testFavourites: Favourites = { ports: [ports.first], gears: [], species: [] };
 
 test.describe('Trip Dates', () => {
   test.use({ testFavourites });
@@ -32,7 +32,7 @@ test.describe('Trip Dates', () => {
       const returnDate = daysAgo(1);
 
       await test.step('My trip did not start and finish today', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.testVessel));
         await tripDatePage.selectSameDate(false);
         await tripDatePage.clickSaveAndContinue();
       });
@@ -61,7 +61,7 @@ test.describe('Trip Dates', () => {
       const tomorrow = daysAgo(-1);
 
       await test.step('My trip did not start and finish today', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.testVessel));
         await tripDatePage.selectSameDate(false);
         await tripDatePage.clickSaveAndContinue();
       });
@@ -94,7 +94,7 @@ test.describe('Trip Dates', () => {
       const earlierReturnDate = daysAgo(3);
 
       await test.step('My trip did not start and finish today', async () => {
-        createdRecords.push(await catchRecordFlow.startRecord(vessels.achilles));
+        createdRecords.push(await catchRecordFlow.startRecord(vessels.testVessel));
         await tripDatePage.selectSameDate(false);
         await tripDatePage.clickSaveAndContinue();
       });

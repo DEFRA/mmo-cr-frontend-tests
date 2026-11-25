@@ -152,12 +152,7 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('The user attempts to add the same species again', async () => {
         await navigationFlow.openAddSpecies();
-        await addSpeciesPage.speciesInput().fill(species);
-        // The catalogue may hide species already on the record, so wait for either outcome before submitting
-        const duplicateOption = addSpeciesPage.suggestionOption(species);
-        await expect(duplicateOption.or(addSpeciesPage.noResultsMessage())).toBeVisible();
-        if (await duplicateOption.isVisible()) await duplicateOption.click();
-        await addSpeciesPage.clickSaveAndContinue();
+        await speciesFlow.submitSpecies(species);
       });
 
       await test.step('The system prevents duplicate entries', async () => {

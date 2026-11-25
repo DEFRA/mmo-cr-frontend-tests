@@ -30,7 +30,7 @@ export class MapFlow {
     await this.mapPage.installCanvasProbe();
   }
 
-  async openMap(portName = ports.plymouth, vesselName = vessels.achilles): Promise<string> {
+  async openMap(portName = ports.first, vesselName = vessels.testVessel): Promise<string> {
     await this.installCanvasProbe();
     await this.navigationFlow.openStatisticalAreaMap({
       portName,
