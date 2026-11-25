@@ -27,6 +27,7 @@ import { SubmittedRecordPage } from '../pages/submittedRecordPage';
 import { AccountPage } from '../pages/accountPage';
 import { RemoveGearPage } from '../pages/removeGearPage';
 import { RemovePortPage } from '../pages/removePortPage';
+import { withSteps } from '../utils/withSteps';
 import { MapFlow } from '../tests/ui/helpers/mapFlow';
 import { NavigationFlow } from '../tests/ui/helpers/navigationFlow';
 import { GearFlow } from '../tests/ui/helpers/gearFlow';
@@ -126,42 +127,46 @@ export const test = base.extend<CommonFixtures>({
     use
   ) => {
     await use(
-      new NavigationFlow({
-        signInPage,
-        accountPage,
-        recordsPage,
-        speciesSelectionPage,
-        addSpeciesPage,
-        statisticalAreaOtherPage,
-        addPortPage,
-        confirmSamePortPage,
-        selectVesselPage,
-        tripDatePage,
-        departurePortPage,
-        returnPortPage,
-        statisticalAreaPage
-      })
+      withSteps(
+        new NavigationFlow({
+          signInPage,
+          accountPage,
+          recordsPage,
+          speciesSelectionPage,
+          addSpeciesPage,
+          statisticalAreaOtherPage,
+          addPortPage,
+          confirmSamePortPage,
+          selectVesselPage,
+          tripDatePage,
+          departurePortPage,
+          returnPortPage,
+          statisticalAreaPage
+        })
+      )
     );
   },
   gearFlow: async ({ addGearPage, accountPage, removeGearPage }, use) => {
-    await use(new GearFlow({ addGearPage, accountPage, removeGearPage }));
+    await use(withSteps(new GearFlow({ addGearPage, accountPage, removeGearPage })));
   },
   speciesFlow: async ({ addSpeciesPage }, use) => {
-    await use(new SpeciesFlow({ addSpeciesPage }));
+    await use(withSteps(new SpeciesFlow({ addSpeciesPage })));
   },
   favouritesFlow: async (
     { accountPage, addSpeciesPage, removeSpeciesPage, removeGearPage, addPortPage, removePortPage, gearFlow },
     use
   ) => {
     await use(
-      new FavouritesFlow(
-        { accountPage, addSpeciesPage, removeSpeciesPage, removeGearPage, addPortPage, removePortPage },
-        gearFlow
+      withSteps(
+        new FavouritesFlow(
+          { accountPage, addSpeciesPage, removeSpeciesPage, removeGearPage, addPortPage, removePortPage },
+          gearFlow
+        )
       )
     );
   },
   mapFlow: async ({ statisticalAreaPage, navigationFlow }, use) => {
-    await use(new MapFlow(statisticalAreaPage, navigationFlow));
+    await use(withSteps(new MapFlow(statisticalAreaPage, navigationFlow)));
   },
   catchRecordFlow: async (
     {
@@ -186,26 +191,28 @@ export const test = base.extend<CommonFixtures>({
     use
   ) => {
     await use(
-      new CatchRecordFlow(
-        {
-          accountPage,
-          recordsPage,
-          tripDatePage,
-          tripDepartureDatePage,
-          tripReturnDatePage,
-          departurePortPage,
-          returnPortPage,
-          gearSelectionPage,
-          statisticalAreaPage,
-          statisticalAreaOtherPage,
-          speciesSelectionPage,
-          catchNotLandedPage,
-          speciesNotLandedPage,
-          checkAnswersPage,
-          draftRecordPage
-        },
-        navigationFlow,
-        favouritesFlow
+      withSteps(
+        new CatchRecordFlow(
+          {
+            accountPage,
+            recordsPage,
+            tripDatePage,
+            tripDepartureDatePage,
+            tripReturnDatePage,
+            departurePortPage,
+            returnPortPage,
+            gearSelectionPage,
+            statisticalAreaPage,
+            statisticalAreaOtherPage,
+            speciesSelectionPage,
+            catchNotLandedPage,
+            speciesNotLandedPage,
+            checkAnswersPage,
+            draftRecordPage
+          },
+          navigationFlow,
+          favouritesFlow
+        )
       )
     );
   },
