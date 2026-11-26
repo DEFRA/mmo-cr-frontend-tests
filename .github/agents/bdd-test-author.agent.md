@@ -27,23 +27,26 @@ If a precondition fails, do not change any files. Explain what is missing and sa
    - Create or update only the files listed under Target files.
    - Copy the Proposed spec and the page-object, flow-helper and fixture changes from the plan.
    - Do not open a browser or look up new locators; anything missing from the plan is a deviation.
-   - The only changes allowed beyond the plan are formatting and type fixes needed to pass `npm run typecheck` / `npm run format:check`. Record each one in the Implementation record.
+   - Specs must not call `.goto()` directly. Use the planned navigation or flow-helper method; if it is missing or the plan proposes direct spec navigation, stop and report the deviation to the Planner.
+   - Prefer locator actionability checks and web-first assertions to explicit load-state waits. Do not add a `waitForLoadState()` before a locator action or assertion unless the plan establishes a specific event requirement.
+   - The only changes allowed beyond the plan are formatting, type fixes, and unused-code cleanup in Target files that is required or exposed by the planned changes. Record each one in the Implementation record.
+   - Remove unused imports, variables, types, or fixture parameters only when they are in Target files and are introduced or exposed by the planned changes; record any such cleanup in the Implementation record.
    - Add the required JSDoc header to each new spec or page-object class, following the shared instructions. For an existing target file missing a header, use its original Git addition commit for `@author` and `@since`; do not add documentation to files outside Target files. Put the CRAR key in a spec header when the user supplied one.
-4. **Run checks.** Run `npm run typecheck` and `npm run format:check`, fixing issues with `npx prettier --write <changed files>`. If the environment and `.env` credentials are available, run `npx playwright test <spec path> --project=Chrome`. Never print `.env` contents.
+4. **Run checks.** Run `npm run typecheck`, `npx tsc --noEmit --noUnusedLocals --noUnusedParameters` and `npm run format:check`, fixing formatting issues with `npx prettier --write <changed files>`. If the environment and `.env` credentials are available, run `npx playwright test <spec path> --project=Chrome`. Never print `.env` contents.
 5. **Verify the spec against the plan.** Re-read the plan file and the written files, and check each item:
 
-   | Check                     | Pass when                                                                                                     |
-   | ------------------------- | ------------------------------------------------------------------------------------------------------------- |
-   | Files                     | Every Target file was changed as planned and `git status --short` shows no other change since the baseline    |
-   | Scenarios                 | Every planned scenario is one `test` named verbatim from the Scenarios section; none extra                    |
-   | Background                | Background statements are `test.beforeEach` steps, in order                                                   |
-   | Steps                     | Each `test.step` title and order matches the Step mapping row by row; none merged or split                    |
-   | Calls                     | Each step uses the page-object / flow calls in its mapping row                                                |
-   | Assertions                | New explicit assertions appear only in `Then` steps, and each `expect` has a descriptive message              |
-   | Test data                 | Values come from `test-data/testData.ts` keys in the Test data table; no hardcoded data constants or literals |
-   | Tags                      | Tags match the Tags section                                                                                   |
-   | Page objects and fixtures | New locators and methods match the planned code; new pages are registered in the fixtures                     |
-   | Conventions               | Imports come from `fixtures/commonfixture.ts`; no `page.locator`/`page.getBy`, sleeps or `test.only` in specs |
+   | Check                     | Pass when                                                                                                                                                                |
+   | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+   | Files                     | Every Target file was changed as planned and `git status --short` shows no other change since the baseline                                                               |
+   | Scenarios                 | Every planned scenario is one `test` named verbatim from the Scenarios section; none extra                                                                               |
+   | Background                | Background statements are `test.beforeEach` steps, in order                                                                                                              |
+   | Steps                     | Each `test.step` title and order matches the Step mapping row by row; none merged or split                                                                               |
+   | Calls                     | Each step uses the page-object / flow calls in its mapping row                                                                                                           |
+   | Assertions                | New explicit assertions appear only in `Then` steps, and each `expect` has a descriptive message                                                                         |
+   | Test data                 | Values come from `test-data/testData.ts` keys in the Test data table; no hardcoded data constants or literals                                                            |
+   | Tags                      | Tags match the Tags section                                                                                                                                              |
+   | Page objects and fixtures | New locators and methods match the planned code; new pages are registered in the fixtures                                                                                |
+   | Conventions               | Imports come from `fixtures/commonfixture.ts`; no `page.locator`/`page.getBy`, `.goto()`, redundant load-state waits, sleeps, unused identifiers or `test.only` in specs |
 
 6. **Update the plan file.** Fill in the Implementation record (template below), set `Status: Implemented` when every check passes, or `Status: Deviations found` with each failure listed. Add a Change log row, then run `npx prettier --write <plan file>`.
 
@@ -63,11 +66,12 @@ If a precondition fails, do not change any files. Explain what is missing and sa
 
 ### Checks
 
-| Command                                            | Result                          |
-| -------------------------------------------------- | ------------------------------- |
-| `npm run typecheck`                                | Pass / Fail                     |
-| `npm run format:check`                             | Pass / Fail                     |
-| `npx playwright test <spec path> --project=Chrome` | Pass / Fail / Not run: <reason> |
+| Command                                                  | Result                          |
+| -------------------------------------------------------- | ------------------------------- |
+| `npm run typecheck`                                      | Pass / Fail                     |
+| `npx tsc --noEmit --noUnusedLocals --noUnusedParameters` | Pass / Fail                     |
+| `npm run format:check`                                   | Pass / Fail                     |
+| `npx playwright test <spec path> --project=Chrome`       | Pass / Fail / Not run: <reason> |
 
 ### Plan conformance
 

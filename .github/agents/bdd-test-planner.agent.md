@@ -42,6 +42,9 @@ Before doing anything else, read [playwright-tests.instructions.md](../instructi
 2. **Research (read-only).**
    - Search `tests/ui/` and `tests/api/` for overlapping scenarios; plan to extend an existing spec rather than duplicate coverage.
    - Read the page objects in `pages/`, helpers in `tests/ui/helpers/` and `fixtures/commonfixture.ts` you intend to use, and map every Gherkin statement to an existing method.
+   - Check that proposed specs use flow/helper methods for navigation and never call `.goto()` directly. Reuse existing helpers such as `navigationFlow.openCheckAnswers()` and `mapFlow.reloadMap()` when they fit; if a helper is missing, plan its addition in the target files.
+   - Prefer locator auto-waiting and web-first assertions; do not plan redundant `waitForLoadState()` calls before locator actions or assertions.
+   - Check proposed code for unused imports, variables, types and fixture parameters.
    - Check the JSDoc header on every target spec and page-object class; if an existing target is missing one, include a history-based header update in the plan using the shared conventions.
    - Flag any AC that is ambiguous, contradicts existing specs or the live app, or cannot be tested through the web UI or API.
 3. **Resolve gaps.** For each statement with no existing method, find the locator from repository evidence, then from the live app via the Playwright MCP tools. If it still cannot be verified, mark it `UNVERIFIED` in the plan; never guess.
@@ -117,6 +120,7 @@ Status values: `Existing`, `New` (added by this plan), `UNVERIFIED`.
 ## Verification plan
 
 - `npm run typecheck`
+- `npx tsc --noEmit --noUnusedLocals --noUnusedParameters`
 - `npm run format:check`
 - `npx playwright test <spec path> --project=Chrome`
 
