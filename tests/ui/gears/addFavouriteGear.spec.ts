@@ -7,6 +7,7 @@
  * @since 2026-11-16
  */
 import { expect, test } from '../../../fixtures/commonfixture';
+import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
 import { gears, errorMessages } from '../../../test-data/testData';
 
 type FavouriteGearData = {
@@ -18,24 +19,25 @@ type MeasuredGearData = FavouriteGearData & {
 };
 
 // Gear names and measurements confirmed by existing gear specs; validation messages confirmed on the live app
-const testFavouriteGears = [gears.pots.name, gears.traps.name, gears.seineNets.name];
+// Gears the tests save; removed at sign-in and after each test, then restored if they were already saved
+const absentFavourites: Favourites = {
+  ...noFavourites,
+  gears: [gears.pots.name, gears.traps.name, gears.seineNets.name]
+};
 const isSeineNets = (name: string): boolean => name === gears.seineNets.name;
 
 test.describe('Add favourite gear', () => {
-  test.beforeEach(async ({ navigationFlow, gearFlow }) => {
+  test.use({ absentFavourites });
+
+  // Requesting createdRecords signs in and restores the gear and drafts after each test
+  test.beforeEach(async ({ navigationFlow, createdRecords }) => {
+    void createdRecords;
     await test.step('I am signed in without the test gear saved as a favourite', async () => {
       await navigationFlow.signIn({
         requiredCredentialsMessage:
           'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Add favourite gear UI tests'
       });
-      await gearFlow.removeSavedGears(testFavouriteGears);
     });
-  });
-
-  // Page fixtures are per test, so clean-up runs after each test rather than in afterAll
-  test.afterEach(async ({ gearFlow, catchRecordFlow }) => {
-    await gearFlow.removeSavedGears(testFavouriteGears);
-    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(

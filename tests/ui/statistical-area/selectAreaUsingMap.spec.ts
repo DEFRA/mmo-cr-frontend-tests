@@ -9,6 +9,7 @@
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type MapLabel } from '../../../pages/statisticalAreaPage';
 import { type LandFeature, MapFlow, type SubrectangleReference } from '../helpers/mapFlow';
+import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
 import { ports, areas, checkAnswers, errorMessages } from '../../../test-data/testData';
 
 type ViewportSize = { width: number; height: number };
@@ -63,10 +64,15 @@ function requireDefined<T>(value: T | undefined, message: string): T {
   return value;
 }
 
+// Departure and return ports the journey saves as favourites; removed after each test unless already saved
+const absentFavourites: Favourites = { ...noFavourites, ports: [ports.first, ports.third] };
+
 test.describe('ICES statistical sub-rectangle map', () => {
-  // Each test starts a catch record, so its draft is deleted after each test
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteCreatedDrafts();
+  test.use({ absentFavourites });
+
+  // Requesting createdRecords signs in and restores the favourites and drafts after each test
+  test.beforeEach(async ({ createdRecords }) => {
+    void createdRecords;
   });
 
   test(

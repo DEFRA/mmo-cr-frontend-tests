@@ -6,19 +6,24 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
+import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
 import { gears } from '../../../test-data/testData';
 
-const testFavouriteGears = [gears.pots.name, gears.traps.name];
+// Gears the tests save; removed at sign-in and after each test, then restored if they were already saved
+const absentFavourites: Favourites = { ...noFavourites, gears: [gears.pots.name, gears.traps.name] };
 const gearDimensionText = (dimension: string): RegExp => new RegExp(`Gear dimension by number.*: ${dimension}`);
 
 test.describe('Remove favourite gear', () => {
-  test.beforeEach(async ({ navigationFlow, gearFlow, accountPage }) => {
+  test.use({ absentFavourites });
+
+  // Requesting createdRecords signs in and restores the gear and drafts after each test
+  test.beforeEach(async ({ navigationFlow, gearFlow, accountPage, createdRecords }) => {
+    void createdRecords;
     await test.step('I am signed in and have a saved favourite gear configuration', async () => {
       await navigationFlow.signIn({
         requiredCredentialsMessage:
           'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Remove favourite gear UI tests'
       });
-      await gearFlow.removeSavedGears(testFavouriteGears);
       await navigationFlow.openAddGear();
       await gearFlow.savePots(gears.pots.gearDimension);
       await expect(
@@ -26,12 +31,6 @@ test.describe('Remove favourite gear', () => {
         `Gear onboard value to contain text ${gears.pots.name}`
       ).toContainText(gears.pots.name);
     });
-  });
-
-  // Page fixtures are per test, so clean-up runs after each test rather than in afterAll
-  test.afterEach(async ({ gearFlow, catchRecordFlow }) => {
-    await gearFlow.removeSavedGears(testFavouriteGears);
-    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(

@@ -106,9 +106,21 @@ export const test = base.extend<CommonFixtures>({
 
     await use(createdRecords);
 
-    await catchRecordFlow.deleteCreatedDrafts();
-    await catchRecordFlow.restoreFavourites(addedFavourites);
-    await catchRecordFlow.restoreAbsentFavourites(absentFavourites, removedFavourites);
+    // Each step runs even if an earlier one fails, so one broken clean-up does not leave the rest behind
+    const cleanupSteps = [
+      () => catchRecordFlow.deleteCreatedDrafts(),
+      () => catchRecordFlow.restoreFavourites(addedFavourites),
+      () => catchRecordFlow.restoreAbsentFavourites(absentFavourites, removedFavourites)
+    ];
+    const failures: unknown[] = [];
+    for (const cleanupStep of cleanupSteps) {
+      try {
+        await cleanupStep();
+      } catch (error) {
+        failures.push(error);
+      }
+    }
+    if (failures.length > 0) throw failures[0];
   },
   navigationFlow: async (
     {

@@ -21,6 +21,8 @@ test.describe('Review Catch Record', () => {
   let reviewRecord: MultiDayCatchRecordData;
 
   test.beforeEach(() => {
+    // Saving the random favourites and completing a record to review exceeds the default 30s test timeout
+    test.slow();
     reviewRecord = {
       vesselName: vessels.testVessel,
       tripDates: { departureDate: daysAgo(2), returnDate: daysAgo(1) },

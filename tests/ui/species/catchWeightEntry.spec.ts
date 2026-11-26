@@ -6,7 +6,7 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
-import { catchSpecies } from '../../../test-data/testData';
+import { catchSpecies, ports } from '../../../test-data/testData';
 
 type Species = {
   name: string;
@@ -58,29 +58,23 @@ const invalidOptionalWeightCases: OptionalWeightCase[] = [
   { name: 'discarded weight', value: '5.55', field: 'discarded' }
 ];
 
-test.describe('Species catch weight entry', () => {
-  let addedFavourites: Favourites = noFavourites;
+// Departure and return ports the journey saves as favourites; removed after each test unless already saved
+const absentFavourites: Favourites = { ...noFavourites, ports: [ports.first, ports.third] };
+const testFavourites: Favourites = { ...noFavourites, species: [catchSpecies.cod.name] };
 
-  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
-    addedFavourites = noFavourites;
+test.describe('Species catch weight entry', () => {
+  test.use({ testFavourites, absentFavourites });
+
+  // Requesting createdRecords signs in, saves Cod and restores favourites and drafts after each test
+  test.beforeEach(async ({ navigationFlow, createdRecords }) => {
+    void createdRecords;
     await test.step('The user is on the species selection page', async () => {
       await navigationFlow.signIn({
         requiredCredentialsMessage:
           'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for catch weight UI tests'
       });
-      addedFavourites = await catchRecordFlow.ensureFavourites({
-        ports: [],
-        gears: [],
-        species: [catchSpecies.cod.name]
-      });
       await navigationFlow.openSpeciesSelectionForNewRecord();
     });
-  });
-
-  // Each test starts a catch record, so its draft is deleted after each test
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteCreatedDrafts();
-    await catchRecordFlow.restoreFavourites(addedFavourites);
   });
 
   test(

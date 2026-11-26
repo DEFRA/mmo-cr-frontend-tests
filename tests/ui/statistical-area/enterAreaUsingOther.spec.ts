@@ -6,21 +6,24 @@
  * @since 2026-11-16
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { areas, checkAnswers, errorMessages } from '../../../test-data/testData';
+import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
+import { areas, checkAnswers, errorMessages, ports } from '../../../test-data/testData';
 
 const searchTerm: string = areas.validCode.slice(0, 2);
 const additionalCharacters: string = areas.validCode.slice(2);
 const areaCodePattern: RegExp = /\d{2}[A-Z]\d{2}/;
 const coordinatesPattern: RegExp = /[-\u2212]?\d+\.\d+,\s*[-\u2212]?\d+\.\d+/;
 
-test.describe('Enter statistical sub area using the Other option', () => {
-  test.beforeEach(async ({ navigationFlow }) => {
-    await navigationFlow.openStatisticalAreaOther();
-  });
+// Departure and return ports the journey saves as favourites; removed after each test unless already saved
+const absentFavourites: Favourites = { ...noFavourites, ports: [ports.fifth, ports.third] };
 
-  // Each test starts a catch record, so its draft is deleted after each test
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteCreatedDrafts();
+test.describe('Enter statistical sub area using the Other option', () => {
+  test.use({ absentFavourites });
+
+  // Requesting createdRecords signs in and restores the favourites and drafts after each test
+  test.beforeEach(async ({ navigationFlow, createdRecords }) => {
+    void createdRecords;
+    await navigationFlow.openStatisticalAreaOther();
   });
 
   test(

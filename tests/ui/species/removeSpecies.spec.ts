@@ -7,23 +7,31 @@
  * @since 2026-11-11
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { catchSpecies } from '../../../test-data/testData';
+import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
+import { catchSpecies, ports } from '../../../test-data/testData';
 
 type SpeciesData = { name: string; code: string; weight: string };
 
 // A third vessel species, so removing two species never removes all of them (confirmed in the live catalogue)
 
+const testFavourites: Favourites = {
+  ...noFavourites,
+  species: [catchSpecies.cod.name, catchSpecies.mackerel.name]
+};
+// Departure and return ports the journey saves as favourites; removed after each test unless already saved
+const absentFavourites: Favourites = { ...noFavourites, ports: [ports.first, ports.third] };
+
 test.describe('Remove species', () => {
-  // Removing species here updates the vessel's saved species, so restore them around every test
-  test.beforeEach(async ({ navigationFlow, favouritesFlow, speciesSelectionPage }) => {
+  test.use({ testFavourites, absentFavourites });
+
+  // Requesting createdRecords signs in and saves the species; its teardown removes only what it added
+  test.beforeEach(async ({ navigationFlow, speciesSelectionPage, createdRecords }) => {
+    void createdRecords;
     await test.step('The user has one or more species displayed', async () => {
       await navigationFlow.signInAndOpenAccount({
         requiredCredentialsMessage:
           'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Remove species UI tests'
       });
-      for (const species of [catchSpecies.cod, catchSpecies.mackerel]) {
-        await favouritesFlow.ensureSpeciesAdded(species.name);
-      }
       await navigationFlow.openSpeciesSelectionForNewRecord();
       for (const species of [catchSpecies.cod, catchSpecies.mackerel]) {
         await speciesSelectionPage.selectSpecies(species.name);
@@ -33,13 +41,13 @@ test.describe('Remove species', () => {
     });
   });
 
-  test.afterEach(async ({ navigationFlow, favouritesFlow, catchRecordFlow }) => {
+  // Tests remove species from the vessel, so put them back before the fixture removes the ones it added
+  test.afterEach(async ({ navigationFlow, favouritesFlow }) => {
     await navigationFlow.openAccount();
     for (const species of [catchSpecies.cod, catchSpecies.mackerel]) {
       await favouritesFlow.ensureSpeciesAdded(species.name);
     }
     await favouritesFlow.removeSpeciesFromAccount(catchSpecies.shads.name);
-    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(

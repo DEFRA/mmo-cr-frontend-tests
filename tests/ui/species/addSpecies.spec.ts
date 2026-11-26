@@ -7,7 +7,11 @@
  * @since 2026-11-16
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { catchSpecies, errorMessages } from '../../../test-data/testData';
+import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
+import { catchSpecies, errorMessages, ports } from '../../../test-data/testData';
+
+// Departure and return ports the journey saves as favourites; removed after each test unless already saved
+const absentFavourites: Favourites = { ...noFavourites, ports: [ports.first, ports.third] };
 
 // Approved species are discovered from the live catalogue at runtime using these search terms
 
@@ -20,7 +24,11 @@ const speciesCodeOf = (speciesName: string): string => {
 };
 
 test.describe('Add species to a catch record', () => {
-  test.beforeEach(async ({ navigationFlow }) => {
+  test.use({ absentFavourites });
+
+  // Requesting createdRecords signs in and restores the favourites and drafts after each test
+  test.beforeEach(async ({ navigationFlow, createdRecords }) => {
+    void createdRecords;
     await test.step('The user is signed in', async () => {
       await navigationFlow.signIn({
         requiredCredentialsMessage:
@@ -31,11 +39,6 @@ test.describe('Add species to a catch record', () => {
     await test.step('The user is on the species selection page', async () => {
       await navigationFlow.openSpeciesSelectionForNewRecord();
     });
-  });
-
-  // Every test starts a catch record, so its draft is deleted after each test
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(

@@ -52,7 +52,7 @@ const tripDatesAtOffsets = ({ start, end }: TripDateOffsets): TripDates => ({
 });
 
 test.describe('Trip date validation', () => {
-  test.beforeEach(async ({ navigationFlow, recordsPage, selectVesselPage, tripDatePage }) => {
+  test.beforeEach(async ({ navigationFlow, tripDatePage }) => {
     await test.step('The user signs in to the service', async () => {
       await navigationFlow.signIn({
         requiredCredentialsMessage:
@@ -61,9 +61,7 @@ test.describe('Trip date validation', () => {
     });
 
     await test.step('The user starts a new catch record', async () => {
-      await recordsPage.createNewRecordButton().click();
-      await selectVesselPage.selectVessel(vessels.testVessel);
-      await selectVesselPage.clickSaveAndContinue();
+      await navigationFlow.openNewRecord(vessels.testVessel);
     });
 
     await test.step('The user chooses to enter separate trip dates', async () => {
