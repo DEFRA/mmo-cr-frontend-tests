@@ -45,6 +45,10 @@ export class MapFlow {
     return portName;
   }
 
+  async reloadMap(): Promise<void> {
+    await this.mapPage.goto('/statistical-area');
+  }
+
   async fetchSubrectangles(): Promise<SubrectangleReference[]> {
     return (await this.fetchMapData<{ subrectangles: SubrectangleReference[] }>('subrectangles.json')).subrectangles;
   }

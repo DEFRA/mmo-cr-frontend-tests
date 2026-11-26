@@ -158,7 +158,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
   test(
     'Saves the area code when a suggested result is selected',
     { tag: ['@ui', '@smoke', '@statisticalAreaManualEntry'] },
-    async ({ statisticalAreaOtherPage, speciesSelectionPage, checkAnswersPage }) => {
+    async ({ navigationFlow, statisticalAreaOtherPage, speciesSelectionPage, checkAnswersPage }) => {
       test.info().annotations.push({
         type: 'unverified',
         description: 'Check answers evidence covers the area code only; stored coordinates are not asserted'
@@ -184,7 +184,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
         await statisticalAreaOtherPage.clickSaveAndContinue();
         await speciesSelectionPage.expectOnPage();
 
-        await checkAnswersPage.goto('/check-answers');
+        await navigationFlow.openCheckAnswers();
         await expect(
           checkAnswersPage.summaryValue(checkAnswers.summaryKeys.statisticalSubArea),
           `Summary value to contain text ${areas.validCode}`

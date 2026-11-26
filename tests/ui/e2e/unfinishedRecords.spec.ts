@@ -82,7 +82,7 @@ test.describe('Unfinished Records', () => {
       });
 
       await test.step('My previously entered information should be retained', async () => {
-        await checkAnswersPage.goto('/check-answers');
+        await navigationFlow.openCheckAnswers();
         await expect(
           checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departureDate),
           'Summary value to have text'
@@ -199,7 +199,7 @@ test.describe('Unfinished Records', () => {
           tripDatePage.pageHeading(),
           `Page heading not to contain text ${secondReference}`
         ).not.toContainText(secondReference);
-        await checkAnswersPage.goto('/check-answers');
+        await navigationFlow.openCheckAnswers();
         await expect(
           checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnDate),
           'Summary value to have text'

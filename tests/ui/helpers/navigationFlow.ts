@@ -10,6 +10,7 @@ import { type AddGearPage } from '../../../pages/addGearPage';
 import { type AddPortPage } from '../../../pages/addPortPage';
 import { type AddSpeciesPage } from '../../../pages/addSpeciesPage';
 import { type CatchNotLandedPage } from '../../../pages/catchNotLandedPage';
+import { type CheckAnswersPage } from '../../../pages/checkAnswersPage';
 import { type ConfirmSamePortPage } from '../../../pages/confirmSamePortPage';
 import { type DeparturePortPage } from '../../../pages/departurePortPage';
 import { type HomePage } from '../../../pages/homePage';
@@ -51,6 +52,7 @@ export class NavigationFlow {
       statisticalAreaPage: StatisticalAreaPage;
       gearSelectionPage: GearSelectionPage;
       catchNotLandedPage: CatchNotLandedPage;
+      checkAnswersPage: CheckAnswersPage;
       addGearPage: AddGearPage;
     }
   ) {}
@@ -237,6 +239,13 @@ export class NavigationFlow {
       }
     });
     await statisticalAreaPage.clickOther();
+  }
+
+  async openCheckAnswers(): Promise<void> {
+    const { checkAnswersPage } = this.pages;
+
+    await checkAnswersPage.goto('/check-answers');
+    await checkAnswersPage.expectOnPage();
   }
 
   // Selects the departure and return ports, then lands on gear selection

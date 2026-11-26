@@ -65,7 +65,8 @@ test.describe('Select a previously used port or add another port', () => {
         returnPortPage,
         confirmSamePortPage,
         addPortPage,
-        checkAnswersPage
+        checkAnswersPage,
+        navigationFlow
       }) => {
         let reference = '';
 
@@ -142,7 +143,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step(`"${ports.third}" is recorded as the departure port`, async () => {
-          await checkAnswersPage.goto('/check-answers');
+          await navigationFlow.openCheckAnswers();
           await expect(
             checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort),
             `Summary value to have text ${ports.third}`
@@ -161,7 +162,8 @@ test.describe('Select a previously used port or add another port', () => {
         returnPortPage,
         addPortPage,
         gearSelectionPage,
-        checkAnswersPage
+        checkAnswersPage,
+        navigationFlow
       }) => {
         let reference = '';
 
@@ -240,7 +242,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step(`"${ports.first}" is recorded as the departure port`, async () => {
-          await checkAnswersPage.goto('/check-answers');
+          await navigationFlow.openCheckAnswers();
           await expect(
             checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort),
             `Summary value to have text ${ports.first}`
@@ -271,7 +273,14 @@ test.describe('Select a previously used port or add another port', () => {
     test(
       'Record the same previously used port as the departure and return port',
       { tag: ['@ui', '@regression', '@favouritePorts'] },
-      async ({ createdRecords, catchRecordFlow, returnPortPage, gearSelectionPage, checkAnswersPage }) => {
+      async ({
+        createdRecords,
+        catchRecordFlow,
+        returnPortPage,
+        gearSelectionPage,
+        checkAnswersPage,
+        navigationFlow
+      }) => {
         await test.step(`I have started a new same-day catch record for "${vessels.testVessel}"`, async () => {
           createdRecords.push(await catchRecordFlow.startRecord(vessels.testVessel));
           await catchRecordFlow.enterSameDayTrip();
@@ -294,7 +303,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step(`"${ports.first}" is recorded as the departure port`, async () => {
-          await checkAnswersPage.goto('/check-answers');
+          await navigationFlow.openCheckAnswers();
           await expect(
             checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort),
             `Summary value to have text ${ports.first}`

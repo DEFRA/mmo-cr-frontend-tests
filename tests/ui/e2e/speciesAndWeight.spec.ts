@@ -78,7 +78,7 @@ test.describe('Species and Weight', () => {
       tag: ['@ui', '@regression', '@catchWeightRecording', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-10' }
     },
-    async ({ createdRecords, catchRecordFlow, checkAnswersPage }) => {
+    async ({ createdRecords, catchRecordFlow, checkAnswersPage, navigationFlow }) => {
       await test.step('I used more than one fishing gear', async () => {
         createdRecords.push(await catchRecordFlow.startRecord(vessels.testVessel));
         await catchRecordFlow.enterSameDayTrip();
@@ -92,7 +92,7 @@ test.describe('Species and Weight', () => {
       });
 
       await test.step('Each weight should remain linked to the correct gear', async () => {
-        await checkAnswersPage.goto('/check-answers');
+        await navigationFlow.openCheckAnswers();
         for (const { gear, species } of sameSpeciesCatches) {
           for (const caught of species) {
             await expect(

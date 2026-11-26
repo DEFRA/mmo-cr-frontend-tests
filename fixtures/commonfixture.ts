@@ -142,7 +142,8 @@ export const test = base.extend<CommonFixtures>({
       statisticalAreaPage,
       gearSelectionPage,
       addGearPage,
-      catchNotLandedPage
+      catchNotLandedPage,
+      checkAnswersPage
     },
     use
   ) => {
@@ -165,7 +166,8 @@ export const test = base.extend<CommonFixtures>({
           statisticalAreaPage,
           gearSelectionPage,
           addGearPage,
-          catchNotLandedPage
+          catchNotLandedPage,
+          checkAnswersPage
         })
       )
     );
