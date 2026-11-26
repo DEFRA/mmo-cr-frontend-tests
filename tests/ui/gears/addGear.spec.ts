@@ -97,7 +97,7 @@ test.describe('Add favourite gear', () => {
           addGearPage.errorSummary(),
           `Error summary to contain text ${errorMessages.gears.unapproved}`
         ).toContainText(errorMessages.gears.unapproved);
-        await addGearPage.expectUrl(/\/add-gear/);
+        await addGearPage.expectOnPage();
       });
     }
   );
@@ -119,7 +119,7 @@ test.describe('Add favourite gear', () => {
           addGearPage.errorSummary(),
           `Error summary to contain text ${errorMessages.gears.noneSelected}`
         ).toContainText(errorMessages.gears.noneSelected);
-        await addGearPage.expectUrl(/\/add-gear/);
+        await addGearPage.expectOnPage();
       });
     }
   );
@@ -215,7 +215,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('I am told pots has already been added', async () => {
-        await addGearPage.expectUrl(/\/add-gear/);
+        await addGearPage.expectOnPage();
         await expect(addGearPage.errorSummary(), `Error summary to contain text ${duplicateGearError}`).toContainText(
           duplicateGearError
         );
@@ -254,7 +254,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('Both gears are shown in my favourites', async () => {
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await expect(
           accountPage.gearOnboardValue(),
           `Gear onboard value to contain text ${gears.seineNets.name}`
@@ -289,7 +289,7 @@ test.describe('Add favourite gear', () => {
           addGearPage.errorSummary(),
           `Error summary to contain text ${errorMessages.gears.missingMeshSize}`
         ).toContainText(errorMessages.gears.missingMeshSize);
-        await addGearPage.expectUrl(/\/add-gear/);
+        await expect(addGearPage.measurementsHeading(), 'Measurements heading to be visible').toBeVisible();
       });
     }
   );
@@ -311,7 +311,7 @@ test.describe('Add favourite gear', () => {
 
         await test.step('A validation error is displayed and the gear is not saved', async () => {
           await expect(addGearPage.errorSummary(), 'Error summary to be visible').toBeVisible();
-          await addGearPage.expectUrl(/\/add-gear/);
+          await expect(addGearPage.measurementsHeading(), 'Measurements heading to be visible').toBeVisible();
         });
       }
     );
@@ -343,7 +343,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('The gear is saved to my favourites', async () => {
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await expect(
           accountPage.gearOnboardValue(),
           `Gear onboard value to contain text ${gears.seineNets.name}`

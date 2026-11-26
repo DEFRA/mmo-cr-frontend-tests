@@ -6,9 +6,10 @@
  */
 import { expect } from '@playwright/test';
 import { type AddSpeciesPage } from '../../../pages/addSpeciesPage';
+import { type SpeciesSelectionPage } from '../../../pages/speciesSelectionPage';
 
 export class SpeciesFlow {
-  constructor(private readonly pages: { addSpeciesPage: AddSpeciesPage }) {}
+  constructor(private readonly pages: { addSpeciesPage: AddSpeciesPage; speciesSelectionPage: SpeciesSelectionPage }) {}
 
   async findSpecies(searchTerm: string, matches: (species: string) => boolean = () => true): Promise<string> {
     const { addSpeciesPage } = this.pages;
@@ -20,12 +21,12 @@ export class SpeciesFlow {
 
   // Requires the Add Species page to be open; returns the species that was saved
   async saveSpeciesFromSearch(searchTerm: string, matches: (species: string) => boolean = () => true): Promise<string> {
-    const { addSpeciesPage } = this.pages;
+    const { addSpeciesPage, speciesSelectionPage } = this.pages;
 
     const species = await this.findSpecies(searchTerm, matches);
     await addSpeciesPage.selectSpeciesFromSuggestions(species);
     await addSpeciesPage.clickSaveAndContinue();
-    await addSpeciesPage.expectUrl(/\/species-selection$/);
+    await speciesSelectionPage.expectOnPage();
     return species;
   }
 

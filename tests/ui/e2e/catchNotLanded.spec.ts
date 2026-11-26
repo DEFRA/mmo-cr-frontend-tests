@@ -48,7 +48,7 @@ test.describe('Catch Not Landed', () => {
       });
 
       await test.step('The catch not landed should be recorded', async () => {
-        await checkAnswersPage.expectUrl(/\/check-answers$/);
+        await checkAnswersPage.expectOnPage();
         await expect(
           checkAnswersPage.notLandedValue(checkAnswers.summaryKeys.notLanded),
           `Not landed value to have text ${checkAnswers.answers.yes}`

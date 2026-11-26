@@ -14,6 +14,9 @@ export abstract class BasePage {
     this.page = page;
   }
 
+  // Must be unique to the page so expectOnPage() proves which page is shown
+  public abstract readonly pageHeading: () => Locator;
+
   public readonly header = {
     govukHeader: (): Locator => this.page.locator('.govuk-header.app-header'),
     serviceNavigation: (): Locator => this.page.getByRole('region', { name: 'Service information' }),
@@ -105,6 +108,10 @@ export abstract class BasePage {
   async expectTitle(title: string) {
     await this.page.waitForLoadState('domcontentloaded');
     await expect(this.page, `Page to have title ${title}`).toHaveTitle(title);
+  }
+
+  async expectOnPage() {
+    await expect(this.pageHeading(), `${this.constructor.name} heading to be visible`).toBeVisible();
   }
 
   async expectUrl(url: string | RegExp) {

@@ -159,7 +159,7 @@ export class CatchRecordFlow {
 
     await tripDatePage.selectSameDate(true);
     await tripDatePage.clickSaveAndContinue();
-    await departurePortPage.expectUrl(/\/departure-port$/);
+    await departurePortPage.expectOnPage();
   }
 
   async enterMultiDayTrip({ departureDate, returnDate }: TripDates): Promise<void> {
@@ -167,13 +167,13 @@ export class CatchRecordFlow {
 
     await tripDatePage.selectSameDate(false);
     await tripDatePage.clickSaveAndContinue();
-    await tripDepartureDatePage.expectUrl(/\/trip-departure-date$/);
+    await tripDepartureDatePage.expectOnPage();
     await tripDepartureDatePage.enterDateFrom(departureDate);
     await tripDepartureDatePage.clickSaveAndContinue();
-    await tripReturnDatePage.expectUrl(/\/trip-return-date$/);
+    await tripReturnDatePage.expectOnPage();
     await tripReturnDatePage.enterDateFrom(returnDate);
     await tripReturnDatePage.clickSaveAndContinue();
-    await departurePortPage.expectUrl(/\/departure-port$/);
+    await departurePortPage.expectOnPage();
   }
 
   // The port must be a favourite so the radio list is shown; waits for the return-port screen
@@ -182,7 +182,7 @@ export class CatchRecordFlow {
 
     await departurePortPage.selectPort(departurePort);
     await departurePortPage.clickSaveAndContinue();
-    await returnPortPage.expectUrl(/\/return-port$/);
+    await returnPortPage.expectOnPage();
   }
 
   // Both ports must be favourites so the radio lists are shown instead of the port search
@@ -192,7 +192,7 @@ export class CatchRecordFlow {
     await this.selectDeparturePort(departurePort);
     await returnPortPage.selectPort(returnPort);
     await returnPortPage.clickSaveAndContinue();
-    await gearSelectionPage.expectUrl(/\/gear-selection$/);
+    await gearSelectionPage.expectOnPage();
   }
 
   async selectGears(gears: GearData[]): Promise<void> {
@@ -207,7 +207,7 @@ export class CatchRecordFlow {
       await gearSelectionPage.gearCheckbox(gear.name).check();
     }
     await gearSelectionPage.clickSaveAndContinue();
-    await statisticalAreaPage.expectUrl(/\/statistical-area\?gearId=/);
+    await expect(statisticalAreaPage.pageHeadingForGear(), 'Page heading for gear to be visible').toBeVisible();
   }
 
   async selectAreaForCurrentGear(areaCode: string): Promise<void> {
@@ -216,7 +216,7 @@ export class CatchRecordFlow {
     await statisticalAreaPage.clickOther();
     await statisticalAreaOtherPage.searchAndSelectAlternativeArea(areaCode);
     await statisticalAreaOtherPage.clickSaveAndContinue();
-    await speciesSelectionPage.expectUrl(/\/species-selection\?gearId=/);
+    await speciesSelectionPage.expectOnPage();
   }
 
   // Clicks a sub-rectangle near the middle of the map and returns its code
@@ -224,7 +224,7 @@ export class CatchRecordFlow {
     const { statisticalAreaPage, speciesSelectionPage } = this.pages;
 
     const areaCode = await statisticalAreaPage.selectMiddleMapArea();
-    await speciesSelectionPage.expectUrl(/\/species-selection\?gearId=/);
+    await speciesSelectionPage.expectOnPage();
     return areaCode;
   }
 
@@ -251,7 +251,7 @@ export class CatchRecordFlow {
       }
       await this.enterSpeciesForCurrentGear(gearCatch.species);
     }
-    await catchNotLandedPage.expectUrl(/\/catch-not-landed$/);
+    await catchNotLandedPage.expectOnPage();
   }
 
   private async currentGearCatch(gearCatches: GearCatch[]): Promise<GearCatch> {
@@ -269,7 +269,7 @@ export class CatchRecordFlow {
 
     await catchNotLandedPage.selectCatchNotLanded(false);
     await catchNotLandedPage.clickSaveAndContinue();
-    await checkAnswersPage.expectUrl(/\/check-answers$/);
+    await checkAnswersPage.expectOnPage();
   }
 
   async recordCatchNotLanded({ speciesName, weightKeptOnboard }: NotLandedCatch): Promise<void> {
@@ -277,11 +277,11 @@ export class CatchRecordFlow {
 
     await catchNotLandedPage.selectCatchNotLanded(true);
     await catchNotLandedPage.clickSaveAndContinue();
-    await speciesNotLandedPage.expectUrl(/\/species-not-landed$/);
+    await speciesNotLandedPage.expectOnPage();
     await speciesNotLandedPage.selectSpecies(speciesName);
     await speciesNotLandedPage.enterWeightKeptOnboard(weightKeptOnboard);
     await speciesNotLandedPage.clickSaveAndContinue();
-    await checkAnswersPage.expectUrl(/\/check-answers$/);
+    await checkAnswersPage.expectOnPage();
   }
 
   // Answers every question up to "Check your details" without submitting; returns the reference
@@ -316,7 +316,7 @@ export class CatchRecordFlow {
       await recordsPage.openRecord(reference);
       await expect(draftRecordPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       await draftRecordPage.deleteDraft();
-      await recordsPage.expectUrl(/\/records$/);
+      await recordsPage.expectOnPage();
       await expect(recordsPage.recordRow(reference), 'Record row to have count').toHaveCount(0);
     }
   }
@@ -331,7 +331,7 @@ export class CatchRecordFlow {
       await recordsPage.openFirstDraftRecord();
       await expect(draftRecordPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       await draftRecordPage.deleteDraft();
-      await recordsPage.expectUrl(/\/records$/);
+      await recordsPage.expectOnPage();
       await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
     }
   }

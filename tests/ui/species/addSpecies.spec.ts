@@ -48,7 +48,7 @@ test.describe('Add species to a catch record', () => {
       let species: string;
 
       await test.step('The user wants to record a species they have caught', async () => {
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        await speciesSelectionPage.expectOnPage();
       });
 
       await test.step('The user selects Add a species', async () => {
@@ -56,8 +56,7 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The Add Species page is displayed', async () => {
-        await addSpeciesPage.expectUrl(/\/add-species/);
-        await expect(addSpeciesPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+        await addSpeciesPage.expectOnPage();
         await expect(addSpeciesPage.speciesInput(), 'Species input to be editable').toBeEditable();
       });
 
@@ -71,7 +70,7 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('The selected species is added to the catch record', async () => {
         await addSpeciesPage.clickSaveAndContinue();
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        await speciesSelectionPage.expectOnPage();
         await expect(speciesSelectionPage.speciesCheckbox(species), 'Species checkbox to be visible').toBeVisible();
       });
     }
@@ -132,7 +131,7 @@ test.describe('Add species to a catch record', () => {
 
       await test.step('The newly selected species is added to the existing species list', async () => {
         await addSpeciesPage.clickSaveAndContinue();
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        await speciesSelectionPage.expectOnPage();
         await expect(
           speciesSelectionPage.speciesCheckbox(secondSpecies),
           'Species checkbox to be visible'
@@ -165,7 +164,7 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The system prevents duplicate entries', async () => {
-        await addSpeciesPage.expectUrl(/\/add-species/);
+        await addSpeciesPage.expectOnPage();
       });
 
       await test.step('An error message is shown: "<species> has already been added."', async () => {
@@ -179,7 +178,7 @@ test.describe('Add species to a catch record', () => {
   test(
     'Preserves the saved species selection when another species is added',
     { tag: ['@ui', '@regression', '@addSpecies'] },
-    async ({ navigationFlow, speciesFlow, addSpeciesPage, speciesSelectionPage }) => {
+    async ({ navigationFlow, speciesFlow, addSpeciesPage, speciesSelectionPage, catchNotLandedPage }) => {
       let firstSpecies: string;
       let secondSpecies: string;
 
@@ -193,7 +192,7 @@ test.describe('Add species to a catch record', () => {
           .weightAboveMinimumInput(speciesCodeOf(firstSpecies))
           .fill(catchSpecies.weights.aboveMinimum);
         await speciesSelectionPage.clickSaveAndContinue();
-        await speciesSelectionPage.expectUrl(/\/catch-not-landed$/);
+        await catchNotLandedPage.expectOnPage();
       });
 
       await test.step('The user returns to the species page', async () => {
@@ -245,7 +244,7 @@ test.describe('Add species to a catch record', () => {
           speciesSelectionPage.errorSummary(),
           `Error summary to contain text ${errorMessages.species.noneSelected}`
         ).toContainText(errorMessages.species.noneSelected);
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        await speciesSelectionPage.expectOnPage();
       });
     }
   );
@@ -296,7 +295,7 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The selected species is added to the catch record', async () => {
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        await speciesSelectionPage.expectOnPage();
         await expect(
           speciesSelectionPage.speciesCheckbox(secondSpecies),
           'Species checkbox to be visible'
@@ -326,7 +325,7 @@ test.describe('Add species to a catch record', () => {
           addSpeciesPage.errorSummary(),
           `Error summary to contain text ${errorMessages.species.unapproved}`
         ).toContainText(errorMessages.species.unapproved);
-        await addSpeciesPage.expectUrl(/\/add-species/);
+        await addSpeciesPage.expectOnPage();
       });
 
       await test.step('The text is not added to the catch record', async () => {

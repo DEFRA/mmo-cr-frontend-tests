@@ -25,6 +25,7 @@ import { RemoveSpeciesPage } from '../pages/removeSpeciesPage';
 import { CheckAnswersPage } from '../pages/checkAnswersPage';
 import { SubmittedRecordPage } from '../pages/submittedRecordPage';
 import { EditReasonPage } from '../pages/editReasonPage';
+import { ConfirmationPage } from '../pages/confirmationPage';
 import { AccountPage } from '../pages/accountPage';
 import { RemoveGearPage } from '../pages/removeGearPage';
 import { RemovePortPage } from '../pages/removePortPage';
@@ -78,6 +79,7 @@ type CommonFixtures = CatchRecordSessionFixtures & {
   checkAnswersPage: CheckAnswersPage;
   submittedRecordPage: SubmittedRecordPage;
   editReasonPage: EditReasonPage;
+  confirmationPage: ConfirmationPage;
   accountPage: AccountPage;
   removeGearPage: RemoveGearPage;
   removePortPage: RemovePortPage;
@@ -136,7 +138,9 @@ export const test = base.extend<CommonFixtures>({
       tripDatePage,
       departurePortPage,
       returnPortPage,
-      statisticalAreaPage
+      statisticalAreaPage,
+      gearSelectionPage,
+      addGearPage
     },
     use
   ) => {
@@ -155,7 +159,9 @@ export const test = base.extend<CommonFixtures>({
           tripDatePage,
           departurePortPage,
           returnPortPage,
-          statisticalAreaPage
+          statisticalAreaPage,
+          gearSelectionPage,
+          addGearPage
         })
       )
     );
@@ -163,8 +169,8 @@ export const test = base.extend<CommonFixtures>({
   gearFlow: async ({ addGearPage, accountPage, removeGearPage }, use) => {
     await use(withSteps(new GearFlow({ addGearPage, accountPage, removeGearPage })));
   },
-  speciesFlow: async ({ addSpeciesPage }, use) => {
-    await use(withSteps(new SpeciesFlow({ addSpeciesPage })));
+  speciesFlow: async ({ addSpeciesPage, speciesSelectionPage }, use) => {
+    await use(withSteps(new SpeciesFlow({ addSpeciesPage, speciesSelectionPage })));
   },
   favouritesFlow: async (
     { accountPage, addSpeciesPage, removeSpeciesPage, removeGearPage, addPortPage, removePortPage, gearFlow },
@@ -254,6 +260,7 @@ export const test = base.extend<CommonFixtures>({
   checkAnswersPage: pageObject(CheckAnswersPage),
   submittedRecordPage: pageObject(SubmittedRecordPage),
   editReasonPage: pageObject(EditReasonPage),
+  confirmationPage: pageObject(ConfirmationPage),
   accountPage: pageObject(AccountPage),
   removeGearPage: pageObject(RemoveGearPage),
   removePortPage: pageObject(RemovePortPage),

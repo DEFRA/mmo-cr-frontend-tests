@@ -46,12 +46,13 @@ Team rules (non-negotiable):
 - `baseURL` is derived from `CATCH_RECORDING_ENV` (`dev` | `test` | `prod`, default `test`); always navigate with relative paths (e.g. `goto('/account')`).
 - UI specs live in feature folders under `tests/ui/<feature-name>/` (kebab-case folder, camelCase file name, e.g. `tests/ui/species/catchWeightEntry.spec.ts`). Top-level specs exist for older features; prefer a feature folder for new work. When a feature needs more than one `test.describe` group (e.g. form, information panel, error scenarios), create the feature folder and put each group in its own spec file with a single top-level `test.describe`, rather than nesting several groups in one file (e.g. `tests/ui/sign-in/signInForm.spec.ts`, `createAccountPanel.spec.ts`, `signInErrors.spec.ts`).
 - Specs import `test` and `expect` from `fixtures/commonfixture.ts`, never directly from `@playwright/test`.
-- Page objects live in `pages/`, extend `BasePage` (or `DateInputPage` / `PortSelectionPage`) from `pages/basePage.ts`, take a `Page` in the constructor, and expose locators as arrow functions returning `Locator` (e.g. `pageHeading = (): Locator => ...`) plus async action methods. New page objects must be registered as fixtures in `fixtures/commonfixture.ts`.
+- Page objects live in `pages/`, extend `BasePage` (or `DateInputPage` / `PortSelectionPage`) from `pages/basePage.ts`, take a `Page` in the constructor, and expose locators as arrow functions returning `Locator` (e.g. `pageHeading = (): Locator => ...`) plus async action methods. Every page object must implement the abstract `pageHeading` with a locator unique to that page (role + accessible name, not the shared `app-heading-title` test id). New page objects must be registered as fixtures in `fixtures/commonfixture.ts`.
 - Page-object classes, like spec files, require a short JSDoc header. Follow the header and Git-history metadata rules in Spec structure.
 - Reusable journeys live in `tests/ui/helpers/` (`NavigationFlow`, `GearFlow`, `SpeciesFlow`, `FavouritesFlow`, `MapFlow`) and are injected as fixtures (`navigationFlow`, `gearFlow`, etc.). Only use methods that currently exist; read the helper before calling it.
 - Catch-record journeys that need saved favourites use the `createdRecords` fixture instead of their own `beforeEach`/`afterEach`: set `test.use({ testFavourites })` (optionally `draftCleanup: 'all'`) on the `test.describe`, request `createdRecords` in each test and push every draft reference the test creates. The fixture signs in, adds missing favourites, and afterwards deletes those drafts and removes the favourites it added.
 - API clients live in `services/` (extend `baseApi.ts`) and are exposed as fixtures (e.g. `healthApi`).
-- `BasePage` already provides shared helpers (`goto`, `clickSaveAndContinue`, `expectTitle`, `expectUrl`, `acceptCookies`, `tabUntilFocused`, `common.backLink()`, `header`, `footer`). Reuse them instead of duplicating.
+- `BasePage` already provides shared helpers (`goto`, `clickSaveAndContinue`, `expectTitle`, `expectOnPage`, `expectUrl`, `acceptCookies`, `tabUntilFocused`, `common.backLink()`, `header`, `footer`). Reuse them instead of duplicating.
+- Prove which page is shown with content, not the URL: call `expectOnPage()` on the page object of the page reached (e.g. `accountPage.expectOnPage()`), or assert a context-specific heading such as `addPortPage.returnPortHeading()` or `addGearPage.measurementsHeading()`. Do not use `expectUrl` / `toHaveURL` for navigation checks.
 - Selectors follow GOV.UK Frontend conventions used in existing page objects: prefer `getByRole`, `getByLabel`, `getByTestId`, then GOV.UK classes (e.g. `.govuk-error-summary`). Never guess a selector, label, or test id.
 
 ## Spec structure
@@ -104,7 +105,7 @@ test.describe('Favourite ports', () => {
       });
 
       await test.step('I am returned to the account page', async () => {
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
       });
 
       await test.step('"Lowestoft" is shown in Ports used', async () => {

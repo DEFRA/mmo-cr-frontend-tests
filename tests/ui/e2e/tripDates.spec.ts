@@ -45,8 +45,7 @@ test.describe('Trip Dates', () => {
       });
 
       await test.step('Only permitted dates should be accepted', async () => {
-        await departurePortPage.expectUrl(/\/departure-port$/);
-        await expect(departurePortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+        await departurePortPage.expectOnPage();
       });
     }
   );
@@ -72,7 +71,7 @@ test.describe('Trip Dates', () => {
       });
 
       await test.step('A future date should not be accepted', async () => {
-        await tripDepartureDatePage.expectUrl(/\/trip-departure-date$/);
+        await tripDepartureDatePage.expectOnPage();
         await expect(
           tripDepartureDatePage.common.errorSummary(),
           `Error summary to contain text ${errorMessages.tripDates.futureDeparture}`
@@ -112,7 +111,7 @@ test.describe('Trip Dates', () => {
       });
 
       await test.step('The return date should not be before the departure date', async () => {
-        await tripReturnDatePage.expectUrl(/\/trip-return-date$/);
+        await tripReturnDatePage.expectOnPage();
         await expect(
           tripReturnDatePage.common.errorSummary(),
           `Error summary to contain text ${errorMessages.tripDates.returnBeforeDeparture}`

@@ -84,7 +84,7 @@ const unapprovedFavourites = [
     trySaveStep: 'I try to save gear outside the approved catalogue',
     rejectedStep: 'I must select valid gear from the list',
     error: errorMessages.gears.unapproved,
-    url: /\/add-gear/,
+    heading: ({ addGearPage }: AddFavouritePages) => addGearPage.pageHeading(),
     openAdd: ({ accountPage }: AddFavouritePages) => accountPage.clickAddGear(),
     enterUnapproved: ({ addGearPage }: AddFavouritePages) => addGearPage.gearInput().fill(gears.unapproved),
     addPage: ({ addGearPage }: AddFavouritePages) => addGearPage
@@ -95,7 +95,7 @@ const unapprovedFavourites = [
     trySaveStep: 'I try to save a species outside the approved catalogue',
     rejectedStep: 'I cannot save the unapproved species',
     error: errorMessages.species.unapproved,
-    url: /\/add-species/,
+    heading: ({ addSpeciesPage }: AddFavouritePages) => addSpeciesPage.pageHeading(),
     openAdd: ({ accountPage }: AddFavouritePages) => accountPage.addSpeciesLink().click(),
     enterUnapproved: async ({ addSpeciesPage }: AddFavouritePages) => {
       await addSpeciesPage.speciesInput().fill(`${catchSpecies.unapprovedPrefix} ${Date.now()}`);
@@ -110,7 +110,7 @@ const unapprovedFavourites = [
     trySaveStep: 'I try to save a port outside the approved catalogue',
     rejectedStep: 'I must select a valid port from the list',
     error: errorMessages.ports.unapproved,
-    url: /\/add-port/,
+    heading: ({ addPortPage }: AddFavouritePages) => addPortPage.favouritesHeading(),
     openAdd: ({ accountPage }: AddFavouritePages) => accountPage.addPortLink().click(),
     enterUnapproved: ({ addPortPage }: AddFavouritePages) =>
       addPortPage.portInput().fill(`${ports.unapprovedPrefix} ${Date.now()}`),
@@ -189,7 +189,7 @@ test.describe('Create and amend favourites', () => {
           addSpeciesPage.errorSummary(),
           `Error summary to contain text ${duplicateSpeciesError}`
         ).toContainText(duplicateSpeciesError);
-        await addSpeciesPage.expectUrl(/\/add-species/);
+        await addSpeciesPage.expectOnPage();
       });
 
       await test.step('Exactly one copy remains saved after reloading the account', async () => {
@@ -262,7 +262,7 @@ test.describe('Create and amend favourites', () => {
         await expect(addGearPage.errorSummary(), `Error summary to contain text ${duplicateGearError}`).toContainText(
           duplicateGearError
         );
-        await addGearPage.expectUrl(/\/add-gear/);
+        await addGearPage.expectOnPage();
       });
 
       await test.step('Exactly one copy remains saved', async () => {
@@ -289,7 +289,7 @@ test.describe('Create and amend favourites', () => {
 
       await test.step('I am informed that the port is already a favourite', async () => {
         await expect(addPortPage.errorSummary(), 'Error summary to contain text').toContainText(/already/i);
-        await addPortPage.expectUrl(/\/add-port/);
+        await expect(addPortPage.favouritesHeading(), 'Add port heading to be visible').toBeVisible();
       });
 
       await test.step('Exactly one copy remains saved after reloading the account', async () => {
@@ -321,7 +321,7 @@ test.describe('Create and amend favourites', () => {
         });
 
         await test.step(`The ${favourite.kind} is no longer saved as a favourite`, async () => {
-          await accountPage.expectUrl(/\/account$/);
+          await accountPage.expectOnPage();
           await accountPage.reload();
           await expect(
             favourite.savedValue(accountPage),
@@ -441,7 +441,7 @@ test.describe('Create and amend favourites', () => {
       });
 
       await test.step('Mandatory catch-weight validation prevents progression', async () => {
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        await speciesSelectionPage.expectOnPage();
         await expect(
           speciesSelectionPage.speciesCheckbox(catchSpecies.cod.name),
           'Species checkbox to be checked'
@@ -472,12 +472,12 @@ test.describe('Create and amend favourites', () => {
 
         await test.step(`I start a new catch record and reach ${portType}-port selection`, async () => {
           await navigationFlow.startCatchRecord();
-          await departurePortPage.expectUrl(/\/departure-port$/);
+          await departurePortPage.expectOnPage();
 
           if (portType === 'return') {
             await departurePortPage.selectPort(ports.first);
             await departurePortPage.clickSaveAndContinue();
-            await returnPortPage.expectUrl(/\/return-port$/);
+            await returnPortPage.expectOnPage();
           }
         });
 
@@ -540,7 +540,7 @@ test.describe('Create and amend favourites', () => {
             favourite.addPage(pages).errorSummary(),
             `Add page to contain text ${favourite.error}`
           ).toContainText(favourite.error);
-          await favourite.addPage(pages).expectUrl(favourite.url);
+          await expect(favourite.heading(pages), `Add ${favourite.kind} heading to be visible`).toBeVisible();
         });
       }
     );

@@ -14,7 +14,10 @@ export class SigninPage extends BasePage {
   public readonly signInButton = (): Locator => this.page.getByRole('button', { name: 'Sign in' });
   public readonly errorMessage = (): Locator => this.page.locator('#errorIsland');
 
+  public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: 'Sign in', exact: true });
   public readonly signInHeading = (): Locator => this.page.getByTestId('app-heading-title');
+  public readonly forgottenPasswordHeading = (): Locator =>
+    this.page.getByRole('heading', { name: 'Forgotten your password?', exact: true });
   public readonly signedOutHeading = (): Locator =>
     this.page.getByRole('heading', { name: 'You have been signed out' });
   public readonly troubleHeading = (): Locator =>

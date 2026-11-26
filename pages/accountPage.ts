@@ -10,7 +10,7 @@ import { BasePage } from './basePage';
  * @since 2026-10-05
  */
 export class AccountPage extends BasePage {
-  public readonly pageHeading = (): Locator => this.page.getByTestId('app-heading-title');
+  public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: 'Your account', exact: true });
 
   public readonly personalDetailsHeading = (): Locator => this.page.getByRole('heading', { name: 'Personal details' });
 

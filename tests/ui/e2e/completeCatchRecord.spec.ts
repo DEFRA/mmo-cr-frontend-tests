@@ -35,7 +35,7 @@ test.describe('Complete Catch Record', () => {
       });
 
       await test.step('I should be told what information is required', async () => {
-        await tripDatePage.expectUrl(/\/trip-date$/);
+        await tripDatePage.expectOnPage();
         await expect(
           tripDatePage.common.errorSummary(),
           `Error summary to contain text ${errorMessages.tripDates.sameDayRequired}`
@@ -60,8 +60,7 @@ test.describe('Complete Catch Record', () => {
       });
 
       await test.step('I should continue after entering valid information', async () => {
-        await departurePortPage.expectUrl(/\/departure-port$/);
-        await expect(departurePortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+        await departurePortPage.expectOnPage();
       });
     }
   );

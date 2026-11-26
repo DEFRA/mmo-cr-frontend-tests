@@ -63,7 +63,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('The gear is saved to my favourites', async () => {
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await expect(
           accountPage.gearOnboardValue(),
           `Gear onboard value to contain text ${gears.pots.name}`
@@ -97,7 +97,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('Both gears appear in my favourites list', async () => {
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await expect(
           accountPage.gearOnboardValue(),
           `Gear onboard value to contain text ${gears.pots.name}`
@@ -145,7 +145,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('The gear is not saved', async () => {
-        await addGearPage.expectUrl(/\/add-gear/);
+        await expect(addGearPage.measurementsHeading(), 'Measurements heading to be visible').toBeVisible();
         await accountPage.goto('/account');
         await expect(accountPage.gearOnboardValue(), `Gear onboard value to have text ${gearBefore}`).toHaveText(
           gearBefore
@@ -180,7 +180,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('Prevents submission', async () => {
-        await addGearPage.expectUrl(/\/add-gear/);
+        await expect(addGearPage.measurementsHeading(), 'Measurements heading to be visible').toBeVisible();
         await accountPage.goto('/account');
         await expect(accountPage.gearOnboardValue(), `Gear onboard value to have text ${gearBefore}`).toHaveText(
           gearBefore

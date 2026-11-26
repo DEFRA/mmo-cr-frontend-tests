@@ -120,7 +120,6 @@ test.describe('Home page', () => {
 
         for (const testCase of testCases) {
           await testCase.link.click();
-          await expect(homePage.page, 'Page to have url').toHaveURL(new RegExp(`.*${testCase.hash}$`));
           await expect(testCase.heading, 'Heading to be in viewport').toBeInViewport();
         }
       });
@@ -130,11 +129,11 @@ test.describe('Home page', () => {
   test(
     'Opens the sign-in page when Start now is selected',
     { tag: ['@ui', '@smoke', '@homePage'] },
-    async ({ homePage }) => {
+    async ({ homePage, signInPage }) => {
       await test.step('Clicking Start now button navigates to sign-in page', async () => {
         await homePage.goto('/');
         await homePage.startNowButton().click();
-        await expect(homePage.page, 'Page to have url').toHaveURL(/.*\/sign-in/);
+        await signInPage.expectOnPage();
       });
     }
   );

@@ -51,7 +51,7 @@ test.describe('Catch Location', () => {
 
       await test.step('I should continue to species selection', async () => {
         await checkAnswersPage.goBack();
-        await speciesSelectionPage.expectUrl(/\/species-selection\?gearId=/);
+        await speciesSelectionPage.expectOnPage();
         await expect(
           speciesSelectionPage.pageHeadingForGear(gears.seineNets.name),
           'Page heading for gear to be visible'

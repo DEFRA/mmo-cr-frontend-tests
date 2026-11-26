@@ -17,7 +17,6 @@ type BackNavigationScenario = {
   tripType: string;
   tripDates?: TripDates;
   previousScreen: string;
-  previousUrl: RegExp;
 };
 
 type WelshScenario = {
@@ -31,13 +30,12 @@ const welshScenarios: WelshScenario[] = [
 ];
 
 const backNavigationScenarios: BackNavigationScenario[] = [
-  { tripType: 'same-day', previousScreen: 'Did your trip start and finish today?', previousUrl: /\/trip-date$/ },
+  { tripType: 'same-day', previousScreen: 'Did your trip start and finish today?' },
   {
     tripType: 'multi-day',
     // Departure two days ago, return yesterday
     tripDates: { departureDate: daysAgo(2), returnDate: daysAgo(1) },
-    previousScreen: 'Which date did you return from your trip?',
-    previousUrl: /\/trip-return-date$/
+    previousScreen: 'Which date did you return from your trip?'
   }
 ];
 
@@ -81,8 +79,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('The "Select the port you set off from" screen is displayed', async () => {
-          await departurePortPage.expectUrl(/\/departure-port$/);
-          await expect(departurePortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+          await departurePortPage.expectOnPage();
         });
 
         await test.step('The catch record reference of the new record is displayed', async () => {
@@ -126,8 +123,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('The "Enter the port or closest port you set off from" screen is displayed', async () => {
-          await addPortPage.expectUrl(/\/add-port\?for=departure/);
-          await expect(addPortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+          await addPortPage.expectOnPage();
         });
 
         await test.step(`I search for and select "${ports.third}"`, async () => {
@@ -184,8 +180,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('The "Select the port you returned to" screen is displayed', async () => {
-          await returnPortPage.expectUrl(/\/return-port$/);
-          await expect(returnPortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+          await returnPortPage.expectOnPage();
         });
 
         await test.step('The catch record reference of the new record is displayed', async () => {
@@ -229,7 +224,6 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('The "Enter the port or closest port you returned to" screen is displayed', async () => {
-          await addPortPage.expectUrl(/\/add-port\?for=return/);
           await expect(addPortPage.returnPortHeading(), 'Return port heading to be visible').toBeVisible();
         });
 
@@ -242,8 +236,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('The "What gear did you use?" screen is displayed', async () => {
-          await gearSelectionPage.expectUrl(/\/gear-selection$/);
-          await expect(gearSelectionPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+          await gearSelectionPage.expectOnPage();
         });
 
         await test.step(`"${ports.first}" is recorded as the departure port`, async () => {
@@ -297,8 +290,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('The "What gear did you use?" screen is displayed', async () => {
-          await gearSelectionPage.expectUrl(/\/gear-selection$/);
-          await expect(gearSelectionPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+          await gearSelectionPage.expectOnPage();
         });
 
         await test.step(`"${ports.first}" is recorded as the departure port`, async () => {
@@ -332,8 +324,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('I remain on the "Select the port you set off from" screen', async () => {
-          await departurePortPage.expectUrl(/\/departure-port$/);
-          await expect(departurePortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+          await departurePortPage.expectOnPage();
         });
 
         await test.step('I am not taken to the "Select the port you returned to" screen', async () => {
@@ -367,8 +358,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('I remain on the "Select the port you returned to" screen', async () => {
-          await returnPortPage.expectUrl(/\/return-port$/);
-          await expect(returnPortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+          await returnPortPage.expectOnPage();
         });
 
         await test.step('I am not taken to the "What gear did you use?" screen', async () => {
@@ -415,7 +405,7 @@ test.describe('Select a previously used port or add another port', () => {
       }
     );
 
-    for (const { tripType, tripDates, previousScreen, previousUrl } of backNavigationScenarios) {
+    for (const { tripType, tripDates, previousScreen } of backNavigationScenarios) {
       test(
         `Back from the departure port screen returns to the previous screen of a ${tripType} catch record`,
         { tag: ['@ui', '@regression', '@favouritePorts'] },
@@ -436,8 +426,7 @@ test.describe('Select a previously used port or add another port', () => {
           });
 
           await test.step(`The "${previousScreen}" screen is displayed`, async () => {
-            await previousPage.expectUrl(previousUrl);
-            await expect(previousPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+            await previousPage.expectOnPage();
           });
         }
       );
@@ -461,8 +450,7 @@ test.describe('Select a previously used port or add another port', () => {
         });
 
         await test.step('The "Select the port you set off from" screen is displayed', async () => {
-          await departurePortPage.expectUrl(/\/departure-port$/);
-          await expect(departurePortPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+          await departurePortPage.expectOnPage();
         });
       }
     );

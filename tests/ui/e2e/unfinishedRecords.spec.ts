@@ -104,7 +104,7 @@ test.describe('Unfinished Records', () => {
       // The service resumes at the trip-date question with the earlier answer selected (OQ-17)
       await test.step('I should continue from the appropriate point', async () => {
         await checkAnswersPage.goBack();
-        await tripDatePage.expectUrl(/\/trip-date$/);
+        await tripDatePage.expectOnPage();
         await expect(tripDatePage.pageHeading(), `Page heading to contain text ${reference}`).toContainText(reference);
         await expect(tripDatePage.noRadio(), 'No radio to be checked').toBeChecked();
       });
@@ -139,7 +139,7 @@ test.describe('Unfinished Records', () => {
       });
 
       await test.step('The draft should be removed', async () => {
-        await recordsPage.expectUrl(/\/records$/);
+        await recordsPage.expectOnPage();
         await expect(recordsPage.recordRow(reference), 'Record row to have count').toHaveCount(0);
       });
 

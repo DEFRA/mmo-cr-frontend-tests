@@ -57,8 +57,7 @@ test.describe('Trip Information', () => {
 
       await test.step('I should be able to continue', async () => {
         await checkAnswersPage.goBack();
-        await gearSelectionPage.expectUrl(/\/gear-selection$/);
-        await expect(gearSelectionPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+        await gearSelectionPage.expectOnPage();
       });
     }
   );

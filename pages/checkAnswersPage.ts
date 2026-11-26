@@ -14,6 +14,10 @@ export class CheckAnswersPage extends BasePage {
   public readonly pageHeading = (): Locator =>
     this.page.getByRole('heading', { name: 'Check your details', exact: true });
 
+  // Shown instead of "Check your details" when reviewing changes to a submitted record
+  public readonly amendmentHeading = (vesselName: string): Locator =>
+    this.page.getByRole('heading', { level: 1, name: `Edit catch record for ${vesselName}` });
+
   public readonly summaryRow = (key: string): Locator =>
     this.page.locator('.govuk-summary-list__row').filter({
       has: this.page.locator('.govuk-summary-list__key', { hasText: key })

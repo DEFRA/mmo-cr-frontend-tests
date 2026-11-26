@@ -13,8 +13,6 @@ const validCredentials = {
   password: process.env.CATCH_RECORDING_PASSWORD ?? ''
 };
 const missingCredentialsReason = 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD must be set in .env';
-const signInUrl = /\/sign-in/;
-const recordsUrl = /\/records$/;
 
 test.describe('Access Catch Recording', () => {
   test(
@@ -42,7 +40,7 @@ test.describe('Access Catch Recording', () => {
       });
 
       await test.step('I should access the Catch Recording service', async () => {
-        await recordsPage.expectUrl(recordsUrl);
+        await recordsPage.expectOnPage();
         await recordsPage.expectTitle(signInData.recordsPageTitle);
       });
 
@@ -77,7 +75,7 @@ test.describe('Access Catch Recording', () => {
       });
 
       await test.step('I should remain on the Sign in screen', async () => {
-        await signInPage.expectUrl(signInUrl);
+        await signInPage.expectOnPage();
         await expect(signInPage.signInHeading(), `Sign in heading to have text ${signInData.signInHeading}`).toHaveText(
           signInData.signInHeading
         );

@@ -140,7 +140,7 @@ test.describe('Species catch weight entry', () => {
   test(
     'Preserves saved catch weights when the species page is reopened',
     { tag: ['@ui', '@smoke', '@catchWeightRecording'] },
-    async ({ speciesSelectionPage }) => {
+    async ({ speciesSelectionPage, catchNotLandedPage }) => {
       await test.step(`The user selects ${catchSpecies.cod.name} and enters all three weights`, async () => {
         await speciesSelectionPage.selectSpecies(catchSpecies.cod.name);
         await speciesSelectionPage.enterSpeciesWeights(
@@ -156,7 +156,7 @@ test.describe('Species catch weight entry', () => {
       });
 
       await test.step('The user returns to the species selection page', async () => {
-        await speciesSelectionPage.expectUrl(/\/catch-not-landed$/);
+        await catchNotLandedPage.expectOnPage();
         await speciesSelectionPage.goto('/species-selection');
       });
 
@@ -184,7 +184,7 @@ test.describe('Species catch weight entry', () => {
   test(
     'Updates saved values when all catch weights are edited',
     { tag: ['@ui', '@regression', '@catchWeightRecording'] },
-    async ({ speciesSelectionPage }) => {
+    async ({ speciesSelectionPage, catchNotLandedPage }) => {
       await test.step('The user has saved all three weights for Cod', async () => {
         await speciesSelectionPage.selectSpecies(catchSpecies.cod.name);
         await speciesSelectionPage.enterSpeciesWeights(
@@ -210,7 +210,7 @@ test.describe('Species catch weight entry', () => {
 
       await test.step('The user saves the edited weights and returns to the species page', async () => {
         await speciesSelectionPage.clickSaveAndContinue();
-        await speciesSelectionPage.expectUrl(/\/catch-not-landed$/);
+        await catchNotLandedPage.expectOnPage();
         await speciesSelectionPage.goto('/species-selection');
       });
 

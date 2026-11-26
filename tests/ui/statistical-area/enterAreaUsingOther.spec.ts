@@ -156,7 +156,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
   test(
     'Saves the area code when a suggested result is selected',
     { tag: ['@ui', '@smoke', '@statisticalAreaManualEntry'] },
-    async ({ statisticalAreaOtherPage, checkAnswersPage }) => {
+    async ({ statisticalAreaOtherPage, speciesSelectionPage, checkAnswersPage }) => {
       test.info().annotations.push({
         type: 'unverified',
         description: 'Check answers evidence covers the area code only; stored coordinates are not asserted'
@@ -180,7 +180,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
 
       await test.step('The corresponding coordinates are saved against the catch record', async () => {
         await statisticalAreaOtherPage.clickSaveAndContinue();
-        await expect(statisticalAreaOtherPage.page, 'Page not to have url').not.toHaveURL(/\/statistical-area-other/);
+        await speciesSelectionPage.expectOnPage();
 
         await checkAnswersPage.goto('/check-answers');
         await expect(

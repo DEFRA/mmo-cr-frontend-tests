@@ -39,6 +39,7 @@ test.describe('Amend Catch Record', () => {
       recordsPage,
       submittedRecordPage,
       editReasonPage,
+      confirmationPage,
       tripReturnDatePage
     }) => {
       test.slow();
@@ -56,7 +57,7 @@ test.describe('Amend Catch Record', () => {
         reference = await catchRecordFlow.completeRecordToReview(record);
         createdRecords.push(reference);
         await checkAnswersPage.clickAcceptAndSubmit();
-        await checkAnswersPage.expectUrl(/\/confirmation$/);
+        await confirmationPage.expectOnPage();
         await recordsPage.goto('/records');
         await expect(
           recordsPage.recordStatus(reference),
@@ -73,7 +74,10 @@ test.describe('Amend Catch Record', () => {
       await test.step('I enter the reason for the changes and save', async () => {
         await editReasonPage.enterReason(amendReason);
         await editReasonPage.clickSaveAndContinue();
-        await checkAnswersPage.expectUrl(/\/edit-review$/);
+        await expect(
+          checkAnswersPage.amendmentHeading(record.vesselName),
+          `Amendment heading for ${record.vesselName} to be visible`
+        ).toBeVisible();
       });
 
       await test.step('I change the return date', async () => {
@@ -88,7 +92,7 @@ test.describe('Amend Catch Record', () => {
 
       await test.step('I confirm the declaration and submit the changes', async () => {
         await checkAnswersPage.clickAcceptAndSubmit();
-        await checkAnswersPage.expectUrl(/\/confirmation$/);
+        await confirmationPage.expectOnPage();
       });
 
       await test.step('The record should be displayed as amended', async () => {
