@@ -60,7 +60,7 @@ test.describe('Fishing Gear', () => {
             await expect(
               checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained),
               'Species summary value to have text'
-            ).toHaveText(`${caught.weight} kg`);
+            ).toHaveText(caught.weight);
           }
         }
       });

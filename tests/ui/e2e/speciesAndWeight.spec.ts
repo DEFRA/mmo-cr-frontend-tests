@@ -55,7 +55,7 @@ test.describe('Species and Weight', () => {
             checkAnswers.summaryKeys.weightRetained
           ),
           'Species summary value to have text'
-        ).toHaveText(`${catchSpecies.cod.weight} kg`);
+        ).toHaveText(catchSpecies.cod.weight);
       });
 
       await test.step('They should be linked to the correct fishing gear', async () => {
@@ -96,7 +96,7 @@ test.describe('Species and Weight', () => {
             await expect(
               checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained),
               'Species summary value to have text'
-            ).toHaveText(`${caught.weight} kg`);
+            ).toHaveText(caught.weight);
           }
         }
       });

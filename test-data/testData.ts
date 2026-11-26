@@ -124,24 +124,24 @@ export const areas = {
 export const checkAnswers = {
   summaryKeys: {
     vessel: 'Vessel',
-    departureDate: 'Departure date',
-    returnDate: 'Return date',
-    departurePort: 'Departure port',
-    returnPort: 'Return port',
-    statisticalSubArea: 'Statistical sub area',
-    areaMajorityCaught: 'Area majority caught',
-    gearType: 'Gear type',
+    departureDate: 'Date left',
+    returnDate: 'Date returned',
+    departurePort: 'Port left from',
+    returnPort: 'Port returned to',
+    statisticalSubArea: 'Area majority catch caught',
+    areaMajorityCaught: 'Area majority catch caught',
+    gearType: 'Gear used',
     speciesCaught: 'Species caught',
-    weightRetained: 'Weight above minimum size retained',
-    notLanded: 'Not landed',
+    weightRetained: 'Weight above minimum size retained (kg)',
+    notLanded: 'Catch kept onboard or in keep pots',
     notLandedSpecies: 'Species',
     weightKeptOnboard: 'Weight above minimum size kept onboard or in keep pots (kg)'
   },
   changeLinks: {
-    departureDate: 'Change departure date',
-    returnDate: 'Change return date',
-    departurePort: 'Change departure port',
-    returnPort: 'Change return port'
+    departureDate: 'Change Date left',
+    returnDate: 'Change Date returned',
+    departurePort: 'Change Port left from',
+    returnPort: 'Change Port returned to'
   },
   answers: {
     yes: 'Yes',

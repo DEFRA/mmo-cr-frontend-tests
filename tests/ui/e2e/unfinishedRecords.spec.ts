@@ -98,7 +98,7 @@ test.describe('Unfinished Records', () => {
             checkAnswers.summaryKeys.weightRetained
           ),
           'Species summary value to have text'
-        ).toHaveText(`${catchSpecies.cod.weight} kg`);
+        ).toHaveText(catchSpecies.cod.weight);
       });
 
       // The service resumes at the trip-date question with the earlier answer selected (OQ-17)

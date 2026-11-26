@@ -5,14 +5,14 @@ const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/
 
 /**
  * Review a catch record before submission.
- * Check summary details, change answers, confirm the declaration and submit the record.
+ * Check summary details, change answers, read the declaration warning and submit the record.
  *
  * @author Randhir Patel
  * @since 2026-09-30
  */
 export class CheckAnswersPage extends BasePage {
   public readonly pageHeading = (): Locator =>
-    this.page.getByRole('heading', { name: 'Check your catch record', exact: true });
+    this.page.getByRole('heading', { name: 'Check your details', exact: true });
 
   public readonly summaryRow = (key: string): Locator =>
     this.page.locator('.govuk-summary-list__row').filter({
@@ -23,7 +23,7 @@ export class CheckAnswersPage extends BasePage {
 
   public readonly changeLink = (key: string): Locator => this.summaryRow(key).locator('.govuk-summary-list__actions a');
 
-  // Accessible names add hidden context, e.g. "Change return date"
+  // Accessible names add hidden context, e.g. "Change Change Date returned"; getByRole matches substrings
   public readonly changeLinkNamed = (accessibleName: string): Locator =>
     this.page.getByRole('link', { name: accessibleName });
 
@@ -54,9 +54,9 @@ export class CheckAnswersPage extends BasePage {
       .locator('.govuk-summary-list__value');
 
   public readonly notLandedSummary = (): Locator =>
-    this.page
-      .locator('.govuk-summary-list')
-      .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: 'Not landed' }) });
+    this.page.locator('.govuk-summary-list').filter({
+      has: this.page.locator('.govuk-summary-list__key', { hasText: 'Catch kept onboard or in keep pots' })
+    });
 
   public readonly notLandedValue = (key: string): Locator =>
     this.notLandedSummary()
@@ -65,9 +65,6 @@ export class CheckAnswersPage extends BasePage {
       .locator('.govuk-summary-list__value');
 
   public readonly declarationWarning = (): Locator => this.page.locator('.govuk-warning-text');
-
-  public readonly declarationCheckbox = (): Locator =>
-    this.page.getByLabel('I confirm the information is complete and accurate');
 
   public readonly submitButton = (): Locator =>
     this.page.getByRole('button', { name: 'Accept and submit trip details' });
@@ -79,10 +76,6 @@ export class CheckAnswersPage extends BasePage {
 
   async clickChangeLinkFor(key: string) {
     await this.changeLink(key).click();
-  }
-
-  async checkDeclaration() {
-    await this.declarationCheckbox().check();
   }
 
   async clickAcceptAndSubmit() {

@@ -48,7 +48,7 @@ export const daysAgo = (days: number): Date => {
   return date;
 };
 
-// Check your catch record shows dates as "14 November 2026"
+// Check your details shows dates as "14 November 2026"
 export const reviewDate = (date: Date): string =>
   date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -284,7 +284,7 @@ export class CatchRecordFlow {
     await checkAnswersPage.expectUrl(/\/check-answers$/);
   }
 
-  // Answers every question up to "Check your catch record" without submitting; returns the reference
+  // Answers every question up to "Check your details" without submitting; returns the reference
   async completeRecordToReview(record: CatchRecordData): Promise<string> {
     const reference = await this.startRecord(record.vesselName);
     if (record.tripDates) {

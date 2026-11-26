@@ -87,7 +87,6 @@ test.describe('Amend Catch Record', () => {
       });
 
       await test.step('I confirm the declaration and submit the changes', async () => {
-        await checkAnswersPage.checkDeclaration();
         await checkAnswersPage.clickAcceptAndSubmit();
         await checkAnswersPage.expectUrl(/\/confirmation$/);
       });
