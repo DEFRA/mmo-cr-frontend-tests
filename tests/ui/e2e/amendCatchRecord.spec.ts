@@ -56,6 +56,7 @@ test.describe('Amend Catch Record', () => {
         reference = await catchRecordFlow.completeRecordToReview(record);
         createdRecords.push(reference);
         await checkAnswersPage.clickAcceptAndSubmit();
+        await checkAnswersPage.expectUrl(/\/confirmation$/);
         await recordsPage.goto('/records');
         await expect(
           recordsPage.recordStatus(reference),
@@ -88,6 +89,7 @@ test.describe('Amend Catch Record', () => {
       await test.step('I confirm the declaration and submit the changes', async () => {
         await checkAnswersPage.checkDeclaration();
         await checkAnswersPage.clickAcceptAndSubmit();
+        await checkAnswersPage.expectUrl(/\/confirmation$/);
       });
 
       await test.step('The record should be displayed as amended', async () => {

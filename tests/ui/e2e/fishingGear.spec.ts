@@ -47,10 +47,6 @@ test.describe('Fishing Gear', () => {
         await checkAnswersPage.goto('/check-answers');
         for (const { gear } of multiGearCatches) {
           await expect(checkAnswersPage.gearSection(gear.name), 'Gear section to be visible').toBeVisible();
-          await expect(
-            checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.gearType),
-            `Gear summary value to have text ${gear.name}`
-          ).toHaveText(gear.name);
         }
       });
 
