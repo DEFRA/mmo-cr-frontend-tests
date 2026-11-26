@@ -21,13 +21,13 @@ test.describe('Access Catch Recording', () => {
       tag: ['@ui', '@smoke', '@signIn', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-01' }
     },
-    async ({ signInPage, recordsPage }) => {
+    async ({ navigationFlow, signInPage, recordsPage }) => {
       await test.step('I am a registered user', async () => {
         test.skip(!validCredentials.email || !validCredentials.password, missingCredentialsReason);
       });
 
       await test.step('I am on the Sign in screen', async () => {
-        await signInPage.goto('/sign-in');
+        await navigationFlow.openSignIn();
       });
 
       await test.step('I enter valid sign-in details', async () => {
@@ -60,9 +60,9 @@ test.describe('Access Catch Recording', () => {
       tag: ['@ui', '@regression', '@signIn', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-02' }
     },
-    async ({ signInPage }) => {
+    async ({ navigationFlow, signInPage }) => {
       await test.step('I am on the Sign in screen', async () => {
-        await signInPage.goto('/sign-in');
+        await navigationFlow.openSignIn();
       });
 
       await test.step('I enter incorrect sign-in details', async () => {

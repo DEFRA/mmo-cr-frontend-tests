@@ -81,7 +81,8 @@ export class GearFlow {
   async removeSavedGears(gearNames: string[]): Promise<void> {
     const { accountPage, removeGearPage } = this.pages;
 
-    await accountPage.goto('/account');
+    await accountPage.header.accountLink().click();
+    await accountPage.expectOnPage();
     const gearText = await accountPage.getGearOnboardText();
     const present = gearNames.filter((name) => gearText.includes(name));
     if (present.length === 0) return;

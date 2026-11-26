@@ -19,6 +19,8 @@ export abstract class BasePage {
 
   public readonly header = {
     govukHeader: (): Locator => this.page.locator('.govuk-header.app-header'),
+    homeLink: (): Locator => this.page.getByRole('link', { name: 'Home', exact: true }),
+    accountLink: (): Locator => this.page.getByRole('link', { name: 'Your account', exact: true }),
     serviceNavigation: (): Locator => this.page.getByRole('region', { name: 'Service information' }),
     // Shown on journey pages such as /select-vessel; not shown on /records or /check-answers (OQ-7)
     signOutButton: (): Locator =>

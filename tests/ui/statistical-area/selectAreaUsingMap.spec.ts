@@ -10,7 +10,7 @@ import { expect, test } from '../../../fixtures/commonfixture';
 import { type MapLabel } from '../../../pages/statisticalAreaPage';
 import { type LandFeature, MapFlow, type SubrectangleReference } from '../helpers/mapFlow';
 import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
-import { ports, areas, checkAnswers, errorMessages } from '../../../test-data/testData';
+import { ports, gears, areas, checkAnswers, errorMessages } from '../../../test-data/testData';
 
 type ViewportSize = { width: number; height: number };
 type PanScenario = { scenario: string; direction: string; dragStep: string; offsetX: number; offsetY: number };
@@ -64,9 +64,11 @@ function requireDefined<T>(value: T | undefined, message: string): T {
 
 // Departure and return ports the journey saves as favourites; removed after each test unless already saved
 const absentFavourites: Favourites = { ...noFavourites, ports: [ports.first, ports.third] };
+// Gear the journey selects to reach the map; saved for the test and removed afterwards unless already saved
+const testFavourites: Favourites = { ...noFavourites, gears: [gears.pots.name] };
 
 test.describe('ICES statistical sub-rectangle map', () => {
-  test.use({ absentFavourites });
+  test.use({ testFavourites, absentFavourites });
 
   // Requesting createdRecords signs in and restores the favourites and drafts after each test
   test.beforeEach(async ({ createdRecords }) => {

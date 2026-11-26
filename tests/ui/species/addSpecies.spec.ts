@@ -8,10 +8,12 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
-import { catchSpecies, errorMessages, ports } from '../../../test-data/testData';
+import { catchSpecies, errorMessages, gears, ports } from '../../../test-data/testData';
 
 // Departure and return ports the journey saves as favourites; removed after each test unless already saved
 const absentFavourites: Favourites = { ...noFavourites, ports: [ports.first, ports.third] };
+// Gear the journey selects to reach the map; saved for the test and removed afterwards unless already saved
+const testFavourites: Favourites = { ...noFavourites, gears: [gears.pots.name] };
 
 // Approved species are discovered from the live catalogue at runtime using these search terms
 
@@ -24,7 +26,7 @@ const speciesCodeOf = (speciesName: string): string => {
 };
 
 test.describe('Add species to a catch record', () => {
-  test.use({ absentFavourites });
+  test.use({ testFavourites, absentFavourites });
 
   // Requesting createdRecords signs in and restores the favourites and drafts after each test
   test.beforeEach(async ({ navigationFlow, createdRecords }) => {
@@ -196,7 +198,7 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The user returns to the species page', async () => {
-        await navigationFlow.openSpeciesSelection();
+        await navigationFlow.returnToSpeciesSelection();
       });
 
       await test.step('Previously selected species are displayed', async () => {
@@ -329,7 +331,7 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The text is not added to the catch record', async () => {
-        await navigationFlow.openSpeciesSelection();
+        await navigationFlow.returnToSpeciesSelection();
         await expect(
           speciesSelectionPage.speciesCheckbox(unapprovedSpecies),
           'Species checkbox to have count'

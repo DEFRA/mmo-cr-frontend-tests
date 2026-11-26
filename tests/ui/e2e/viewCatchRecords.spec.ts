@@ -38,9 +38,9 @@ test.describe('View Catch Records', () => {
       tag: ['@ui', '@regression', '@catchRecords', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-03' }
     },
-    async ({ recordsPage }) => {
+    async ({ recordsPage, navigationFlow }) => {
       await test.step('I open my catch records', async () => {
-        await recordsPage.goto('/records');
+        await navigationFlow.openRecords();
       });
 
       await test.step('I should see my catch records', async () => {

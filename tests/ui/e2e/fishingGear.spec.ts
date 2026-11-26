@@ -41,10 +41,11 @@ test.describe('Fishing Gear', () => {
 
       await test.step('I enter the catch details for each gear', async () => {
         await catchRecordFlow.enterCatchDetailsForEachGear(multiGearCatches);
+        await catchRecordFlow.confirmAllCatchLanded();
       });
 
       await test.step('Each gear should be recorded separately', async () => {
-        await checkAnswersPage.goto('/check-answers');
+        await checkAnswersPage.expectOnPage();
         for (const { gear } of multiGearCatches) {
           await expect(checkAnswersPage.gearSection(gear.name), 'Gear section to be visible').toBeVisible();
         }

@@ -7,9 +7,13 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites } from '../helpers/catchRecordFlow';
-import { vessels, ports, checkAnswers } from '../../../test-data/testData';
+import { vessels, ports, gears, catchSpecies, areas, checkAnswers } from '../../../test-data/testData';
 
-const testFavourites: Favourites = { ports: [ports.first, ports.second], gears: [], species: [] };
+const testFavourites: Favourites = {
+  ports: [ports.first, ports.second],
+  gears: [gears.pots.name],
+  species: [catchSpecies.cod.name]
+};
 
 test.describe('Trip Information', () => {
   test.use({ testFavourites });
@@ -43,8 +47,15 @@ test.describe('Trip Information', () => {
         await returnPortPage.clickSaveAndContinue();
       });
 
+      await test.step('I should be able to continue', async () => {
+        await gearSelectionPage.expectOnPage();
+      });
+
       await test.step('Both ports should be saved against the trip', async () => {
-        await checkAnswersPage.goto('/check-answers');
+        // "Check your details" is reached by answering the remaining questions
+        await catchRecordFlow.completeCatchToReview([
+          { gear: gears.pots, areaCode: areas.validCode, species: [catchSpecies.cod] }
+        ]);
         await expect(
           checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departurePort),
           `Summary value to have text ${ports.first}`
@@ -53,11 +64,6 @@ test.describe('Trip Information', () => {
           checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnPort),
           `Summary value to have text ${ports.second}`
         ).toHaveText(ports.second);
-      });
-
-      await test.step('I should be able to continue', async () => {
-        await checkAnswersPage.goBack();
-        await gearSelectionPage.expectOnPage();
       });
     }
   );

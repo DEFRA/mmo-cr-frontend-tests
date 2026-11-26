@@ -7,10 +7,14 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
-import { gears } from '../../../test-data/testData';
+import { gears, ports } from '../../../test-data/testData';
 
 // Gears the tests save; removed at sign-in and after each test, then restored if they were already saved
-const absentFavourites: Favourites = { ...noFavourites, gears: [gears.pots.name, gears.traps.name] };
+const absentFavourites: Favourites = {
+  ...noFavourites,
+  ports: [ports.first, ports.third],
+  gears: [gears.pots.name, gears.traps.name]
+};
 const gearDimensionText = (dimension: string): RegExp => new RegExp(`Gear dimension by number.*: ${dimension}`);
 
 test.describe('Remove favourite gear', () => {
@@ -161,8 +165,7 @@ test.describe('Remove favourite gear', () => {
 
       await test.step('I start a new catch record and reach gear selection', async () => {
         // Favourites are saved per vessel, so a record must be started to give gear selection its vessel
-        await navigationFlow.startCatchRecord();
-        await gearSelectionPage.goto('/gear-selection');
+        await navigationFlow.openGearSelectionForNewRecord();
       });
 
       await test.step('The removed gear is not offered as a favourite', async () => {

@@ -10,7 +10,7 @@ import { BasePage } from './basePage';
  */
 export class SpeciesSelectionPage extends BasePage {
   public readonly pageHeading = (): Locator =>
-    this.page.getByRole('heading', { name: /(What|Which) species did you catch\?/ });
+    this.page.getByRole('heading', { name: /(What|Which) species did you catch( with .+)?\?/ });
 
   public readonly pageHeadingForGear = (gearName: string): Locator =>
     this.page.getByRole('heading', { name: `Which species did you catch with ${gearName}?` });
@@ -81,12 +81,6 @@ export class SpeciesSelectionPage extends BasePage {
   }
 
   // Unsaved selections are lost when leaving the page, so persist them before removing species
-  async saveAndReturn() {
-    await this.clickSaveAndContinue();
-    await this.page.waitForURL(/catch-not-landed/);
-    await this.goto('/species-selection');
-  }
-
   async clickAddSpecies() {
     await this.addSpeciesLink().click();
   }

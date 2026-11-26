@@ -52,7 +52,15 @@ test.describe('Unfinished Records', () => {
       tag: ['@ui', '@regression', '@draftRecords', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-19' }
     },
-    async ({ createdRecords, catchRecordFlow, recordsPage, draftRecordPage, checkAnswersPage, tripDatePage }) => {
+    async ({
+      createdRecords,
+      catchRecordFlow,
+      recordsPage,
+      draftRecordPage,
+      checkAnswersPage,
+      tripDatePage,
+      navigationFlow
+    }) => {
       let reference = '';
 
       await test.step('I started a catch record', async () => {
@@ -61,7 +69,7 @@ test.describe('Unfinished Records', () => {
       });
 
       await test.step('I left it before completion', async () => {
-        await recordsPage.goto('/records');
+        await navigationFlow.openRecords();
       });
 
       await test.step('I open the Unsent record', async () => {
@@ -117,13 +125,13 @@ test.describe('Unfinished Records', () => {
       tag: ['@ui', '@regression', '@draftRecords', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-20' }
     },
-    async ({ createdRecords, catchRecordFlow, recordsPage, draftRecordPage }) => {
+    async ({ createdRecords, catchRecordFlow, recordsPage, draftRecordPage, navigationFlow }) => {
       let reference = '';
 
       await test.step('I have an Unsent catch record', async () => {
         reference = await catchRecordFlow.completeRecordToReview(firstDraft);
         createdRecords.push(reference);
-        await recordsPage.goto('/records');
+        await navigationFlow.openRecords();
       });
 
       await test.step('I open the record', async () => {
@@ -156,7 +164,15 @@ test.describe('Unfinished Records', () => {
       tag: ['@ui', '@regression', '@draftRecords', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-28' }
     },
-    async ({ createdRecords, catchRecordFlow, recordsPage, draftRecordPage, tripDatePage, checkAnswersPage }) => {
+    async ({
+      createdRecords,
+      catchRecordFlow,
+      recordsPage,
+      draftRecordPage,
+      tripDatePage,
+      checkAnswersPage,
+      navigationFlow
+    }) => {
       const secondDraftTripEnd = daysAgo(0);
       let firstReference = '';
       let secondReference = '';
@@ -166,7 +182,7 @@ test.describe('Unfinished Records', () => {
         createdRecords.push(firstReference);
         secondReference = await catchRecordFlow.completeRecordToReview(secondDraft);
         createdRecords.push(secondReference);
-        await recordsPage.goto('/records');
+        await navigationFlow.openRecords();
       });
 
       await test.step('I open one Unsent record', async () => {
@@ -195,7 +211,7 @@ test.describe('Unfinished Records', () => {
       });
 
       await test.step('The other records should remain unchanged', async () => {
-        await recordsPage.goto('/records');
+        await navigationFlow.openRecords();
         await expect(
           recordsPage.recordStatus(secondReference),
           `Record status to have text ${recordStatuses.draft}`

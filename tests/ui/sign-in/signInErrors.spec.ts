@@ -7,9 +7,9 @@ import { expect, test } from '../../../fixtures/commonfixture';
 import { errorMessages, signInData } from '../../../test-data/testData';
 
 test.describe.skip('Sign in error scenarios', () => {
-  test.beforeEach(async ({ signInPage }) => {
+  test.beforeEach(async ({ navigationFlow }) => {
     await test.step('The user is on the Sign In screen', async () => {
-      await signInPage.goto('/sign-in');
+      await navigationFlow.openSignIn();
     });
   });
 

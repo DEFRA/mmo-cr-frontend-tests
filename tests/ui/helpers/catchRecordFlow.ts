@@ -24,6 +24,8 @@ export type GearData = { name: string };
 // Omit areaCode to pick a visible sub-rectangle on the map instead of searching under "Other"
 export type GearCatch = { gear: GearData; areaCode?: string; species: SpeciesCatch[] };
 export type NotLandedCatch = { speciesName: string; weightKeptOnboard: string };
+// Upper bound on the questions between a resumed draft and the review page
+const maxQuestions = 15;
 export type Favourites = { ports: string[]; gears: string[]; species: string[] };
 export type TripDates = { departureDate: Date; returnDate: Date };
 export type CatchRecordData = {
@@ -284,6 +286,33 @@ export class CatchRecordFlow {
     await checkAnswersPage.expectOnPage();
   }
 
+  // Continues from gear selection through to "Check your details"
+  async completeCatchToReview(gearCatches: GearCatch[]): Promise<void> {
+    await this.selectGears(gearCatches.map(({ gear }) => gear));
+    await this.enterCatchDetailsForEachGear(gearCatches);
+    await this.confirmAllCatchLanded();
+  }
+
+  // Continues from the species question of the only gear through to "Check your details"
+  async completeSpeciesToReview(species: SpeciesCatch[]): Promise<void> {
+    await this.enterSpeciesForCurrentGear(species);
+    await this.confirmAllCatchLanded();
+  }
+
+  // A resumed draft shows each answered question again; saving each one leads to "Check your details"
+  async continueSavedAnswersToReview(): Promise<void> {
+    const { checkAnswersPage } = this.pages;
+    const questionHeading = checkAnswersPage.page.getByRole('heading', { level: 1 });
+
+    for (let question = 0; question < maxQuestions; question++) {
+      if (await checkAnswersPage.pageHeading().isVisible()) return;
+      const currentQuestion = await questionHeading.innerText();
+      await checkAnswersPage.clickSaveAndContinue();
+      await expect(questionHeading, 'Question heading not to have text').not.toHaveText(currentQuestion);
+    }
+    await checkAnswersPage.expectOnPage();
+  }
+
   // Answers every question up to "Check your details" without submitting; returns the reference
   async completeRecordToReview(record: CatchRecordData): Promise<string> {
     const reference = await this.startRecord(record.vesselName);
@@ -308,7 +337,7 @@ export class CatchRecordFlow {
     const { recordsPage, draftRecordPage } = this.pages;
 
     for (const reference of references) {
-      await recordsPage.goto('/records');
+      await this.navigationFlow.openRecords();
       await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
       if ((await recordsPage.recordRow(reference).count()) === 0) continue;
       if ((await recordsPage.recordStatus(reference).innerText()).trim() !== recordStatuses.draft) continue;
@@ -325,7 +354,7 @@ export class CatchRecordFlow {
   async deleteAllDrafts(): Promise<void> {
     const { recordsPage, draftRecordPage } = this.pages;
 
-    await recordsPage.goto('/records');
+    await this.navigationFlow.openRecords();
     await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
     while ((await recordsPage.draftRecordRows().count()) > 0) {
       await recordsPage.openFirstDraftRecord();

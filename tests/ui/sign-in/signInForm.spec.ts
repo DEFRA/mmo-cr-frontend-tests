@@ -14,9 +14,9 @@ const validCredentials = {
 const missingCredentialsReason = 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD must be set in .env';
 
 test.describe.skip('Sign in form', () => {
-  test.beforeEach(async ({ signInPage }) => {
+  test.beforeEach(async ({ navigationFlow }) => {
     await test.step('The user is on the Sign In screen', async () => {
-      await signInPage.goto('/sign-in');
+      await navigationFlow.openSignIn();
     });
   });
 

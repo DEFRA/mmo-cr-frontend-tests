@@ -44,10 +44,11 @@ test.describe('Species and Weight', () => {
       await test.step('I enter its catch weight', async () => {
         await speciesSelectionPage.enterSpeciesWeights(catchSpecies.cod.code, catchSpecies.cod.weight);
         await speciesSelectionPage.clickSaveAndContinue();
+        await catchRecordFlow.confirmAllCatchLanded();
       });
 
       await test.step('The species and weight should be recorded', async () => {
-        await checkAnswersPage.goto('/check-answers');
+        await checkAnswersPage.expectOnPage();
         await expect(
           checkAnswersPage.speciesSummaryValue(
             catchSpecies.cod.name,
@@ -87,6 +88,7 @@ test.describe('Species and Weight', () => {
 
       await test.step('I record the same species with the relevant weight against each gear', async () => {
         await catchRecordFlow.enterCatchDetailsForEachGear(sameSpeciesCatches);
+        await catchRecordFlow.confirmAllCatchLanded();
       });
 
       await test.step('Each weight should remain linked to the correct gear', async () => {

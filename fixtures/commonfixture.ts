@@ -126,6 +126,7 @@ export const test = base.extend<CommonFixtures>({
   },
   navigationFlow: async (
     {
+      homePage,
       signInPage,
       accountPage,
       recordsPage,
@@ -140,13 +141,15 @@ export const test = base.extend<CommonFixtures>({
       returnPortPage,
       statisticalAreaPage,
       gearSelectionPage,
-      addGearPage
+      addGearPage,
+      catchNotLandedPage
     },
     use
   ) => {
     await use(
       withSteps(
         new NavigationFlow({
+          homePage,
           signInPage,
           accountPage,
           recordsPage,
@@ -161,7 +164,8 @@ export const test = base.extend<CommonFixtures>({
           returnPortPage,
           statisticalAreaPage,
           gearSelectionPage,
-          addGearPage
+          addGearPage,
+          catchNotLandedPage
         })
       )
     );

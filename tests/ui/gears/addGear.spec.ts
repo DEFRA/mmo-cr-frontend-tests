@@ -7,14 +7,18 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
-import { gears, errorMessages } from '../../../test-data/testData';
+import { gears, ports, errorMessages } from '../../../test-data/testData';
 
 type InvalidMeasurement = { description: string; value: string };
 
 // Gear names, measurements and validation messages confirmed by existing gear specs and the live app
 const isSeineNets = (name: string): boolean => name === gears.seineNets.name;
 // Gears the tests save; removed at sign-in and after each test, then restored if they were already saved
-const absentFavourites: Favourites = { ...noFavourites, gears: [gears.seineNets.name, gears.pots.name] };
+const absentFavourites: Favourites = {
+  ...noFavourites,
+  ports: [ports.first, ports.third],
+  gears: [gears.seineNets.name, gears.pots.name]
+};
 
 const invalidMeasurements: InvalidMeasurement[] = [
   { description: 'fractional', value: '1.5' },
@@ -145,8 +149,7 @@ test.describe('Add favourite gear', () => {
 
       await test.step('I start a new catch record and open gear selection', async () => {
         // Favourites are saved per vessel, so a record must be started to give gear selection its vessel
-        await navigationFlow.startCatchRecord();
-        await gearSelectionPage.goto('/gear-selection');
+        await navigationFlow.openGearSelectionForNewRecord();
       });
 
       await test.step('The saved gear is offered for the catch record', async () => {
@@ -225,7 +228,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('Pots is saved once with its original measurement', async () => {
-        await accountPage.goto('/account');
+        await navigationFlow.openAccount();
         expect(occurrences(await accountPage.getGearOnboardText(), gears.pots.name), 'Occurrences to be').toBe(1);
         await expect(accountPage.gearOnboardValue(), 'Gear onboard value to contain text').toContainText(
           `: ${gears.pots.gearDimension}`

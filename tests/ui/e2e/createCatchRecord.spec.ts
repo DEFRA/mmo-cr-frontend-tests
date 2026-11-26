@@ -50,7 +50,14 @@ test.describe('Create Catch Record', () => {
         tag: ['@ui', '@smoke', '@createCatchRecord', '@e2e'],
         annotation: { type: 'UAT', description: uat }
       },
-      async ({ createdRecords, catchRecordFlow, checkAnswersPage, recordsPage, submittedRecordPage }) => {
+      async ({
+        createdRecords,
+        catchRecordFlow,
+        checkAnswersPage,
+        recordsPage,
+        submittedRecordPage,
+        navigationFlow
+      }) => {
         let reference = '';
 
         await test.step('I am signed in', async () => {
@@ -88,7 +95,7 @@ test.describe('Create Catch Record', () => {
 
         await test.step(`The ${tripType} trip should be recorded successfully`, async () => {
           const tripEndDate = tripDates?.returnDate ?? new Date();
-          await recordsPage.goto('/records');
+          await navigationFlow.openRecords();
           await expect(
             recordsPage.recordStatus(reference),
             `Record status to have text ${recordStatuses.submitted}`

@@ -47,7 +47,7 @@ test.describe('Review Catch Record', () => {
       });
 
       await test.step('I open the catch record review', async () => {
-        await checkAnswersPage.goto('/check-answers');
+        await checkAnswersPage.expectOnPage();
       });
 
       await test.step('I should see the trip information', async () => {

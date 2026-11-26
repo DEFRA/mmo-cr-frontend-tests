@@ -7,7 +7,7 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
-import { areas, checkAnswers, errorMessages, ports } from '../../../test-data/testData';
+import { areas, checkAnswers, errorMessages, gears, ports } from '../../../test-data/testData';
 
 const searchTerm: string = areas.validCode.slice(0, 2);
 const additionalCharacters: string = areas.validCode.slice(2);
@@ -16,9 +16,11 @@ const coordinatesPattern: RegExp = /[-\u2212]?\d+\.\d+,\s*[-\u2212]?\d+\.\d+/;
 
 // Departure and return ports the journey saves as favourites; removed after each test unless already saved
 const absentFavourites: Favourites = { ...noFavourites, ports: [ports.fifth, ports.third] };
+// Gear the journey selects to reach the map; saved for the test and removed afterwards unless already saved
+const testFavourites: Favourites = { ...noFavourites, gears: [gears.pots.name] };
 
 test.describe('Enter statistical sub area using the Other option', () => {
-  test.use({ absentFavourites });
+  test.use({ testFavourites, absentFavourites });
 
   // Requesting createdRecords signs in and restores the favourites and drafts after each test
   test.beforeEach(async ({ navigationFlow, createdRecords }) => {

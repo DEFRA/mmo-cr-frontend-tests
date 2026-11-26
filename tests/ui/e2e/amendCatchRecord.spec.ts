@@ -40,7 +40,8 @@ test.describe('Amend Catch Record', () => {
       submittedRecordPage,
       editReasonPage,
       confirmationPage,
-      tripReturnDatePage
+      tripReturnDatePage,
+      navigationFlow
     }) => {
       test.slow();
       const record: MultiDayCatchRecordData = {
@@ -58,7 +59,7 @@ test.describe('Amend Catch Record', () => {
         createdRecords.push(reference);
         await checkAnswersPage.clickAcceptAndSubmit();
         await confirmationPage.expectOnPage();
-        await recordsPage.goto('/records');
+        await navigationFlow.openRecords();
         await expect(
           recordsPage.recordStatus(reference),
           `Record status to have text ${recordStatuses.submitted}`
@@ -96,7 +97,7 @@ test.describe('Amend Catch Record', () => {
       });
 
       await test.step('The record should be displayed as amended', async () => {
-        await recordsPage.goto('/records');
+        await navigationFlow.openRecords();
         await expect(
           recordsPage.recordStatus(reference),
           `Record status to have text ${recordStatuses.amended}`

@@ -8,7 +8,7 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
-import { catchSpecies, ports } from '../../../test-data/testData';
+import { catchSpecies, gears, ports } from '../../../test-data/testData';
 
 type SpeciesData = { name: string; code: string; weight: string };
 
@@ -16,6 +16,7 @@ type SpeciesData = { name: string; code: string; weight: string };
 
 const testFavourites: Favourites = {
   ...noFavourites,
+  gears: [gears.pots.name],
   species: [catchSpecies.cod.name, catchSpecies.mackerel.name]
 };
 // Departure and return ports the journey saves as favourites; removed after each test unless already saved
@@ -37,7 +38,7 @@ test.describe('Remove species', () => {
         await speciesSelectionPage.selectSpecies(species.name);
         await speciesSelectionPage.enterSpeciesWeights(species.code, species.weight);
       }
-      await speciesSelectionPage.saveAndReturn();
+      await navigationFlow.saveSpeciesAndReturn();
     });
   });
 
@@ -91,15 +92,16 @@ test.describe('Remove species', () => {
   test(
     'Removes selected species and their catch weights when removal is confirmed',
     { tag: ['@ui', '@regression', '@removeSpecies'] },
-    async ({ navigationFlow, favouritesFlow, speciesSelectionPage, removeSpeciesPage }) => {
+    async ({ navigationFlow, addSpeciesPage, speciesSelectionPage, removeSpeciesPage }) => {
       await test.step('The user has multiple species selected', async () => {
-        // The Remove Species page lists the vessel's saved species, so the third species is saved to the account first
-        await navigationFlow.openAccount();
-        await favouritesFlow.ensureSpeciesAdded(catchSpecies.shads.name);
-        await navigationFlow.openSpeciesSelection();
+        // The Remove Species page lists the vessel's saved species, so the third species is added to the vessel first
+        await navigationFlow.openAddSpecies();
+        await addSpeciesPage.searchAndSelectSpecies(catchSpecies.shads.name);
+        await addSpeciesPage.clickSaveAndContinue();
+        await speciesSelectionPage.expectOnPage();
         await speciesSelectionPage.selectSpecies(catchSpecies.shads.name);
         await speciesSelectionPage.enterSpeciesWeights(catchSpecies.shads.code, catchSpecies.shads.weight);
-        await speciesSelectionPage.saveAndReturn();
+        await navigationFlow.saveSpeciesAndReturn();
         for (const species of [catchSpecies.cod, catchSpecies.mackerel, catchSpecies.shads]) {
           await expect(
             speciesSelectionPage.weightAboveMinimumInput(species.code),
@@ -184,7 +186,7 @@ test.describe('Remove species', () => {
   test(
     'Preserves the remaining species when a previously saved species is removed',
     { tag: ['@ui', '@regression', '@removeSpecies'] },
-    async ({ speciesSelectionPage, removeSpeciesPage }) => {
+    async ({ navigationFlow, speciesSelectionPage, removeSpeciesPage }) => {
       await test.step('The user has previously selected species', async () => {
         await expect(
           speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code),
@@ -193,7 +195,7 @@ test.describe('Remove species', () => {
       });
 
       await test.step('The user returns to the species page', async () => {
-        await speciesSelectionPage.goto('/species-selection');
+        await navigationFlow.saveSpeciesAndReturn();
       });
 
       await test.step('Previously selected species are displayed', async () => {

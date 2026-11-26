@@ -124,7 +124,7 @@ test.describe('Account details and selections', () => {
       });
 
       await test.step('I can remove selections added during this test', async () => {
-        await accountPage.goto('/account');
+        await navigationFlow.openAccount();
 
         await favouritesFlow.removeSpeciesFromAccount(catchSpecies.cod.name);
         await expect(
