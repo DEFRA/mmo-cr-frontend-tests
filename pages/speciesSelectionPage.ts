@@ -60,7 +60,6 @@ export class SpeciesSelectionPage extends BasePage {
   public readonly removeSpeciesLink = (): Locator => this.page.getByRole('link', { name: 'Remove species' });
 
   async selectSpecies(speciesName: string) {
-    await this.page.waitForLoadState('load');
     await this.speciesCheckbox(speciesName).check();
   }
 

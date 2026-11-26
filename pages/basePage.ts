@@ -108,7 +108,6 @@ export abstract class BasePage {
   }
 
   async expectTitle(title: string) {
-    await this.page.waitForLoadState('domcontentloaded');
     await expect(this.page, `Page to have title ${title}`).toHaveTitle(title);
   }
 

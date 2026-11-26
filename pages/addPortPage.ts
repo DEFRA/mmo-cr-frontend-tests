@@ -30,7 +30,6 @@ export class AddPortPage extends BasePage {
     this.portResultsList().locator('li').filter({ hasText: portName });
 
   async searchPorts(searchTerm: string): Promise<void> {
-    await this.page.waitForLoadState('load');
     await this.portInput().fill(searchTerm);
     await expect(this.portResultsList().getByRole('option').first(), 'Port results list to be visible').toBeVisible();
   }

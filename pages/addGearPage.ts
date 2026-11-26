@@ -45,7 +45,6 @@ export class AddGearPage extends BasePage {
       throw new Error('Gear searches require at least two characters');
     }
 
-    await this.page.waitForLoadState('load');
     await this.gearInput().fill(searchTerm);
     const options = this.gearResultsList().getByRole('option');
     await expect(options.first(), 'First to be visible').toBeVisible({ timeout: 10_000 });
