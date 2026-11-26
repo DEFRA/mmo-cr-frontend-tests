@@ -10,8 +10,6 @@ import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
 import { catchSpecies, gears, ports } from '../../../test-data/testData';
 
-type SpeciesData = { name: string; code: string; weight: string };
-
 // A third vessel species, so removing two species never removes all of them (confirmed in the live catalogue)
 
 const testFavourites: Favourites = {
@@ -29,10 +27,6 @@ test.describe('Remove species', () => {
   test.beforeEach(async ({ navigationFlow, speciesSelectionPage, createdRecords }) => {
     void createdRecords;
     await test.step('The user has one or more species displayed', async () => {
-      await navigationFlow.signInAndOpenAccount({
-        requiredCredentialsMessage:
-          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Remove species UI tests'
-      });
       await navigationFlow.openSpeciesSelectionForNewRecord();
       for (const species of [catchSpecies.cod, catchSpecies.mackerel]) {
         await speciesSelectionPage.selectSpecies(species.name);

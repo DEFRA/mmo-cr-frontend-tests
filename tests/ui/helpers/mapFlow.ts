@@ -5,7 +5,7 @@
  * @since 2026-10-28
  */
 import { expect } from '@playwright/test';
-import { type MapLabel, type StatisticalAreaPage } from '../../../pages/statisticalAreaPage';
+import { type StatisticalAreaPage } from '../../../pages/statisticalAreaPage';
 import { type NavigationFlow } from './navigationFlow';
 import { ports, vessels } from '../../../test-data/testData';
 

@@ -10,14 +10,6 @@ import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
 import { gears, ports, errorMessages } from '../../../test-data/testData';
 
-type FavouriteGearData = {
-  name: string;
-};
-
-type MeasuredGearData = FavouriteGearData & {
-  gearDimension: string;
-};
-
 // Gear names and measurements confirmed by existing gear specs; validation messages confirmed on the live app
 // Gears the tests save; removed at sign-in and after each test, then restored if they were already saved
 const absentFavourites: Favourites = {
@@ -31,13 +23,9 @@ test.describe('Add favourite gear', () => {
   test.use({ absentFavourites });
 
   // Requesting createdRecords signs in and restores the gear and drafts after each test
-  test.beforeEach(async ({ navigationFlow, createdRecords }) => {
-    void createdRecords;
+  test.beforeEach(async ({ createdRecords }) => {
     await test.step('I am signed in without the test gear saved as a favourite', async () => {
-      await navigationFlow.signIn({
-        requiredCredentialsMessage:
-          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Add favourite gear UI tests'
-      });
+      void createdRecords;
     });
   });
 

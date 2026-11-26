@@ -8,11 +8,6 @@ import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
 import { catchSpecies, gears, ports } from '../../../test-data/testData';
 
-type Species = {
-  name: string;
-  code: string;
-};
-
 type WeightValidationCase = {
   name: string;
   value: string;
@@ -69,10 +64,6 @@ test.describe('Species catch weight entry', () => {
   test.beforeEach(async ({ navigationFlow, createdRecords }) => {
     void createdRecords;
     await test.step('The user is on the species selection page', async () => {
-      await navigationFlow.signIn({
-        requiredCredentialsMessage:
-          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for catch weight UI tests'
-      });
       await navigationFlow.openSpeciesSelectionForNewRecord();
     });
   });

@@ -32,10 +32,7 @@ test.describe('Add species to a catch record', () => {
   test.beforeEach(async ({ navigationFlow, createdRecords }) => {
     void createdRecords;
     await test.step('The user is signed in', async () => {
-      await navigationFlow.signIn({
-        requiredCredentialsMessage:
-          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Add species UI tests'
-      });
+      void createdRecords;
     });
 
     await test.step('The user is on the species selection page', async () => {
@@ -152,7 +149,7 @@ test.describe('Add species to a catch record', () => {
   test(
     'Displays an error when the same species is added again',
     { tag: ['@ui', '@regression', '@addSpecies'] },
-    async ({ navigationFlow, speciesFlow, addSpeciesPage, speciesSelectionPage }) => {
+    async ({ navigationFlow, speciesFlow, addSpeciesPage }) => {
       let species: string;
 
       await test.step('A species has already been added', async () => {
@@ -180,7 +177,7 @@ test.describe('Add species to a catch record', () => {
   test(
     'Preserves the saved species selection when another species is added',
     { tag: ['@ui', '@regression', '@addSpecies'] },
-    async ({ navigationFlow, speciesFlow, addSpeciesPage, speciesSelectionPage, catchNotLandedPage }) => {
+    async ({ navigationFlow, speciesFlow, speciesSelectionPage, catchNotLandedPage }) => {
       let firstSpecies: string;
       let secondSpecies: string;
 

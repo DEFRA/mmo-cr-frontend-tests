@@ -36,10 +36,9 @@ test.describe('Add favourite gear', () => {
   test.use({ absentFavourites });
 
   // Requesting createdRecords signs in and restores the gear and drafts after each test
-  test.beforeEach(async ({ navigationFlow, createdRecords }) => {
-    void createdRecords;
+  test.beforeEach(async ({ createdRecords }) => {
     await test.step('I am signed in without the test gear saved as a favourite', async () => {
-      await navigationFlow.signIn();
+      void createdRecords;
     });
   });
 

@@ -213,7 +213,6 @@ export class NavigationFlow {
   async openStatisticalAreaMap(
     options: { portName?: string; returnPortName?: string; vesselName?: string; signInOptions?: SignInOptions } = {}
   ): Promise<void> {
-    const { statisticalAreaPage } = this.pages;
     const {
       portName = ports.first,
       returnPortName = ports.third,

@@ -24,10 +24,6 @@ test.describe('Remove favourite gear', () => {
   test.beforeEach(async ({ navigationFlow, gearFlow, accountPage, createdRecords }) => {
     void createdRecords;
     await test.step('I am signed in and have a saved favourite gear configuration', async () => {
-      await navigationFlow.signIn({
-        requiredCredentialsMessage:
-          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Remove favourite gear UI tests'
-      });
       await navigationFlow.openAddGear();
       await gearFlow.savePots(gears.pots.gearDimension);
       await expect(
