@@ -6,13 +6,19 @@
  * @since 2026-11-16
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { gears, errorMessages } from '../../../test-data/testData';
+import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
+import { gears, ports, errorMessages } from '../../../test-data/testData';
 
 type InvalidMeasurement = { description: string; value: string };
 
 // Gear names, measurements and validation messages confirmed by existing gear specs and the live app
 const isSeineNets = (name: string): boolean => name === gears.seineNets.name;
-const testFavouriteGears = [gears.seineNets.name, gears.pots.name];
+// Gears the tests save; removed at sign-in and after each test, then restored if they were already saved
+const absentFavourites: Favourites = {
+  ...noFavourites,
+  ports: [ports.first, ports.third],
+  gears: [gears.seineNets.name, gears.pots.name]
+};
 
 const invalidMeasurements: InvalidMeasurement[] = [
   { description: 'fractional', value: '1.5' },
@@ -27,17 +33,13 @@ function occurrences(text: string, value: string): number {
 }
 
 test.describe('Add favourite gear', () => {
-  test.beforeEach(async ({ navigationFlow, gearFlow }) => {
-    await test.step('I am signed in without the test gear saved as a favourite', async () => {
-      await navigationFlow.signIn();
-      await gearFlow.removeSavedGears(testFavouriteGears);
-    });
-  });
+  test.use({ absentFavourites });
 
-  // Page fixtures are per test, so clean-up runs after each test rather than in afterAll
-  test.afterEach(async ({ gearFlow, catchRecordFlow }) => {
-    await gearFlow.removeSavedGears(testFavouriteGears);
-    await catchRecordFlow.deleteCreatedDrafts();
+  // Requesting createdRecords signs in and restores the gear and drafts after each test
+  test.beforeEach(async ({ createdRecords }) => {
+    await test.step('I am signed in without the test gear saved as a favourite', async () => {
+      void createdRecords;
+    });
   });
 
   test(
@@ -98,7 +100,7 @@ test.describe('Add favourite gear', () => {
           addGearPage.errorSummary(),
           `Error summary to contain text ${errorMessages.gears.unapproved}`
         ).toContainText(errorMessages.gears.unapproved);
-        await addGearPage.expectUrl(/\/add-gear/);
+        await addGearPage.expectOnPage();
       });
     }
   );
@@ -120,7 +122,7 @@ test.describe('Add favourite gear', () => {
           addGearPage.errorSummary(),
           `Error summary to contain text ${errorMessages.gears.noneSelected}`
         ).toContainText(errorMessages.gears.noneSelected);
-        await addGearPage.expectUrl(/\/add-gear/);
+        await addGearPage.expectOnPage();
       });
     }
   );
@@ -146,8 +148,7 @@ test.describe('Add favourite gear', () => {
 
       await test.step('I start a new catch record and open gear selection', async () => {
         // Favourites are saved per vessel, so a record must be started to give gear selection its vessel
-        await navigationFlow.startCatchRecord();
-        await gearSelectionPage.goto('/gear-selection');
+        await navigationFlow.openGearSelectionForNewRecord();
       });
 
       await test.step('The saved gear is offered for the catch record', async () => {
@@ -216,7 +217,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('I am told pots has already been added', async () => {
-        await addGearPage.expectUrl(/\/add-gear/);
+        await addGearPage.expectOnPage();
         await expect(addGearPage.errorSummary(), `Error summary to contain text ${duplicateGearError}`).toContainText(
           duplicateGearError
         );
@@ -226,7 +227,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('Pots is saved once with its original measurement', async () => {
-        await accountPage.goto('/account');
+        await navigationFlow.openAccount();
         expect(occurrences(await accountPage.getGearOnboardText(), gears.pots.name), 'Occurrences to be').toBe(1);
         await expect(accountPage.gearOnboardValue(), 'Gear onboard value to contain text').toContainText(
           `: ${gears.pots.gearDimension}`
@@ -255,7 +256,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('Both gears are shown in my favourites', async () => {
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await expect(
           accountPage.gearOnboardValue(),
           `Gear onboard value to contain text ${gears.seineNets.name}`
@@ -290,7 +291,7 @@ test.describe('Add favourite gear', () => {
           addGearPage.errorSummary(),
           `Error summary to contain text ${errorMessages.gears.missingMeshSize}`
         ).toContainText(errorMessages.gears.missingMeshSize);
-        await addGearPage.expectUrl(/\/add-gear/);
+        await expect(addGearPage.measurementsHeading(), 'Measurements heading to be visible').toBeVisible();
       });
     }
   );
@@ -312,7 +313,7 @@ test.describe('Add favourite gear', () => {
 
         await test.step('A validation error is displayed and the gear is not saved', async () => {
           await expect(addGearPage.errorSummary(), 'Error summary to be visible').toBeVisible();
-          await addGearPage.expectUrl(/\/add-gear/);
+          await expect(addGearPage.measurementsHeading(), 'Measurements heading to be visible').toBeVisible();
         });
       }
     );
@@ -344,7 +345,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('The gear is saved to my favourites', async () => {
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await expect(
           accountPage.gearOnboardValue(),
           `Gear onboard value to contain text ${gears.seineNets.name}`

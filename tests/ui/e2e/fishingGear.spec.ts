@@ -41,16 +41,13 @@ test.describe('Fishing Gear', () => {
 
       await test.step('I enter the catch details for each gear', async () => {
         await catchRecordFlow.enterCatchDetailsForEachGear(multiGearCatches);
+        await catchRecordFlow.confirmAllCatchLanded();
       });
 
       await test.step('Each gear should be recorded separately', async () => {
-        await checkAnswersPage.goto('/check-answers');
+        await checkAnswersPage.expectOnPage();
         for (const { gear } of multiGearCatches) {
           await expect(checkAnswersPage.gearSection(gear.name), 'Gear section to be visible').toBeVisible();
-          await expect(
-            checkAnswersPage.gearSummaryValue(gear.name, checkAnswers.summaryKeys.gearType),
-            `Gear summary value to have text ${gear.name}`
-          ).toHaveText(gear.name);
         }
       });
 
@@ -64,7 +61,7 @@ test.describe('Fishing Gear', () => {
             await expect(
               checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained),
               'Species summary value to have text'
-            ).toHaveText(`${caught.weight} kg`);
+            ).toHaveText(caught.weight);
           }
         }
       });

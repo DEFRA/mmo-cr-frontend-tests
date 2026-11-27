@@ -24,6 +24,8 @@ export type GearData = { name: string };
 // Omit areaCode to pick a visible sub-rectangle on the map instead of searching under "Other"
 export type GearCatch = { gear: GearData; areaCode?: string; species: SpeciesCatch[] };
 export type NotLandedCatch = { speciesName: string; weightKeptOnboard: string };
+// Upper bound on the questions between a resumed draft and the review page
+const maxQuestions = 15;
 export type Favourites = { ports: string[]; gears: string[]; species: string[] };
 export type TripDates = { departureDate: Date; returnDate: Date };
 export type CatchRecordData = {
@@ -48,7 +50,7 @@ export const daysAgo = (days: number): Date => {
   return date;
 };
 
-// Check your catch record shows dates as "14 November 2026"
+// Check your details shows dates as "14 November 2026"
 export const reviewDate = (date: Date): string =>
   date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -88,8 +90,14 @@ export class CatchRecordFlow {
     private readonly favouritesFlow: FavouritesFlow
   ) {}
 
+  private hasFavourites(favourites: Favourites): boolean {
+    return favourites.ports.length + favourites.gears.length + favourites.species.length > 0;
+  }
+
   // Returns only the favourites this call added so the shared account can be restored afterwards
   async ensureFavourites(favourites: Favourites): Promise<Favourites> {
+    if (!this.hasFavourites(favourites)) return noFavourites;
+
     const { accountPage } = this.pages;
 
     await this.navigationFlow.openAccount();
@@ -109,7 +117,7 @@ export class CatchRecordFlow {
   }
 
   async restoreFavourites(added: Favourites): Promise<void> {
-    if (added.ports.length + added.gears.length + added.species.length === 0) return;
+    if (!this.hasFavourites(added)) return;
 
     await this.navigationFlow.openAccount();
     for (const port of added.ports) await this.favouritesFlow.removePortFromAccount(port);
@@ -119,7 +127,7 @@ export class CatchRecordFlow {
 
   // Removes the given favourites if saved; returns only those it removed so they can be re-added afterwards
   async removeSavedFavourites(favourites: Favourites): Promise<Favourites> {
-    if (favourites.ports.length + favourites.gears.length + favourites.species.length === 0) return noFavourites;
+    if (!this.hasFavourites(favourites)) return noFavourites;
 
     const { accountPage } = this.pages;
     await this.navigationFlow.openAccount();
@@ -138,12 +146,11 @@ export class CatchRecordFlow {
   // Removes absent favourites the journey saved, then re-adds those that were saved before the test
   async restoreAbsentFavourites(absent: Favourites, removed: Favourites): Promise<void> {
     await this.restoreFavourites(absent);
-    if (removed.ports.length + removed.gears.length + removed.species.length > 0) {
+    if (this.hasFavourites(removed)) {
       await this.ensureFavourites(removed);
     }
   }
 
-  // Creates the draft and returns its reference
   async startRecord(vesselName: string): Promise<string> {
     await this.navigationFlow.openNewRecord(vesselName);
     return this.readRecordReference();
@@ -159,7 +166,7 @@ export class CatchRecordFlow {
 
     await tripDatePage.selectSameDate(true);
     await tripDatePage.clickSaveAndContinue();
-    await departurePortPage.expectUrl(/\/departure-port$/);
+    await departurePortPage.expectOnPage();
   }
 
   async enterMultiDayTrip({ departureDate, returnDate }: TripDates): Promise<void> {
@@ -167,13 +174,13 @@ export class CatchRecordFlow {
 
     await tripDatePage.selectSameDate(false);
     await tripDatePage.clickSaveAndContinue();
-    await tripDepartureDatePage.expectUrl(/\/trip-departure-date$/);
+    await tripDepartureDatePage.expectOnPage();
     await tripDepartureDatePage.enterDateFrom(departureDate);
     await tripDepartureDatePage.clickSaveAndContinue();
-    await tripReturnDatePage.expectUrl(/\/trip-return-date$/);
+    await tripReturnDatePage.expectOnPage();
     await tripReturnDatePage.enterDateFrom(returnDate);
     await tripReturnDatePage.clickSaveAndContinue();
-    await departurePortPage.expectUrl(/\/departure-port$/);
+    await departurePortPage.expectOnPage();
   }
 
   // The port must be a favourite so the radio list is shown; waits for the return-port screen
@@ -182,7 +189,7 @@ export class CatchRecordFlow {
 
     await departurePortPage.selectPort(departurePort);
     await departurePortPage.clickSaveAndContinue();
-    await returnPortPage.expectUrl(/\/return-port$/);
+    await returnPortPage.expectOnPage();
   }
 
   // Both ports must be favourites so the radio lists are shown instead of the port search
@@ -192,7 +199,7 @@ export class CatchRecordFlow {
     await this.selectDeparturePort(departurePort);
     await returnPortPage.selectPort(returnPort);
     await returnPortPage.clickSaveAndContinue();
-    await gearSelectionPage.expectUrl(/\/gear-selection$/);
+    await gearSelectionPage.expectOnPage();
   }
 
   async selectGears(gears: GearData[]): Promise<void> {
@@ -207,7 +214,7 @@ export class CatchRecordFlow {
       await gearSelectionPage.gearCheckbox(gear.name).check();
     }
     await gearSelectionPage.clickSaveAndContinue();
-    await statisticalAreaPage.expectUrl(/\/statistical-area\?gearId=/);
+    await expect(statisticalAreaPage.pageHeadingForGear(), 'Page heading for gear to be visible').toBeVisible();
   }
 
   async selectAreaForCurrentGear(areaCode: string): Promise<void> {
@@ -216,7 +223,7 @@ export class CatchRecordFlow {
     await statisticalAreaPage.clickOther();
     await statisticalAreaOtherPage.searchAndSelectAlternativeArea(areaCode);
     await statisticalAreaOtherPage.clickSaveAndContinue();
-    await speciesSelectionPage.expectUrl(/\/species-selection\?gearId=/);
+    await speciesSelectionPage.expectOnPage();
   }
 
   // Clicks a sub-rectangle near the middle of the map and returns its code
@@ -224,7 +231,7 @@ export class CatchRecordFlow {
     const { statisticalAreaPage, speciesSelectionPage } = this.pages;
 
     const areaCode = await statisticalAreaPage.selectMiddleMapArea();
-    await speciesSelectionPage.expectUrl(/\/species-selection\?gearId=/);
+    await speciesSelectionPage.expectOnPage();
     return areaCode;
   }
 
@@ -251,7 +258,7 @@ export class CatchRecordFlow {
       }
       await this.enterSpeciesForCurrentGear(gearCatch.species);
     }
-    await catchNotLandedPage.expectUrl(/\/catch-not-landed$/);
+    await catchNotLandedPage.expectOnPage();
   }
 
   private async currentGearCatch(gearCatches: GearCatch[]): Promise<GearCatch> {
@@ -269,7 +276,7 @@ export class CatchRecordFlow {
 
     await catchNotLandedPage.selectCatchNotLanded(false);
     await catchNotLandedPage.clickSaveAndContinue();
-    await checkAnswersPage.expectUrl(/\/check-answers$/);
+    await checkAnswersPage.expectOnPage();
   }
 
   async recordCatchNotLanded({ speciesName, weightKeptOnboard }: NotLandedCatch): Promise<void> {
@@ -277,14 +284,41 @@ export class CatchRecordFlow {
 
     await catchNotLandedPage.selectCatchNotLanded(true);
     await catchNotLandedPage.clickSaveAndContinue();
-    await speciesNotLandedPage.expectUrl(/\/species-not-landed$/);
+    await speciesNotLandedPage.expectOnPage();
     await speciesNotLandedPage.selectSpecies(speciesName);
     await speciesNotLandedPage.enterWeightKeptOnboard(weightKeptOnboard);
     await speciesNotLandedPage.clickSaveAndContinue();
-    await checkAnswersPage.expectUrl(/\/check-answers$/);
+    await checkAnswersPage.expectOnPage();
   }
 
-  // Answers every question up to "Check your catch record" without submitting; returns the reference
+  // Continues from gear selection through to "Check your details"
+  async completeCatchToReview(gearCatches: GearCatch[]): Promise<void> {
+    await this.selectGears(gearCatches.map(({ gear }) => gear));
+    await this.enterCatchDetailsForEachGear(gearCatches);
+    await this.confirmAllCatchLanded();
+  }
+
+  // Continues from the species question of the only gear through to "Check your details"
+  async completeSpeciesToReview(species: SpeciesCatch[]): Promise<void> {
+    await this.enterSpeciesForCurrentGear(species);
+    await this.confirmAllCatchLanded();
+  }
+
+  // A resumed draft shows each answered question again; saving each one leads to "Check your details"
+  async continueSavedAnswersToReview(): Promise<void> {
+    const { checkAnswersPage } = this.pages;
+    const questionHeading = checkAnswersPage.page.getByRole('heading', { level: 1 });
+
+    for (let question = 0; question < maxQuestions; question++) {
+      if (await checkAnswersPage.pageHeading().isVisible()) return;
+      const currentQuestion = await questionHeading.innerText();
+      await checkAnswersPage.clickSaveAndContinue();
+      await expect(questionHeading, 'Question heading not to have text').not.toHaveText(currentQuestion);
+    }
+    await checkAnswersPage.expectOnPage();
+  }
+
+  // Answers every question up to "Check your details" without submitting; returns the reference
   async completeRecordToReview(record: CatchRecordData): Promise<string> {
     const reference = await this.startRecord(record.vesselName);
     if (record.tripDates) {
@@ -305,10 +339,12 @@ export class CatchRecordFlow {
 
   // Deletes drafts created by a test; submitted records and records already removed are left alone
   async deleteDraftsIfPresent(references: string[]): Promise<void> {
+    if (references.length === 0) return;
+
     const { recordsPage, draftRecordPage } = this.pages;
 
+    await this.navigationFlow.openRecords();
     for (const reference of references) {
-      await recordsPage.goto('/records');
       await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
       if ((await recordsPage.recordRow(reference).count()) === 0) continue;
       if ((await recordsPage.recordStatus(reference).innerText()).trim() !== recordStatuses.draft) continue;
@@ -316,7 +352,7 @@ export class CatchRecordFlow {
       await recordsPage.openRecord(reference);
       await expect(draftRecordPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       await draftRecordPage.deleteDraft();
-      await recordsPage.expectUrl(/\/records$/);
+      await recordsPage.expectOnPage();
       await expect(recordsPage.recordRow(reference), 'Record row to have count').toHaveCount(0);
     }
   }
@@ -325,18 +361,19 @@ export class CatchRecordFlow {
   async deleteAllDrafts(): Promise<void> {
     const { recordsPage, draftRecordPage } = this.pages;
 
-    await recordsPage.goto('/records');
+    await this.navigationFlow.openRecords();
     await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
     while ((await recordsPage.draftRecordRows().count()) > 0) {
       await recordsPage.openFirstDraftRecord();
       await expect(draftRecordPage.pageHeading(), 'Page heading to be visible').toBeVisible();
       await draftRecordPage.deleteDraft();
-      await recordsPage.expectUrl(/\/records$/);
+      await recordsPage.expectOnPage();
       await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
     }
   }
 
-  async deleteCreatedDrafts(): Promise<void> {
-    await this.deleteDraftsIfPresent([...this.navigationFlow.createdRecordReferences]);
+  async deleteCreatedDrafts(extraReferences: string[] = []): Promise<void> {
+    const references = [...new Set([...this.navigationFlow.createdRecordReferences, ...extraReferences])];
+    await this.deleteDraftsIfPresent(references);
   }
 }

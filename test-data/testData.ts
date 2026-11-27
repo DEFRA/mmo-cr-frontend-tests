@@ -124,24 +124,24 @@ export const areas = {
 export const checkAnswers = {
   summaryKeys: {
     vessel: 'Vessel',
-    departureDate: 'Departure date',
-    returnDate: 'Return date',
-    departurePort: 'Departure port',
-    returnPort: 'Return port',
-    statisticalSubArea: 'Statistical sub area',
-    areaMajorityCaught: 'Area majority caught',
-    gearType: 'Gear type',
+    departureDate: 'Date left',
+    returnDate: 'Date returned',
+    departurePort: 'Port left from',
+    returnPort: 'Port returned to',
+    statisticalSubArea: 'Area majority catch caught',
+    areaMajorityCaught: 'Area majority catch caught',
+    gearType: 'Gear used',
     speciesCaught: 'Species caught',
-    weightRetained: 'Weight above minimum size retained',
-    notLanded: 'Not landed',
+    weightRetained: 'Weight above minimum size retained (kg)',
+    notLanded: 'Catch kept onboard or in keep pots',
     notLandedSpecies: 'Species',
     weightKeptOnboard: 'Weight above minimum size kept onboard or in keep pots (kg)'
   },
   changeLinks: {
-    departureDate: 'Change departure date',
-    returnDate: 'Change return date',
-    departurePort: 'Change departure port',
-    returnPort: 'Change return port'
+    departureDate: 'Change Date left',
+    returnDate: 'Change Date returned',
+    departurePort: 'Change Port left from',
+    returnPort: 'Change Port returned to'
   },
   answers: {
     yes: 'Yes',
@@ -151,8 +151,11 @@ export const checkAnswers = {
 
 export const recordStatuses = {
   draft: 'Draft',
-  submitted: 'Submitted'
+  submitted: 'Submitted',
+  amended: 'Amended'
 };
+
+export const amendReason = 'Correcting the return date as requested by the office';
 
 export const errorMessages = {
   ports: {
@@ -161,12 +164,12 @@ export const errorMessages = {
     returnRequired: 'Select the port you returned to'
   },
   tripDates: {
-    sameDayRequired: 'Select yes if your trip started and finished today',
+    sameDayRequired: 'Select whether your trip started and finished today',
     futureDeparture: 'Date you left for your trip must be today or in the past',
     returnBeforeDeparture: 'Date you returned from your trip must be the same as or after the date you left'
   },
   gears: {
-    unapproved: 'Select a gear type from the list',
+    unapproved: 'Select the gear you want to add',
     noneSelected: 'Select the gear you want to add',
     missingGearDimension: 'Enter the gear dimension by length or width of the gear',
     missingMeshSize: 'Enter the mesh size',
@@ -175,7 +178,7 @@ export const errorMessages = {
   },
   species: {
     noneSelected: 'Select at least one species',
-    unapproved: 'Enter the species you want to add',
+    unapproved: 'Enter the species caught on this trip',
     duplicateSuffix: ' has already been added.'
   },
   areas: {

@@ -8,9 +8,9 @@ import { expect, test } from '../../../fixtures/commonfixture';
 import { signInData } from '../../../test-data/testData';
 
 test.describe('Create an account information panel', () => {
-  test.beforeEach(async ({ signInPage }) => {
+  test.beforeEach(async ({ navigationFlow }) => {
     await test.step('The user is on the Sign In screen', async () => {
-      await signInPage.goto('/sign-in');
+      await navigationFlow.openSignIn();
     });
   });
 

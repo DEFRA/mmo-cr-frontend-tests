@@ -28,6 +28,7 @@ const hdViewport = { width: 1280, height: 720 };
  */
 export default defineConfig({
   testDir: './tests',
+  timeout: 90_000,
   globalSetup: ['./allure-setup.ts', './reference-data-setup.ts'],
   fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -36,11 +37,26 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [['allure-playwright'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
+  reporter: [
+    [
+      'allure-playwright',
+      {
+        detail: true,
+        suiteTitle: true,
+        environmentInfo: {
+          Environment: environmentName,
+          BaseURL: baseURL,
+          'Node.js': process.version
+        }
+      }
+    ],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }]
+  ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     baseURL,
     ignoreHTTPSErrors: true,
+    screenshot: 'only-on-failure',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry'

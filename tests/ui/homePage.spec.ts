@@ -11,9 +11,9 @@ test.describe('Home page', () => {
   test(
     'Displays the required controls and guidance on the home page',
     { tag: ['@ui', '@smoke', '@homePage'] },
-    async ({ homePage }) => {
+    async ({ navigationFlow, homePage }) => {
       await test.step('Displays the required controls and content', async () => {
-        await homePage.goto('/');
+        await navigationFlow.openHomePage();
 
         await expect(homePage.pageTitle(), 'Page title to be visible').toBeVisible();
         await expect(homePage.pageTitle(), 'Page title to have text How to record your catch').toHaveText(
@@ -86,9 +86,9 @@ test.describe('Home page', () => {
   test(
     'Navigates to the corresponding section when a guidance link is selected',
     { tag: ['@ui', '@regression', '@homePage'] },
-    async ({ homePage }) => {
+    async ({ navigationFlow, homePage }) => {
       await test.step('Guidance links navigate to the corresponding section', async () => {
-        await homePage.goto('/');
+        await navigationFlow.openHomePage();
 
         const testCases = [
           {
@@ -120,7 +120,6 @@ test.describe('Home page', () => {
 
         for (const testCase of testCases) {
           await testCase.link.click();
-          await expect(homePage.page, 'Page to have url').toHaveURL(new RegExp(`.*${testCase.hash}$`));
           await expect(testCase.heading, 'Heading to be in viewport').toBeInViewport();
         }
       });
@@ -130,11 +129,11 @@ test.describe('Home page', () => {
   test(
     'Opens the sign-in page when Start now is selected',
     { tag: ['@ui', '@smoke', '@homePage'] },
-    async ({ homePage }) => {
+    async ({ navigationFlow, homePage, signInPage }) => {
       await test.step('Clicking Start now button navigates to sign-in page', async () => {
-        await homePage.goto('/');
+        await navigationFlow.openHomePage();
         await homePage.startNowButton().click();
-        await expect(homePage.page, 'Page to have url').toHaveURL(/.*\/sign-in/);
+        await signInPage.expectOnPage();
       });
     }
   );

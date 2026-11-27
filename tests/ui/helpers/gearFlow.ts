@@ -41,26 +41,26 @@ export class GearFlow {
   }
 
   async saveGearWithMeasurements(searchTerm: string, matches: (name: string) => boolean): Promise<string> {
-    const { addGearPage } = this.pages;
+    const { addGearPage, accountPage } = this.pages;
 
     const gearName = await this.selectGearWithMeasurements(searchTerm, matches);
     for (const input of await addGearPage.measurementInputs().all()) {
       await input.fill('1');
     }
     await addGearPage.clickSaveAndContinue();
-    await addGearPage.expectUrl(/\/account$/);
+    await accountPage.expectOnPage();
     return gearName;
   }
 
   async savePots(gearDimension: string): Promise<void> {
-    const { addGearPage } = this.pages;
+    const { addGearPage, accountPage } = this.pages;
 
     await addGearPage.searchAndSelectGear(gears.pots.name);
     await addGearPage.clickSaveAndContinue();
     await expect(addGearPage.measurementsHeading('pots'), 'Measurements heading to be visible').toBeVisible();
     await addGearPage.gearDimensionInput().fill(gearDimension);
     await addGearPage.clickSaveAndContinue();
-    await addGearPage.expectUrl(/\/account$/);
+    await accountPage.expectOnPage();
   }
 
   async saveGearFromAddPage(gearName: string): Promise<void> {
@@ -81,7 +81,8 @@ export class GearFlow {
   async removeSavedGears(gearNames: string[]): Promise<void> {
     const { accountPage, removeGearPage } = this.pages;
 
-    await accountPage.goto('/account');
+    await accountPage.header.accountLink().click();
+    await accountPage.expectOnPage();
     const gearText = await accountPage.getGearOnboardText();
     const present = gearNames.filter((name) => gearText.includes(name));
     if (present.length === 0) return;
@@ -89,6 +90,6 @@ export class GearFlow {
     await accountPage.clickRemoveGear();
     await removeGearPage.selectGearToRemove(...present);
     await removeGearPage.clickContinue();
-    await accountPage.expectUrl(/\/account$/);
+    await accountPage.expectOnPage();
   }
 }

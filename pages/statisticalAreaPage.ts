@@ -12,7 +12,7 @@ export type MapLabel = { code: string; x: number; y: number };
  */
 export class StatisticalAreaPage extends BasePage {
   public readonly pageHeading = (): Locator =>
-    this.page.getByRole('heading', { name: 'Where was the majority of your catch caught?', exact: true });
+    this.page.getByRole('heading', { name: /Where was the majority of your catch caught( using .+)?\?/ });
 
   // With gears selected the heading names the gear in lower case; name matching is case-insensitive
   public readonly pageHeadingForGear = (gearName?: string): Locator =>

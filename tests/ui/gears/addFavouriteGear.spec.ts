@@ -7,35 +7,26 @@
  * @since 2026-11-16
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { gears, errorMessages } from '../../../test-data/testData';
-
-type FavouriteGearData = {
-  name: string;
-};
-
-type MeasuredGearData = FavouriteGearData & {
-  gearDimension: string;
-};
+import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
+import { gears, ports, errorMessages } from '../../../test-data/testData';
 
 // Gear names and measurements confirmed by existing gear specs; validation messages confirmed on the live app
-const testFavouriteGears = [gears.pots.name, gears.traps.name, gears.seineNets.name];
+// Gears the tests save; removed at sign-in and after each test, then restored if they were already saved
+const absentFavourites: Favourites = {
+  ...noFavourites,
+  ports: [ports.first, ports.third],
+  gears: [gears.pots.name, gears.traps.name, gears.seineNets.name]
+};
 const isSeineNets = (name: string): boolean => name === gears.seineNets.name;
 
 test.describe('Add favourite gear', () => {
-  test.beforeEach(async ({ navigationFlow, gearFlow }) => {
-    await test.step('I am signed in without the test gear saved as a favourite', async () => {
-      await navigationFlow.signIn({
-        requiredCredentialsMessage:
-          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Add favourite gear UI tests'
-      });
-      await gearFlow.removeSavedGears(testFavouriteGears);
-    });
-  });
+  test.use({ absentFavourites });
 
-  // Page fixtures are per test, so clean-up runs after each test rather than in afterAll
-  test.afterEach(async ({ gearFlow, catchRecordFlow }) => {
-    await gearFlow.removeSavedGears(testFavouriteGears);
-    await catchRecordFlow.deleteCreatedDrafts();
+  // Requesting createdRecords signs in and restores the gear and drafts after each test
+  test.beforeEach(async ({ createdRecords }) => {
+    await test.step('I am signed in without the test gear saved as a favourite', async () => {
+      void createdRecords;
+    });
   });
 
   test(
@@ -61,7 +52,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('The gear is saved to my favourites', async () => {
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await expect(
           accountPage.gearOnboardValue(),
           `Gear onboard value to contain text ${gears.pots.name}`
@@ -73,8 +64,7 @@ test.describe('Add favourite gear', () => {
 
       await test.step('It is available for future catch records', async () => {
         // Favourites are saved per vessel, so a record must be started to give gear selection its vessel
-        await navigationFlow.startCatchRecord();
-        await gearSelectionPage.goto('/gear-selection');
+        await navigationFlow.openGearSelectionForNewRecord();
         await expect(gearSelectionPage.gearCheckbox(gears.pots.name), 'Gear checkbox to be visible').toBeVisible();
       });
     }
@@ -95,7 +85,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('Both gears appear in my favourites list', async () => {
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await expect(
           accountPage.gearOnboardValue(),
           `Gear onboard value to contain text ${gears.pots.name}`
@@ -143,8 +133,8 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('The gear is not saved', async () => {
-        await addGearPage.expectUrl(/\/add-gear/);
-        await accountPage.goto('/account');
+        await expect(addGearPage.measurementsHeading(), 'Measurements heading to be visible').toBeVisible();
+        await navigationFlow.openAccount();
         await expect(accountPage.gearOnboardValue(), `Gear onboard value to have text ${gearBefore}`).toHaveText(
           gearBefore
         );
@@ -178,8 +168,8 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('Prevents submission', async () => {
-        await addGearPage.expectUrl(/\/add-gear/);
-        await accountPage.goto('/account');
+        await expect(addGearPage.measurementsHeading(), 'Measurements heading to be visible').toBeVisible();
+        await navigationFlow.openAccount();
         await expect(accountPage.gearOnboardValue(), `Gear onboard value to have text ${gearBefore}`).toHaveText(
           gearBefore
         );
@@ -197,8 +187,7 @@ test.describe('Add favourite gear', () => {
       });
 
       await test.step('I start a new catch record', async () => {
-        await navigationFlow.startCatchRecord();
-        await gearSelectionPage.goto('/gear-selection');
+        await navigationFlow.openGearSelectionForNewRecord();
       });
 
       await test.step('The gear appears in my available gear list', async () => {

@@ -7,39 +7,42 @@
  * @since 2026-11-11
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { catchSpecies } from '../../../test-data/testData';
-
-type SpeciesData = { name: string; code: string; weight: string };
+import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
+import { catchSpecies, gears, ports } from '../../../test-data/testData';
 
 // A third vessel species, so removing two species never removes all of them (confirmed in the live catalogue)
 
+const testFavourites: Favourites = {
+  ...noFavourites,
+  gears: [gears.pots.name],
+  species: [catchSpecies.cod.name, catchSpecies.mackerel.name]
+};
+// Departure and return ports the journey saves as favourites; removed after each test unless already saved
+const absentFavourites: Favourites = { ...noFavourites, ports: [ports.first, ports.third] };
+
 test.describe('Remove species', () => {
-  // Removing species here updates the vessel's saved species, so restore them around every test
-  test.beforeEach(async ({ navigationFlow, favouritesFlow, speciesSelectionPage }) => {
+  test.use({ testFavourites, absentFavourites });
+
+  // Requesting createdRecords signs in and saves the species; its teardown removes only what it added
+  test.beforeEach(async ({ navigationFlow, speciesSelectionPage, createdRecords }) => {
+    void createdRecords;
     await test.step('The user has one or more species displayed', async () => {
-      await navigationFlow.signInAndOpenAccount({
-        requiredCredentialsMessage:
-          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Remove species UI tests'
-      });
-      for (const species of [catchSpecies.cod, catchSpecies.mackerel]) {
-        await favouritesFlow.ensureSpeciesAdded(species.name);
-      }
       await navigationFlow.openSpeciesSelectionForNewRecord();
       for (const species of [catchSpecies.cod, catchSpecies.mackerel]) {
         await speciesSelectionPage.selectSpecies(species.name);
         await speciesSelectionPage.enterSpeciesWeights(species.code, species.weight);
       }
-      await speciesSelectionPage.saveAndReturn();
+      await navigationFlow.saveSpeciesAndReturn();
     });
   });
 
-  test.afterEach(async ({ navigationFlow, favouritesFlow, catchRecordFlow }) => {
+  // Tests remove species from the vessel, so put them back before the fixture removes the ones it added
+  test.afterEach(async ({ navigationFlow, favouritesFlow }) => {
     await navigationFlow.openAccount();
     for (const species of [catchSpecies.cod, catchSpecies.mackerel]) {
       await favouritesFlow.ensureSpeciesAdded(species.name);
     }
     await favouritesFlow.removeSpeciesFromAccount(catchSpecies.shads.name);
-    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(
@@ -83,15 +86,16 @@ test.describe('Remove species', () => {
   test(
     'Removes selected species and their catch weights when removal is confirmed',
     { tag: ['@ui', '@regression', '@removeSpecies'] },
-    async ({ navigationFlow, favouritesFlow, speciesSelectionPage, removeSpeciesPage }) => {
+    async ({ navigationFlow, addSpeciesPage, speciesSelectionPage, removeSpeciesPage }) => {
       await test.step('The user has multiple species selected', async () => {
-        // The Remove Species page lists the vessel's saved species, so the third species is saved to the account first
-        await navigationFlow.openAccount();
-        await favouritesFlow.ensureSpeciesAdded(catchSpecies.shads.name);
-        await navigationFlow.openSpeciesSelection();
+        // The Remove Species page lists the vessel's saved species, so the third species is added to the vessel first
+        await navigationFlow.openAddSpecies();
+        await addSpeciesPage.searchAndSelectSpecies(catchSpecies.shads.name);
+        await addSpeciesPage.clickSaveAndContinue();
+        await speciesSelectionPage.expectOnPage();
         await speciesSelectionPage.selectSpecies(catchSpecies.shads.name);
         await speciesSelectionPage.enterSpeciesWeights(catchSpecies.shads.code, catchSpecies.shads.weight);
-        await speciesSelectionPage.saveAndReturn();
+        await navigationFlow.saveSpeciesAndReturn();
         for (const species of [catchSpecies.cod, catchSpecies.mackerel, catchSpecies.shads]) {
           await expect(
             speciesSelectionPage.weightAboveMinimumInput(species.code),
@@ -176,7 +180,7 @@ test.describe('Remove species', () => {
   test(
     'Preserves the remaining species when a previously saved species is removed',
     { tag: ['@ui', '@regression', '@removeSpecies'] },
-    async ({ speciesSelectionPage, removeSpeciesPage }) => {
+    async ({ navigationFlow, speciesSelectionPage, removeSpeciesPage }) => {
       await test.step('The user has previously selected species', async () => {
         await expect(
           speciesSelectionPage.weightAboveMinimumInput(catchSpecies.cod.code),
@@ -185,7 +189,7 @@ test.describe('Remove species', () => {
       });
 
       await test.step('The user returns to the species page', async () => {
-        await speciesSelectionPage.goto('/species-selection');
+        await navigationFlow.saveSpeciesAndReturn();
       });
 
       await test.step('Previously selected species are displayed', async () => {

@@ -21,6 +21,8 @@ test.describe('Review Catch Record', () => {
   let reviewRecord: MultiDayCatchRecordData;
 
   test.beforeEach(() => {
+    // Saving the random favourites and completing a record to review exceeds the default 30s test timeout
+    test.slow();
     reviewRecord = {
       vesselName: vessels.testVessel,
       tripDates: { departureDate: daysAgo(2), returnDate: daysAgo(1) },
@@ -45,7 +47,7 @@ test.describe('Review Catch Record', () => {
       });
 
       await test.step('I open the catch record review', async () => {
-        await checkAnswersPage.goto('/check-answers');
+        await checkAnswersPage.expectOnPage();
       });
 
       await test.step('I should see the trip information', async () => {
@@ -77,7 +79,7 @@ test.describe('Review Catch Record', () => {
             await expect(
               checkAnswersPage.speciesSummaryValue(caught.name, gear.name, checkAnswers.summaryKeys.weightRetained),
               'Species summary value to have text'
-            ).toHaveText(`${caught.weight} kg`);
+            ).toHaveText(caught.weight);
           }
         }
       });

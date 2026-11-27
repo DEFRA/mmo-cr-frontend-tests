@@ -52,7 +52,7 @@ const tripDatesAtOffsets = ({ start, end }: TripDateOffsets): TripDates => ({
 });
 
 test.describe('Trip date validation', () => {
-  test.beforeEach(async ({ navigationFlow, recordsPage, selectVesselPage, tripDatePage }) => {
+  test.beforeEach(async ({ navigationFlow, tripDatePage }) => {
     await test.step('The user signs in to the service', async () => {
       await navigationFlow.signIn({
         requiredCredentialsMessage:
@@ -61,9 +61,7 @@ test.describe('Trip date validation', () => {
     });
 
     await test.step('The user starts a new catch record', async () => {
-      await recordsPage.createNewRecordButton().click();
-      await selectVesselPage.selectVessel(vessels.testVessel);
-      await selectVesselPage.clickSaveAndContinue();
+      await navigationFlow.openNewRecord(vessels.testVessel);
     });
 
     await test.step('The user chooses to enter separate trip dates', async () => {
@@ -80,7 +78,7 @@ test.describe('Trip date validation', () => {
   test(
     'Accepts a valid trip',
     { tag: ['@ui', '@regression', '@tripDateValidation'] },
-    async ({ tripDepartureDatePage, tripReturnDatePage }) => {
+    async ({ tripDepartureDatePage, tripReturnDatePage, departurePortPage, addPortPage }) => {
       const dates = tripDatesAtOffsets(dateOffsets.validTrip);
 
       await test.step('The trip start date is not in the future', async () => {
@@ -111,7 +109,10 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('The user is allowed to proceed', async () => {
-        await expect(tripReturnDatePage.page, 'Page not to have url').not.toHaveURL(/\/trip-(departure|return)-date$/);
+        await expect(
+          departurePortPage.pageHeading().or(addPortPage.pageHeading()),
+          'Departure port heading to be visible'
+        ).toBeVisible();
       });
     }
   );
@@ -132,7 +133,7 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('Progression is prevented', async () => {
-        await tripDepartureDatePage.expectUrl(/\/trip-departure-date$/);
+        await tripDepartureDatePage.expectOnPage();
       });
 
       await test.step('A validation message explains the 365-day limit', async () => {
@@ -163,7 +164,7 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('Progression is prevented', async () => {
-        await tripReturnDatePage.expectUrl(/\/trip-return-date$/);
+        await tripReturnDatePage.expectOnPage();
       });
 
       await test.step('A validation message explains the 30-day limit', async () => {
@@ -194,7 +195,7 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('Progression is prevented', async () => {
-        await tripReturnDatePage.expectUrl(/\/trip-return-date$/);
+        await tripReturnDatePage.expectOnPage();
       });
 
       await test.step('A validation message explains the end-date ordering rule', async () => {
@@ -222,7 +223,7 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('Progression is prevented', async () => {
-        await tripDepartureDatePage.expectUrl(/\/trip-departure-date$/);
+        await tripDepartureDatePage.expectOnPage();
       });
 
       await test.step('A validation message explains that the start date cannot be in the future', async () => {
@@ -238,7 +239,7 @@ test.describe('Trip date validation', () => {
   test(
     'Accepts the 365-day boundary',
     { tag: ['@ui', '@regression', '@tripDateValidation'] },
-    async ({ tripDepartureDatePage, tripReturnDatePage }) => {
+    async ({ tripDepartureDatePage, tripReturnDatePage, departurePortPage, addPortPage }) => {
       const dates = tripDatesAtOffsets(dateOffsets.exactly365Days);
 
       await test.step('The trip start date is exactly 365 days before the date of entry', async () => {
@@ -258,7 +259,10 @@ test.describe('Trip date validation', () => {
 
       await test.step('The trip dates are accepted', async () => {
         await expect(tripReturnDatePage.errorSummary(), 'Error summary to be hidden').toBeHidden();
-        await expect(tripReturnDatePage.page, 'Page not to have url').not.toHaveURL(/\/trip-(departure|return)-date$/);
+        await expect(
+          departurePortPage.pageHeading().or(addPortPage.pageHeading()),
+          'Departure port heading to be visible'
+        ).toBeVisible();
       });
     }
   );
@@ -266,7 +270,7 @@ test.describe('Trip date validation', () => {
   test(
     'Accepts the 30-day boundary',
     { tag: ['@ui', '@regression', '@tripDateValidation'] },
-    async ({ tripDepartureDatePage, tripReturnDatePage }) => {
+    async ({ tripDepartureDatePage, tripReturnDatePage, departurePortPage, addPortPage }) => {
       const dates = tripDatesAtOffsets(dateOffsets.exactly30Days);
 
       await test.step('The trip length is exactly 30 days', async () => {
@@ -286,7 +290,10 @@ test.describe('Trip date validation', () => {
 
       await test.step('The trip dates are accepted', async () => {
         await expect(tripReturnDatePage.errorSummary(), 'Error summary to be hidden').toBeHidden();
-        await expect(tripReturnDatePage.page, 'Page not to have url').not.toHaveURL(/\/trip-(departure|return)-date$/);
+        await expect(
+          departurePortPage.pageHeading().or(addPortPage.pageHeading()),
+          'Departure port heading to be visible'
+        ).toBeVisible();
       });
     }
   );
@@ -294,7 +301,7 @@ test.describe('Trip date validation', () => {
   test(
     'Accepts a same-day trip',
     { tag: ['@ui', '@regression', '@tripDateValidation'] },
-    async ({ tripDepartureDatePage, tripReturnDatePage }) => {
+    async ({ tripDepartureDatePage, tripReturnDatePage, departurePortPage, addPortPage }) => {
       const dates = tripDatesAtOffsets(dateOffsets.sameDay);
 
       await test.step('The trip start and end dates are the same', async () => {
@@ -314,7 +321,10 @@ test.describe('Trip date validation', () => {
 
       await test.step('The trip dates are accepted', async () => {
         await expect(tripReturnDatePage.errorSummary(), 'Error summary to be hidden').toBeHidden();
-        await expect(tripReturnDatePage.page, 'Page not to have url').not.toHaveURL(/\/trip-(departure|return)-date$/);
+        await expect(
+          departurePortPage.pageHeading().or(addPortPage.pageHeading()),
+          'Departure port heading to be visible'
+        ).toBeVisible();
       });
     }
   );
@@ -337,7 +347,7 @@ test.describe('Trip date validation', () => {
       });
 
       await test.step('Progression is prevented', async () => {
-        await tripReturnDatePage.expectUrl(/\/trip-return-date$/);
+        await tripReturnDatePage.expectOnPage();
       });
 
       await test.step('A validation message explains that the end date cannot be in the future', async () => {

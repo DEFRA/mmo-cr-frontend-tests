@@ -9,6 +9,8 @@ import { BasePage } from './basePage';
  * @since 2026-09-03
  */
 export class RecordsPage extends BasePage {
+  public readonly pageHeading = (): Locator =>
+    this.page.getByRole('heading', { name: 'Your catch records', exact: true });
   public readonly pageTitle = (): Locator => this.page.getByTestId('app-heading-title');
   public readonly pageCaption = (): Locator => this.page.getByTestId('app-heading-caption');
 

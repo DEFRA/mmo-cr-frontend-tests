@@ -6,10 +6,15 @@
  */
 import { expect } from '@playwright/test';
 import { type AccountPage } from '../../../pages/accountPage';
+import { type AddGearPage } from '../../../pages/addGearPage';
 import { type AddPortPage } from '../../../pages/addPortPage';
 import { type AddSpeciesPage } from '../../../pages/addSpeciesPage';
+import { type CatchNotLandedPage } from '../../../pages/catchNotLandedPage';
+import { type CheckAnswersPage } from '../../../pages/checkAnswersPage';
 import { type ConfirmSamePortPage } from '../../../pages/confirmSamePortPage';
 import { type DeparturePortPage } from '../../../pages/departurePortPage';
+import { type HomePage } from '../../../pages/homePage';
+import { type GearSelectionPage } from '../../../pages/gearSelectionPage';
 import { type RecordsPage } from '../../../pages/recordsPage';
 import { type ReturnPortPage } from '../../../pages/returnPortPage';
 import { type SelectVesselPage } from '../../../pages/selectVesselPage';
@@ -18,7 +23,7 @@ import { type SpeciesSelectionPage } from '../../../pages/speciesSelectionPage';
 import { type StatisticalAreaOtherPage } from '../../../pages/statisticalAreaOtherPage';
 import { type StatisticalAreaPage } from '../../../pages/statisticalAreaPage';
 import { type TripDatePage } from '../../../pages/tripDatePage';
-import { vessels, ports } from '../../../test-data/testData';
+import { vessels, ports, gears } from '../../../test-data/testData';
 
 export type SignInOptions = {
   email?: string;
@@ -31,6 +36,7 @@ export class NavigationFlow {
 
   constructor(
     private readonly pages: {
+      homePage: HomePage;
       signInPage: SigninPage;
       accountPage: AccountPage;
       recordsPage: RecordsPage;
@@ -44,11 +50,31 @@ export class NavigationFlow {
       departurePortPage: DeparturePortPage;
       returnPortPage: ReturnPortPage;
       statisticalAreaPage: StatisticalAreaPage;
+      gearSelectionPage: GearSelectionPage;
+      catchNotLandedPage: CatchNotLandedPage;
+      checkAnswersPage: CheckAnswersPage;
+      addGearPage: AddGearPage;
     }
   ) {}
 
+  async openHomePage(): Promise<void> {
+    const { homePage } = this.pages;
+
+    await homePage.goto('/');
+    await homePage.expectOnPage();
+  }
+
+  // Starts from the home page, as a user would, and selects Start now
+  async openSignIn(): Promise<void> {
+    const { homePage, signInPage } = this.pages;
+
+    await this.openHomePage();
+    await homePage.startNowButton().click();
+    await signInPage.expectOnPage();
+  }
+
   async signIn(options: SignInOptions = {}): Promise<void> {
-    const { signInPage } = this.pages;
+    const { signInPage, recordsPage } = this.pages;
 
     const email = options.email ?? process.env.CATCH_RECORDING_EMAIL ?? '';
     const password = options.password ?? process.env.CATCH_RECORDING_PASSWORD ?? '';
@@ -56,17 +82,23 @@ export class NavigationFlow {
       throw new Error(options.requiredCredentialsMessage);
     }
 
-    await signInPage.goto('/sign-in');
+    await this.openSignIn();
     await signInPage.login(email, password);
-    await expect(signInPage.page, 'Page to have url').toHaveURL(/\/records$/);
+    await recordsPage.expectOnPage();
   }
 
   async openAccount(): Promise<void> {
     const { accountPage } = this.pages;
 
-    await accountPage.goto('/account');
-    await accountPage.expectUrl(/\/account$/);
-    await expect(accountPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+    await accountPage.header.accountLink().click();
+    await accountPage.expectOnPage();
+  }
+
+  async openRecords(): Promise<void> {
+    const { recordsPage } = this.pages;
+
+    await recordsPage.header.homeLink().click();
+    await recordsPage.expectOnPage();
   }
 
   async signInAndOpenAccount(options: SignInOptions = {}): Promise<void> {
@@ -83,18 +115,44 @@ export class NavigationFlow {
   }
 
   async openAddGear(): Promise<void> {
-    const { accountPage } = this.pages;
+    const { accountPage, addGearPage } = this.pages;
 
-    await accountPage.goto('/account');
+    await this.openAccount();
     await accountPage.clickAddGear();
-    await expect(accountPage.page, 'Page to have url').toHaveURL(/\/add-gear\?return=/);
+    await addGearPage.expectOnPage();
   }
 
-  async openSpeciesSelection(): Promise<void> {
+  // Follows the Back link from the page being shown (catch not landed, add species) to species selection
+  async returnToSpeciesSelection(): Promise<void> {
     const { speciesSelectionPage } = this.pages;
 
-    await speciesSelectionPage.goto('/species-selection');
-    await expect(speciesSelectionPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+    await speciesSelectionPage.common.backLink().click();
+    await speciesSelectionPage.expectOnPage();
+  }
+
+  async saveSpeciesAndReturn(): Promise<void> {
+    const { speciesSelectionPage, catchNotLandedPage } = this.pages;
+
+    await speciesSelectionPage.clickSaveAndContinue();
+    await catchNotLandedPage.expectOnPage();
+    await this.returnToSpeciesSelection();
+  }
+
+  // Follows the Back link from species selection to the map for the gear
+  async returnToMap(): Promise<void> {
+    const { statisticalAreaPage } = this.pages;
+
+    await statisticalAreaPage.common.backLink().click();
+    await statisticalAreaPage.expectOnPage();
+  }
+
+  // Selects a favourite gear on gear selection, which opens the map for that gear
+  async selectGearForMap(gearName = gears.pots.name): Promise<void> {
+    const { gearSelectionPage, statisticalAreaPage } = this.pages;
+
+    await gearSelectionPage.gearCheckbox(gearName).check();
+    await gearSelectionPage.clickSaveAndContinue();
+    await statisticalAreaPage.expectOnPage();
   }
 
   // Requires a signed-in user; reaches species selection through a new catch record
@@ -105,20 +163,27 @@ export class NavigationFlow {
   ): Promise<void> {
     const { statisticalAreaPage, speciesSelectionPage } = this.pages;
 
+    await this.openGearSelectionForNewRecord(portName, vesselName, returnPortName);
+    await statisticalAreaPage.installCanvasProbe();
+    await this.selectGearForMap();
+    await statisticalAreaPage.selectMiddleMapArea();
+    await speciesSelectionPage.expectOnPage();
+  }
+
+  async openGearSelectionForNewRecord(
+    portName = ports.first,
+    vesselName = vessels.testVessel,
+    returnPortName = ports.third
+  ): Promise<void> {
     await this.startCatchRecord(vesselName);
     await this.selectDepartureAndReturnPorts(portName, returnPortName);
-    await statisticalAreaPage.installCanvasProbe();
-    await statisticalAreaPage.goto('/statistical-area');
-    await statisticalAreaPage.selectMiddleMapArea();
-    await speciesSelectionPage.expectUrl(/\/species-selection$/);
-    await expect(speciesSelectionPage.pageHeading(), 'Page heading to be visible').toBeVisible();
   }
 
   async openAddSpecies(): Promise<void> {
     const { speciesSelectionPage, addSpeciesPage } = this.pages;
 
     await speciesSelectionPage.clickAddSpecies();
-    await expect(addSpeciesPage.page, 'Page to have url').toHaveURL(/\/add-species\?return=\/species-selection/);
+    await addSpeciesPage.expectOnPage();
     await expect(addSpeciesPage.speciesInput(), 'Species input to be visible').toBeVisible();
     await expect(addSpeciesPage.speciesInput(), 'Species input to be editable').toBeEditable();
   }
@@ -127,27 +192,29 @@ export class NavigationFlow {
   async openNewRecord(vesselName = vessels.testVessel): Promise<void> {
     const { recordsPage, selectVesselPage, tripDatePage } = this.pages;
 
-    await recordsPage.goto('/records');
+    await this.openRecords();
     await recordsPage.createNewRecordButton().click();
     await selectVesselPage.selectVessel(vesselName);
     await selectVesselPage.clickSaveAndContinue();
-    await tripDatePage.expectUrl(/\/trip-date$/);
+    await tripDatePage.expectOnPage();
     this.createdRecordReferences.add(await tripDatePage.getRecordReference());
   }
 
   async startCatchRecord(vesselName = vessels.testVessel): Promise<void> {
-    const { tripDatePage } = this.pages;
+    const { tripDatePage, departurePortPage, addPortPage } = this.pages;
 
     await this.openNewRecord(vesselName);
     await tripDatePage.yesRadio().check();
     await tripDatePage.clickSaveAndContinue();
-    await tripDatePage.expectUrl(/\/(departure-port|add-port)(\?|$)/);
+    await expect(
+      departurePortPage.pageHeading().or(addPortPage.pageHeading()),
+      'Departure port heading to be visible'
+    ).toBeVisible();
   }
 
   async openStatisticalAreaMap(
     options: { portName?: string; returnPortName?: string; vesselName?: string; signInOptions?: SignInOptions } = {}
   ): Promise<void> {
-    const { statisticalAreaPage } = this.pages;
     const {
       portName = ports.first,
       returnPortName = ports.third,
@@ -156,10 +223,8 @@ export class NavigationFlow {
     } = options;
 
     await this.signIn(signInOptions);
-    await this.startCatchRecord(vesselName);
-    await this.selectDepartureAndReturnPorts(portName, returnPortName);
-    await statisticalAreaPage.goto('/statistical-area');
-    await statisticalAreaPage.expectUrl(/\/statistical-area$/);
+    await this.openGearSelectionForNewRecord(portName, vesselName, returnPortName);
+    await this.selectGearForMap();
   }
 
   async openStatisticalAreaOther(portName = ports.fifth, vesselName = vessels.testVessel): Promise<void> {
@@ -176,11 +241,22 @@ export class NavigationFlow {
     await statisticalAreaPage.clickOther();
   }
 
+  async openCheckAnswers(): Promise<void> {
+    const { checkAnswersPage } = this.pages;
+
+    await checkAnswersPage.goto('/check-answers');
+    await checkAnswersPage.expectOnPage();
+  }
+
   // Selects the departure and return ports, then lands on gear selection
   async selectDepartureAndReturnPorts(portName: string, returnPortName = ports.third): Promise<void> {
-    const { addPortPage, confirmSamePortPage, returnPortPage } = this.pages;
+    const { addPortPage, confirmSamePortPage, departurePortPage, returnPortPage, gearSelectionPage } = this.pages;
 
-    await addPortPage.goto('/add-port?for=departure&entry=1');
+    // The account's favourite ports are listed first; adding another port opens the search
+    if (await departurePortPage.pageHeading().isVisible()) {
+      await departurePortPage.clickAddPort();
+    }
+    await addPortPage.expectOnPage();
     await addPortPage.searchAndSelectPort(portName);
     await addPortPage.clickSaveAndContinue();
 
@@ -195,12 +271,13 @@ export class NavigationFlow {
       await confirmSamePortPage.selectSamePort(true);
       await confirmSamePortPage.clickSaveAndContinue();
     } else {
-      if (!(await addPortPage.returnPortHeading().isVisible())) {
-        await addPortPage.goto('/add-port?for=return&entry=1');
+      if (await returnPortPage.pageHeading().isVisible()) {
+        await returnPortPage.clickAddPort();
       }
+      await expect(addPortPage.returnPortHeading(), 'Return port heading to be visible').toBeVisible();
       await addPortPage.searchAndSelectPort(returnPortName);
       await addPortPage.clickSaveAndContinue();
     }
-    await addPortPage.expectUrl(/\/gear-selection$/);
+    await gearSelectionPage.expectOnPage();
   }
 }

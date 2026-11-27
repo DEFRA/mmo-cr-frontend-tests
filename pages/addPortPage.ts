@@ -16,18 +16,20 @@ export class AddPortPage extends BasePage {
   public readonly returnPortHeading = (): Locator =>
     this.page.getByRole('heading', { name: 'Enter the port or closest port you returned to' });
 
+  public readonly favouritesHeading = (): Locator =>
+    this.page.getByRole('heading', { name: 'Add a port to your favourites' });
+
   public readonly portInput = (): Locator =>
     this.page.getByLabel(/Enter the port or closest port you (set off from|returned to)|Add a port to your favourites/);
 
   public readonly portResultsList = (): Locator => this.page.locator('#port-results');
 
-  public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
+  public readonly errorSummary = (): Locator => this.common.errorSummary();
 
   public readonly portResultItem = (portName: string): Locator =>
     this.portResultsList().locator('li').filter({ hasText: portName });
 
   async searchPorts(searchTerm: string): Promise<void> {
-    await this.page.waitForLoadState('load');
     await this.portInput().fill(searchTerm);
     await expect(this.portResultsList().getByRole('option').first(), 'Port results list to be visible').toBeVisible();
   }

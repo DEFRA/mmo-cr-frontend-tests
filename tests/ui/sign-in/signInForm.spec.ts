@@ -12,14 +12,11 @@ const validCredentials = {
   password: process.env.CATCH_RECORDING_PASSWORD ?? ''
 };
 const missingCredentialsReason = 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD must be set in .env';
-const signInUrl = /\/sign-in/;
-const homeScreenUrl = /\/records$/;
-const forgottenPasswordUrl = /\/forgotten-password$/;
 
 test.describe.skip('Sign in form', () => {
-  test.beforeEach(async ({ signInPage }) => {
+  test.beforeEach(async ({ navigationFlow }) => {
     await test.step('The user is on the Sign In screen', async () => {
-      await signInPage.goto('/sign-in');
+      await navigationFlow.openSignIn();
     });
   });
 
@@ -74,7 +71,7 @@ test.describe.skip('Sign in form', () => {
   test(
     'Leading and trailing spaces in the email address are removed',
     { tag: ['@ui', '@regression', '@signIn'] },
-    async ({ signInPage }) => {
+    async ({ signInPage, recordsPage }) => {
       test.skip(!validCredentials.email || !validCredentials.password, missingCredentialsReason);
 
       await test.step('The user signs in with a valid email address surrounded by spaces', async () => {
@@ -82,7 +79,7 @@ test.describe.skip('Sign in form', () => {
       });
 
       await test.step('The user is signed in and taken to the home screen', async () => {
-        await signInPage.expectUrl(homeScreenUrl);
+        await recordsPage.expectOnPage();
       });
     }
   );
@@ -100,7 +97,7 @@ test.describe.skip('Sign in form', () => {
   test(
     'Opens the records page when sign-in credentials are valid',
     { tag: ['@ui', '@smoke', '@signIn'] },
-    async ({ signInPage }) => {
+    async ({ signInPage, recordsPage }) => {
       test.skip(!validCredentials.email || !validCredentials.password, missingCredentialsReason);
 
       await test.step('The user enters valid credentials and taps Sign in', async () => {
@@ -108,7 +105,7 @@ test.describe.skip('Sign in form', () => {
       });
 
       await test.step('The user is taken to the application home screen', async () => {
-        await signInPage.expectUrl(homeScreenUrl);
+        await recordsPage.expectOnPage();
       });
     }
   );
@@ -122,8 +119,7 @@ test.describe.skip('Sign in form', () => {
       });
 
       await test.step('The user remains on the Sign In screen', async () => {
-        await signInPage.expectUrl(signInUrl);
-        await expect(signInPage.signInHeading(), 'Sign in heading to be visible').toBeVisible();
+        await signInPage.expectOnPage();
       });
 
       await test.step(`"${errorMessages.signIn.invalidCredentials}" is displayed`, async () => {
@@ -144,7 +140,7 @@ test.describe.skip('Sign in form', () => {
       });
 
       await test.step('The Forgot Password screen is opened', async () => {
-        await signInPage.expectUrl(forgottenPasswordUrl);
+        await expect(signInPage.forgottenPasswordHeading(), 'Forgotten password heading to be visible').toBeVisible();
       });
     }
   );

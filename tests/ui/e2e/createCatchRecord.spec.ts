@@ -11,7 +11,6 @@ import {
   type GearCatch,
   type TripDates,
   daysAgo,
-  noFavourites,
   recordReferencePattern,
   recordsListDate
 } from '../helpers/catchRecordFlow';
@@ -38,18 +37,10 @@ const tripScenarios: TripScenario[] = [
 ];
 
 test.describe('Create Catch Record', () => {
-  let addedFavourites: Favourites = noFavourites;
-  let createdRecords: string[] = [];
+  test.use({ testFavourites });
 
-  test.beforeEach(async () => {
+  test.beforeEach(() => {
     test.slow();
-    createdRecords = [];
-    addedFavourites = noFavourites;
-  });
-
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.restoreFavourites(addedFavourites);
-    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   for (const { tripType, uat, tripDates, tripStepTitle } of tripScenarios) {
@@ -59,12 +50,20 @@ test.describe('Create Catch Record', () => {
         tag: ['@ui', '@smoke', '@createCatchRecord', '@e2e'],
         annotation: { type: 'UAT', description: uat }
       },
-      async ({ navigationFlow, catchRecordFlow, checkAnswersPage, recordsPage, submittedRecordPage }) => {
+      async ({
+        createdRecords,
+        catchRecordFlow,
+        checkAnswersPage,
+        confirmationPage,
+        recordsPage,
+        submittedRecordPage,
+        navigationFlow
+      }) => {
         let reference = '';
 
         await test.step('I am signed in', async () => {
-          await navigationFlow.signIn();
-          addedFavourites = await catchRecordFlow.ensureFavourites(testFavourites);
+          // Signed in with the test favourites saved by the createdRecords fixture
+          void createdRecords;
         });
 
         await test.step(tripStepTitle, async () => {
@@ -93,11 +92,12 @@ test.describe('Create Catch Record', () => {
 
         await test.step('I review and submit the record', async () => {
           await checkAnswersPage.clickAcceptAndSubmit();
+          await confirmationPage.expectOnPage();
         });
 
         await test.step(`The ${tripType} trip should be recorded successfully`, async () => {
           const tripEndDate = tripDates?.returnDate ?? new Date();
-          await recordsPage.goto('/records');
+          await navigationFlow.openRecords();
           await expect(
             recordsPage.recordStatus(reference),
             `Record status to have text ${recordStatuses.submitted}`

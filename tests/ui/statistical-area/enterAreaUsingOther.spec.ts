@@ -6,21 +6,27 @@
  * @since 2026-11-16
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { areas, checkAnswers, errorMessages } from '../../../test-data/testData';
+import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
+import { areas, checkAnswers, errorMessages, gears, ports } from '../../../test-data/testData';
+import { searchTermFor } from '../../../utils/search';
 
-const searchTerm: string = areas.validCode.slice(0, 2);
+const searchTerm: string = searchTermFor(areas.validCode);
 const additionalCharacters: string = areas.validCode.slice(2);
 const areaCodePattern: RegExp = /\d{2}[A-Z]\d{2}/;
 const coordinatesPattern: RegExp = /[-\u2212]?\d+\.\d+,\s*[-\u2212]?\d+\.\d+/;
 
-test.describe('Enter statistical sub area using the Other option', () => {
-  test.beforeEach(async ({ navigationFlow }) => {
-    await navigationFlow.openStatisticalAreaOther();
-  });
+// Departure and return ports the journey saves as favourites; removed after each test unless already saved
+const absentFavourites: Favourites = { ...noFavourites, ports: [ports.fifth, ports.third] };
+// Gear the journey selects to reach the map; saved for the test and removed afterwards unless already saved
+const testFavourites: Favourites = { ...noFavourites, gears: [gears.pots.name] };
 
-  // Each test starts a catch record, so its draft is deleted after each test
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteCreatedDrafts();
+test.describe('Enter statistical sub area using the Other option', () => {
+  test.use({ testFavourites, absentFavourites });
+
+  // Requesting createdRecords signs in and restores the favourites and drafts after each test
+  test.beforeEach(async ({ navigationFlow, createdRecords }) => {
+    void createdRecords;
+    await navigationFlow.openStatisticalAreaOther();
   });
 
   test(
@@ -153,7 +159,7 @@ test.describe('Enter statistical sub area using the Other option', () => {
   test(
     'Saves the area code when a suggested result is selected',
     { tag: ['@ui', '@smoke', '@statisticalAreaManualEntry'] },
-    async ({ statisticalAreaOtherPage, checkAnswersPage }) => {
+    async ({ navigationFlow, statisticalAreaOtherPage, speciesSelectionPage, checkAnswersPage }) => {
       test.info().annotations.push({
         type: 'unverified',
         description: 'Check answers evidence covers the area code only; stored coordinates are not asserted'
@@ -177,9 +183,9 @@ test.describe('Enter statistical sub area using the Other option', () => {
 
       await test.step('The corresponding coordinates are saved against the catch record', async () => {
         await statisticalAreaOtherPage.clickSaveAndContinue();
-        await expect(statisticalAreaOtherPage.page, 'Page not to have url').not.toHaveURL(/\/statistical-area-other/);
+        await speciesSelectionPage.expectOnPage();
 
-        await checkAnswersPage.goto('/check-answers');
+        await navigationFlow.openCheckAnswers();
         await expect(
           checkAnswersPage.summaryValue(checkAnswers.summaryKeys.statisticalSubArea),
           `Summary value to contain text ${areas.validCode}`

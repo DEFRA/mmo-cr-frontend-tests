@@ -88,7 +88,7 @@ test.describe('Late Catch Record', () => {
 
       await test.step('The corrected date means the record is no longer late', async () => {
         await tripReturnDatePage.clickSaveAndContinue();
-        await checkAnswersPage.expectUrl(/\/check-answers$/);
+        await checkAnswersPage.expectOnPage();
       });
 
       await test.step('The late warning should no longer apply', async () => {

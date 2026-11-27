@@ -52,7 +52,15 @@ test.describe('Unfinished Records', () => {
       tag: ['@ui', '@regression', '@draftRecords', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-19' }
     },
-    async ({ createdRecords, catchRecordFlow, recordsPage, draftRecordPage, checkAnswersPage, tripDatePage }) => {
+    async ({
+      createdRecords,
+      catchRecordFlow,
+      recordsPage,
+      draftRecordPage,
+      checkAnswersPage,
+      tripDatePage,
+      navigationFlow
+    }) => {
       let reference = '';
 
       await test.step('I started a catch record', async () => {
@@ -61,7 +69,7 @@ test.describe('Unfinished Records', () => {
       });
 
       await test.step('I left it before completion', async () => {
-        await recordsPage.goto('/records');
+        await navigationFlow.openRecords();
       });
 
       await test.step('I open the Unsent record', async () => {
@@ -74,7 +82,7 @@ test.describe('Unfinished Records', () => {
       });
 
       await test.step('My previously entered information should be retained', async () => {
-        await checkAnswersPage.goto('/check-answers');
+        await navigationFlow.openCheckAnswers();
         await expect(
           checkAnswersPage.summaryValue(checkAnswers.summaryKeys.departureDate),
           'Summary value to have text'
@@ -98,13 +106,13 @@ test.describe('Unfinished Records', () => {
             checkAnswers.summaryKeys.weightRetained
           ),
           'Species summary value to have text'
-        ).toHaveText(`${catchSpecies.cod.weight} kg`);
+        ).toHaveText(catchSpecies.cod.weight);
       });
 
       // The service resumes at the trip-date question with the earlier answer selected (OQ-17)
       await test.step('I should continue from the appropriate point', async () => {
         await checkAnswersPage.goBack();
-        await tripDatePage.expectUrl(/\/trip-date$/);
+        await tripDatePage.expectOnPage();
         await expect(tripDatePage.pageHeading(), `Page heading to contain text ${reference}`).toContainText(reference);
         await expect(tripDatePage.noRadio(), 'No radio to be checked').toBeChecked();
       });
@@ -117,13 +125,13 @@ test.describe('Unfinished Records', () => {
       tag: ['@ui', '@regression', '@draftRecords', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-20' }
     },
-    async ({ createdRecords, catchRecordFlow, recordsPage, draftRecordPage }) => {
+    async ({ createdRecords, catchRecordFlow, recordsPage, draftRecordPage, navigationFlow }) => {
       let reference = '';
 
       await test.step('I have an Unsent catch record', async () => {
         reference = await catchRecordFlow.completeRecordToReview(firstDraft);
         createdRecords.push(reference);
-        await recordsPage.goto('/records');
+        await navigationFlow.openRecords();
       });
 
       await test.step('I open the record', async () => {
@@ -139,7 +147,7 @@ test.describe('Unfinished Records', () => {
       });
 
       await test.step('The draft should be removed', async () => {
-        await recordsPage.expectUrl(/\/records$/);
+        await recordsPage.expectOnPage();
         await expect(recordsPage.recordRow(reference), 'Record row to have count').toHaveCount(0);
       });
 
@@ -156,7 +164,15 @@ test.describe('Unfinished Records', () => {
       tag: ['@ui', '@regression', '@draftRecords', '@e2e'],
       annotation: { type: 'UAT', description: 'UAT-28' }
     },
-    async ({ createdRecords, catchRecordFlow, recordsPage, draftRecordPage, tripDatePage, checkAnswersPage }) => {
+    async ({
+      createdRecords,
+      catchRecordFlow,
+      recordsPage,
+      draftRecordPage,
+      tripDatePage,
+      checkAnswersPage,
+      navigationFlow
+    }) => {
       const secondDraftTripEnd = daysAgo(0);
       let firstReference = '';
       let secondReference = '';
@@ -166,7 +182,7 @@ test.describe('Unfinished Records', () => {
         createdRecords.push(firstReference);
         secondReference = await catchRecordFlow.completeRecordToReview(secondDraft);
         createdRecords.push(secondReference);
-        await recordsPage.goto('/records');
+        await navigationFlow.openRecords();
       });
 
       await test.step('I open one Unsent record', async () => {
@@ -183,7 +199,7 @@ test.describe('Unfinished Records', () => {
           tripDatePage.pageHeading(),
           `Page heading not to contain text ${secondReference}`
         ).not.toContainText(secondReference);
-        await checkAnswersPage.goto('/check-answers');
+        await navigationFlow.openCheckAnswers();
         await expect(
           checkAnswersPage.summaryValue(checkAnswers.summaryKeys.returnDate),
           'Summary value to have text'
@@ -195,7 +211,7 @@ test.describe('Unfinished Records', () => {
       });
 
       await test.step('The other records should remain unchanged', async () => {
-        await recordsPage.goto('/records');
+        await navigationFlow.openRecords();
         await expect(
           recordsPage.recordStatus(secondReference),
           `Record status to have text ${recordStatuses.draft}`

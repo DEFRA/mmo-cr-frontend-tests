@@ -12,6 +12,8 @@ export class HomePage extends BasePage {
   public readonly startNowButton = (): Locator => this.page.getByRole('button', { name: 'Start now' });
   public readonly privacyPolicyLink = (): Locator => this.page.getByRole('link', { name: 'Privacy policy' });
   public readonly privacyNoticeLink = (): Locator => this.page.getByRole('link', { name: 'Privacy notice' });
+  public readonly pageHeading = (): Locator =>
+    this.page.getByRole('heading', { name: 'How to record your catch', exact: true });
   public readonly pageTitle = (): Locator => this.page.getByTestId('app-heading-title');
   public readonly pageCaption = (): Locator => this.page.getByTestId('app-heading-caption');
   public readonly warningText = (): Locator => this.page.locator('.govuk-warning-text');

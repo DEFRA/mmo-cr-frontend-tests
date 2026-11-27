@@ -7,9 +7,6 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 
-const signInUrl = /\/sign-in/;
-const signedOutUrl = /\/signed-out$/;
-
 test.describe('Account Access', () => {
   test(
     'Sign out',
@@ -27,7 +24,6 @@ test.describe('Account Access', () => {
       });
 
       await test.step('I should see that I have been signed out', async () => {
-        await signInPage.expectUrl(signedOutUrl);
         await expect(signInPage.signedOutHeading(), 'Signed out heading to be visible').toBeVisible();
       });
     }

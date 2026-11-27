@@ -7,9 +7,13 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites } from '../helpers/catchRecordFlow';
-import { vessels, ports, gears, checkAnswers } from '../../../test-data/testData';
+import { vessels, ports, gears, catchSpecies, checkAnswers } from '../../../test-data/testData';
 
-const testFavourites: Favourites = { ports: [ports.first], gears: [gears.seineNets.name], species: [] };
+const testFavourites: Favourites = {
+  ports: [ports.first],
+  gears: [gears.seineNets.name],
+  species: [catchSpecies.cod.name]
+};
 
 test.describe('Catch Location', () => {
   test.use({ testFavourites });
@@ -37,8 +41,16 @@ test.describe('Catch Location', () => {
         areaCode = await catchRecordFlow.selectAreaFromMapForCurrentGear();
       });
 
+      await test.step('I should continue to species selection', async () => {
+        await speciesSelectionPage.expectOnPage();
+        await expect(
+          speciesSelectionPage.pageHeadingForGear(gears.seineNets.name),
+          'Page heading for gear to be visible'
+        ).toBeVisible();
+      });
+
       await test.step('The selected area should be recorded', async () => {
-        await checkAnswersPage.goto('/check-answers');
+        await catchRecordFlow.completeSpeciesToReview([catchSpecies.cod]);
         await expect(
           checkAnswersPage.gearSummaryValue(gears.seineNets.name, checkAnswers.summaryKeys.statisticalSubArea),
           `Gear summary value to have text ${areaCode}`
@@ -47,15 +59,6 @@ test.describe('Catch Location', () => {
           checkAnswersPage.summaryValue(checkAnswers.summaryKeys.statisticalSubArea),
           `Summary value to contain text ${areaCode}`
         ).toContainText(areaCode);
-      });
-
-      await test.step('I should continue to species selection', async () => {
-        await checkAnswersPage.goBack();
-        await speciesSelectionPage.expectUrl(/\/species-selection\?gearId=/);
-        await expect(
-          speciesSelectionPage.pageHeadingForGear(gears.seineNets.name),
-          'Page heading for gear to be visible'
-        ).toBeVisible();
       });
     }
   );

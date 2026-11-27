@@ -7,7 +7,14 @@
  * @since 2026-11-16
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { catchSpecies, errorMessages } from '../../../test-data/testData';
+import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
+import { catchSpecies, errorMessages, gears, ports } from '../../../test-data/testData';
+import { searchTermFor } from '../../../utils/search';
+
+// Departure and return ports the journey saves as favourites; removed after each test unless already saved
+const absentFavourites: Favourites = { ...noFavourites, ports: [ports.first, ports.third] };
+// Gear the journey selects to reach the map; saved for the test and removed afterwards unless already saved
+const testFavourites: Favourites = { ...noFavourites, gears: [gears.pots.name] };
 
 // Approved species are discovered from the live catalogue at runtime using these search terms
 
@@ -20,22 +27,18 @@ const speciesCodeOf = (speciesName: string): string => {
 };
 
 test.describe('Add species to a catch record', () => {
-  test.beforeEach(async ({ navigationFlow }) => {
+  test.use({ testFavourites, absentFavourites });
+
+  // Requesting createdRecords signs in and restores the favourites and drafts after each test
+  test.beforeEach(async ({ navigationFlow, createdRecords }) => {
+    void createdRecords;
     await test.step('The user is signed in', async () => {
-      await navigationFlow.signIn({
-        requiredCredentialsMessage:
-          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Add species UI tests'
-      });
+      void createdRecords;
     });
 
     await test.step('The user is on the species selection page', async () => {
       await navigationFlow.openSpeciesSelectionForNewRecord();
     });
-  });
-
-  // Every test starts a catch record, so its draft is deleted after each test
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(
@@ -45,7 +48,7 @@ test.describe('Add species to a catch record', () => {
       let species: string;
 
       await test.step('The user wants to record a species they have caught', async () => {
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        await speciesSelectionPage.expectOnPage();
       });
 
       await test.step('The user selects Add a species', async () => {
@@ -53,8 +56,7 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The Add Species page is displayed', async () => {
-        await addSpeciesPage.expectUrl(/\/add-species/);
-        await expect(addSpeciesPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+        await addSpeciesPage.expectOnPage();
         await expect(addSpeciesPage.speciesInput(), 'Species input to be editable').toBeEditable();
       });
 
@@ -63,12 +65,12 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The user can select a species from the available list', async () => {
-        await addSpeciesPage.selectSpeciesFromSuggestions(species);
+        await addSpeciesPage.searchAndSelectSpecies(species);
       });
 
       await test.step('The selected species is added to the catch record', async () => {
         await addSpeciesPage.clickSaveAndContinue();
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        await speciesSelectionPage.expectOnPage();
         await expect(speciesSelectionPage.speciesCheckbox(species), 'Species checkbox to be visible').toBeVisible();
       });
     }
@@ -84,7 +86,7 @@ test.describe('Add species to a catch record', () => {
       await test.step('The user is on the Add Species page', async () => {
         await navigationFlow.openAddSpecies();
         species = await speciesFlow.findSpecies(catchSpecies.searchTerms.first);
-        searchTerm = species.slice(0, 2);
+        searchTerm = searchTermFor(species);
       });
 
       await test.step('The user enters at least two characters', async () => {
@@ -96,7 +98,7 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The user can select a species from the results list', async () => {
-        await addSpeciesPage.selectSpeciesFromSuggestions(species);
+        await addSpeciesPage.searchAndSelectSpecies(species);
         await addSpeciesPage.clickSaveAndContinue();
         await expect(speciesSelectionPage.speciesCheckbox(species), 'Species checkbox to be visible').toBeVisible();
       });
@@ -124,12 +126,12 @@ test.describe('Add species to a catch record', () => {
           catchSpecies.searchTerms.second,
           (species) => species !== firstSpecies
         );
-        await addSpeciesPage.selectSpeciesFromSuggestions(secondSpecies);
+        await addSpeciesPage.searchAndSelectSpecies(secondSpecies);
       });
 
       await test.step('The newly selected species is added to the existing species list', async () => {
         await addSpeciesPage.clickSaveAndContinue();
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        await speciesSelectionPage.expectOnPage();
         await expect(
           speciesSelectionPage.speciesCheckbox(secondSpecies),
           'Species checkbox to be visible'
@@ -148,7 +150,7 @@ test.describe('Add species to a catch record', () => {
   test(
     'Displays an error when the same species is added again',
     { tag: ['@ui', '@regression', '@addSpecies'] },
-    async ({ navigationFlow, speciesFlow, addSpeciesPage, speciesSelectionPage }) => {
+    async ({ navigationFlow, speciesFlow, addSpeciesPage }) => {
       let species: string;
 
       await test.step('A species has already been added', async () => {
@@ -162,7 +164,7 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The system prevents duplicate entries', async () => {
-        await addSpeciesPage.expectUrl(/\/add-species/);
+        await addSpeciesPage.expectOnPage();
       });
 
       await test.step('An error message is shown: "<species> has already been added."', async () => {
@@ -176,7 +178,7 @@ test.describe('Add species to a catch record', () => {
   test(
     'Preserves the saved species selection when another species is added',
     { tag: ['@ui', '@regression', '@addSpecies'] },
-    async ({ navigationFlow, speciesFlow, addSpeciesPage, speciesSelectionPage }) => {
+    async ({ navigationFlow, speciesFlow, speciesSelectionPage, catchNotLandedPage }) => {
       let firstSpecies: string;
       let secondSpecies: string;
 
@@ -190,11 +192,11 @@ test.describe('Add species to a catch record', () => {
           .weightAboveMinimumInput(speciesCodeOf(firstSpecies))
           .fill(catchSpecies.weights.aboveMinimum);
         await speciesSelectionPage.clickSaveAndContinue();
-        await speciesSelectionPage.expectUrl(/\/catch-not-landed$/);
+        await catchNotLandedPage.expectOnPage();
       });
 
       await test.step('The user returns to the species page', async () => {
-        await navigationFlow.openSpeciesSelection();
+        await navigationFlow.returnToSpeciesSelection();
       });
 
       await test.step('Previously selected species are displayed', async () => {
@@ -242,7 +244,7 @@ test.describe('Add species to a catch record', () => {
           speciesSelectionPage.errorSummary(),
           `Error summary to contain text ${errorMessages.species.noneSelected}`
         ).toContainText(errorMessages.species.noneSelected);
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        await speciesSelectionPage.expectOnPage();
       });
     }
   );
@@ -259,13 +261,14 @@ test.describe('Add species to a catch record', () => {
       await test.step('The user is on the Add Species page', async () => {
         await navigationFlow.openAddSpecies();
         firstSpecies = await speciesFlow.findSpecies(catchSpecies.searchTerms.first);
-        firstSearchTerm = firstSpecies.slice(0, 2);
+        firstSearchTerm = searchTermFor(firstSpecies);
         secondSpecies = await speciesFlow.findSpecies(
           catchSpecies.searchTerms.second,
           (species) =>
-            species !== firstSpecies && species.slice(0, 2).toLocaleLowerCase() !== firstSearchTerm.toLocaleLowerCase()
+            species !== firstSpecies &&
+            searchTermFor(species).toLocaleLowerCase() !== firstSearchTerm.toLocaleLowerCase()
         );
-        secondSearchTerm = secondSpecies.slice(0, 2);
+        secondSearchTerm = searchTermFor(secondSpecies);
       });
 
       await test.step('The user enters a search term', async () => {
@@ -285,7 +288,7 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The user selects a species matching the new search term', async () => {
-        await addSpeciesPage.selectSpeciesFromSuggestions(secondSpecies);
+        await addSpeciesPage.searchAndSelectSpecies(secondSpecies);
       });
 
       await test.step('The user selects Save and Continue', async () => {
@@ -293,7 +296,7 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The selected species is added to the catch record', async () => {
-        await speciesSelectionPage.expectUrl(/\/species-selection$/);
+        await speciesSelectionPage.expectOnPage();
         await expect(
           speciesSelectionPage.speciesCheckbox(secondSpecies),
           'Species checkbox to be visible'
@@ -323,11 +326,11 @@ test.describe('Add species to a catch record', () => {
           addSpeciesPage.errorSummary(),
           `Error summary to contain text ${errorMessages.species.unapproved}`
         ).toContainText(errorMessages.species.unapproved);
-        await addSpeciesPage.expectUrl(/\/add-species/);
+        await addSpeciesPage.expectOnPage();
       });
 
       await test.step('The text is not added to the catch record', async () => {
-        await navigationFlow.openSpeciesSelection();
+        await navigationFlow.returnToSpeciesSelection();
         await expect(
           speciesSelectionPage.speciesCheckbox(unapprovedSpecies),
           'Species checkbox to have count'

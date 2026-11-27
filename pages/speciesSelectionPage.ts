@@ -10,7 +10,7 @@ import { BasePage } from './basePage';
  */
 export class SpeciesSelectionPage extends BasePage {
   public readonly pageHeading = (): Locator =>
-    this.page.getByRole('heading', { name: /(What|Which) species did you catch\?/ });
+    this.page.getByRole('heading', { name: /(What|Which) species did you catch( with .+)?\?/ });
 
   public readonly pageHeadingForGear = (gearName: string): Locator =>
     this.page.getByRole('heading', { name: `Which species did you catch with ${gearName}?` });
@@ -40,27 +40,26 @@ export class SpeciesSelectionPage extends BasePage {
   public readonly addWeightDiscardedLink = (speciesCode: string): Locator =>
     this.speciesSection(speciesCode).locator('[data-target^="weightDiscarded-"]');
 
-  public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
+  public readonly errorSummary = (): Locator => this.common.errorSummary();
 
   public readonly errorSummaryLinks = (): Locator => this.page.locator('.govuk-error-summary__list a');
 
   public readonly speciesErrorMessage = (): Locator => this.page.locator('#speciesIds-error');
 
   public readonly weightAboveMinimumError = (speciesCode: string): Locator =>
-    this.page.locator('.govuk-error-message[id^="weightAboveMinimum-"]').filter({ hasText: `(${speciesCode})` });
+    this.speciesSection(speciesCode).locator('.govuk-error-message[id^="weightAboveMinimum-"]');
 
   public readonly weightBelowMinimumError = (speciesCode: string): Locator =>
-    this.page.locator('.govuk-error-message[id^="weightBelowMinimum-"]').filter({ hasText: `(${speciesCode})` });
+    this.speciesSection(speciesCode).locator('.govuk-error-message[id^="weightBelowMinimum-"]');
 
   public readonly weightDiscardedError = (speciesCode: string): Locator =>
-    this.page.locator('.govuk-error-message[id^="weightDiscarded-"]').filter({ hasText: `(${speciesCode})` });
+    this.speciesSection(speciesCode).locator('.govuk-error-message[id^="weightDiscarded-"]');
 
   public readonly addSpeciesLink = (): Locator => this.page.getByRole('link', { name: 'Add species' });
 
   public readonly removeSpeciesLink = (): Locator => this.page.getByRole('link', { name: 'Remove species' });
 
   async selectSpecies(speciesName: string) {
-    await this.page.waitForLoadState('load');
     await this.speciesCheckbox(speciesName).check();
   }
 
@@ -68,25 +67,17 @@ export class SpeciesSelectionPage extends BasePage {
     await this.weightAboveMinimumInput(speciesCode).fill(aboveMin);
 
     if (belowMin !== undefined) {
-      // Reveal the input by clicking the toggle link
       await this.addWeightBelowMinimumLink(speciesCode).click();
       await this.weightBelowMinimumInput(speciesCode).fill(belowMin);
     }
 
     if (discarded !== undefined) {
-      // Reveal the input by clicking the toggle link
       await this.addWeightDiscardedLink(speciesCode).click();
       await this.weightDiscardedInput(speciesCode).fill(discarded);
     }
   }
 
   // Unsaved selections are lost when leaving the page, so persist them before removing species
-  async saveAndReturn() {
-    await this.clickSaveAndContinue();
-    await this.page.waitForURL(/catch-not-landed/);
-    await this.goto('/species-selection');
-  }
-
   async clickAddSpecies() {
     await this.addSpeciesLink().click();
   }

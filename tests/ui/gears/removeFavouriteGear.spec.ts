@@ -6,19 +6,24 @@
  * @since 2026-11-17
  */
 import { expect, test } from '../../../fixtures/commonfixture';
-import { gears } from '../../../test-data/testData';
+import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
+import { gears, ports } from '../../../test-data/testData';
 
-const testFavouriteGears = [gears.pots.name, gears.traps.name];
+// Gears the tests save; removed at sign-in and after each test, then restored if they were already saved
+const absentFavourites: Favourites = {
+  ...noFavourites,
+  ports: [ports.first, ports.third],
+  gears: [gears.pots.name, gears.traps.name]
+};
 const gearDimensionText = (dimension: string): RegExp => new RegExp(`Gear dimension by number.*: ${dimension}`);
 
 test.describe('Remove favourite gear', () => {
-  test.beforeEach(async ({ navigationFlow, gearFlow, accountPage }) => {
+  test.use({ absentFavourites });
+
+  // Requesting createdRecords signs in and restores the gear and drafts after each test
+  test.beforeEach(async ({ navigationFlow, gearFlow, accountPage, createdRecords }) => {
+    void createdRecords;
     await test.step('I am signed in and have a saved favourite gear configuration', async () => {
-      await navigationFlow.signIn({
-        requiredCredentialsMessage:
-          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for Remove favourite gear UI tests'
-      });
-      await gearFlow.removeSavedGears(testFavouriteGears);
       await navigationFlow.openAddGear();
       await gearFlow.savePots(gears.pots.gearDimension);
       await expect(
@@ -26,12 +31,6 @@ test.describe('Remove favourite gear', () => {
         `Gear onboard value to contain text ${gears.pots.name}`
       ).toContainText(gears.pots.name);
     });
-  });
-
-  // Page fixtures are per test, so clean-up runs after each test rather than in afterAll
-  test.afterEach(async ({ gearFlow, catchRecordFlow }) => {
-    await gearFlow.removeSavedGears(testFavouriteGears);
-    await catchRecordFlow.deleteCreatedDrafts();
   });
 
   test(
@@ -48,7 +47,7 @@ test.describe('Remove favourite gear', () => {
       });
 
       await test.step('The gear is no longer saved as a favourite', async () => {
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await expect(
           accountPage.gearOnboardValue(),
           `Gear onboard value not to contain text ${gears.pots.name}`
@@ -71,7 +70,7 @@ test.describe('Remove favourite gear', () => {
       await test.step('I have multiple favourite gear configurations saved', async () => {
         await navigationFlow.openAddGear();
         await gearFlow.saveGearFromAddPage(gears.traps.name);
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await expect(
           accountPage.gearOnboardValue(),
           `Gear onboard value to contain text ${gears.pots.name}`
@@ -95,7 +94,7 @@ test.describe('Remove favourite gear', () => {
       });
 
       await test.step('The selected gear is removed and the remaining configuration is unchanged', async () => {
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await accountPage.reload();
         await expect(
           accountPage.gearOnboardValue(),
@@ -133,7 +132,7 @@ test.describe('Remove favourite gear', () => {
       });
 
       await test.step('My saved gear and its measurements remain unchanged', async () => {
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await accountPage.reload();
         await expect(accountPage.gearOnboardValue(), `Gear onboard value to have text ${savedGear}`).toHaveText(
           savedGear
@@ -153,7 +152,7 @@ test.describe('Remove favourite gear', () => {
         await accountPage.clickRemoveGear();
         await removeGearPage.selectGearToRemove(gears.pots.name);
         await removeGearPage.clickContinue();
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await expect(
           accountPage.gearOnboardValue(),
           `Gear onboard value not to contain text ${gears.pots.name}`
@@ -162,8 +161,7 @@ test.describe('Remove favourite gear', () => {
 
       await test.step('I start a new catch record and reach gear selection', async () => {
         // Favourites are saved per vessel, so a record must be started to give gear selection its vessel
-        await navigationFlow.startCatchRecord();
-        await gearSelectionPage.goto('/gear-selection');
+        await navigationFlow.openGearSelectionForNewRecord();
       });
 
       await test.step('The removed gear is not offered as a favourite', async () => {
@@ -187,7 +185,7 @@ test.describe('Remove favourite gear', () => {
       await test.step('I have multiple saved favourite gears', async () => {
         await navigationFlow.openAddGear();
         await gearFlow.saveGearFromAddPage(gears.traps.name);
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await accountPage.clickRemoveGear();
         await expect(removeGearPage.gearCheckbox(gears.pots.name), 'Gear checkbox to be visible').toBeVisible();
         await expect(removeGearPage.gearCheckbox(gears.traps.name), 'Gear checkbox to be visible').toBeVisible();
@@ -201,7 +199,7 @@ test.describe('Remove favourite gear', () => {
       });
 
       await test.step('Neither selected gear remains saved after reloading', async () => {
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await accountPage.reload();
         await expect(
           accountPage.gearOnboardValue(),
@@ -223,7 +221,7 @@ test.describe('Remove favourite gear', () => {
         await accountPage.clickRemoveGear();
         await removeGearPage.selectGearToRemove(gears.pots.name);
         await removeGearPage.clickContinue();
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await expect(
           accountPage.gearOnboardValue(),
           `Gear onboard value not to contain text ${gears.pots.name}`
@@ -247,7 +245,7 @@ test.describe('Remove favourite gear', () => {
       });
 
       await test.step('Only the new configuration is saved', async () => {
-        await accountPage.expectUrl(/\/account$/);
+        await accountPage.expectOnPage();
         await accountPage.reload();
         await expect(accountPage.gearOnboardValue(), 'Gear onboard value to contain text').toContainText(
           gearDimensionText(gears.measurements.replacementDimension)

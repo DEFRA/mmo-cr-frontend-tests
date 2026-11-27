@@ -6,12 +6,7 @@
  */
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
-import { catchSpecies } from '../../../test-data/testData';
-
-type Species = {
-  name: string;
-  code: string;
-};
+import { catchSpecies, gears, ports } from '../../../test-data/testData';
 
 type WeightValidationCase = {
   name: string;
@@ -58,29 +53,19 @@ const invalidOptionalWeightCases: OptionalWeightCase[] = [
   { name: 'discarded weight', value: '5.55', field: 'discarded' }
 ];
 
-test.describe('Species catch weight entry', () => {
-  let addedFavourites: Favourites = noFavourites;
+// Departure and return ports the journey saves as favourites; removed after each test unless already saved
+const absentFavourites: Favourites = { ...noFavourites, ports: [ports.first, ports.third] };
+const testFavourites: Favourites = { ...noFavourites, gears: [gears.pots.name], species: [catchSpecies.cod.name] };
 
-  test.beforeEach(async ({ navigationFlow, catchRecordFlow }) => {
-    addedFavourites = noFavourites;
+test.describe('Species catch weight entry', () => {
+  test.use({ testFavourites, absentFavourites });
+
+  // Requesting createdRecords signs in, saves Cod and restores favourites and drafts after each test
+  test.beforeEach(async ({ navigationFlow, createdRecords }) => {
+    void createdRecords;
     await test.step('The user is on the species selection page', async () => {
-      await navigationFlow.signIn({
-        requiredCredentialsMessage:
-          'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for catch weight UI tests'
-      });
-      addedFavourites = await catchRecordFlow.ensureFavourites({
-        ports: [],
-        gears: [],
-        species: [catchSpecies.cod.name]
-      });
       await navigationFlow.openSpeciesSelectionForNewRecord();
     });
-  });
-
-  // Each test starts a catch record, so its draft is deleted after each test
-  test.afterEach(async ({ catchRecordFlow }) => {
-    await catchRecordFlow.deleteCreatedDrafts();
-    await catchRecordFlow.restoreFavourites(addedFavourites);
   });
 
   test(
@@ -146,7 +131,7 @@ test.describe('Species catch weight entry', () => {
   test(
     'Preserves saved catch weights when the species page is reopened',
     { tag: ['@ui', '@smoke', '@catchWeightRecording'] },
-    async ({ speciesSelectionPage }) => {
+    async ({ navigationFlow, speciesSelectionPage, catchNotLandedPage }) => {
       await test.step(`The user selects ${catchSpecies.cod.name} and enters all three weights`, async () => {
         await speciesSelectionPage.selectSpecies(catchSpecies.cod.name);
         await speciesSelectionPage.enterSpeciesWeights(
@@ -162,8 +147,8 @@ test.describe('Species catch weight entry', () => {
       });
 
       await test.step('The user returns to the species selection page', async () => {
-        await speciesSelectionPage.expectUrl(/\/catch-not-landed$/);
-        await speciesSelectionPage.goto('/species-selection');
+        await catchNotLandedPage.expectOnPage();
+        await navigationFlow.returnToSpeciesSelection();
       });
 
       await test.step('The species and saved weights are displayed', async () => {
@@ -190,7 +175,7 @@ test.describe('Species catch weight entry', () => {
   test(
     'Updates saved values when all catch weights are edited',
     { tag: ['@ui', '@regression', '@catchWeightRecording'] },
-    async ({ speciesSelectionPage }) => {
+    async ({ navigationFlow, speciesSelectionPage, catchNotLandedPage }) => {
       await test.step('The user has saved all three weights for Cod', async () => {
         await speciesSelectionPage.selectSpecies(catchSpecies.cod.name);
         await speciesSelectionPage.enterSpeciesWeights(
@@ -199,7 +184,7 @@ test.describe('Species catch weight entry', () => {
           catchSpecies.weights.initial.belowMinimum,
           catchSpecies.weights.initial.discarded
         );
-        await speciesSelectionPage.saveAndReturn();
+        await navigationFlow.saveSpeciesAndReturn();
       });
 
       await test.step('The user edits each weight', async () => {
@@ -216,8 +201,8 @@ test.describe('Species catch weight entry', () => {
 
       await test.step('The user saves the edited weights and returns to the species page', async () => {
         await speciesSelectionPage.clickSaveAndContinue();
-        await speciesSelectionPage.expectUrl(/\/catch-not-landed$/);
-        await speciesSelectionPage.goto('/species-selection');
+        await catchNotLandedPage.expectOnPage();
+        await navigationFlow.returnToSpeciesSelection();
       });
 
       await test.step('The edited values are displayed', async () => {

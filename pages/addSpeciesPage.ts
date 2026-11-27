@@ -1,5 +1,6 @@
 import { expect, type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
+import { searchTermFor } from '../utils/search';
 
 /**
  * Select a species from the catalogue.
@@ -14,7 +15,7 @@ export class AddSpeciesPage extends BasePage {
 
   public readonly speciesInput = (): Locator => this.page.locator('input#species[role="combobox"]');
 
-  public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
+  public readonly errorSummary = (): Locator => this.common.errorSummary();
 
   public readonly errorMessage = (): Locator => this.page.locator('#species-error');
 
@@ -25,9 +26,10 @@ export class AddSpeciesPage extends BasePage {
   public readonly suggestionOption = (speciesName: string): Locator =>
     this.page.getByRole('option', { name: speciesName, exact: true });
 
-  async searchAndSelectSpecies(speciesName: string) {
-    await this.speciesInput().fill(speciesName.slice(0, 2));
+  async searchAndSelectSpecies(speciesName: string): Promise<void> {
+    await this.speciesInput().fill(searchTermFor(speciesName));
     const option = this.suggestionOption(speciesName);
+    await expect(option, 'Option to be visible').toBeVisible();
     await option.scrollIntoViewIfNeeded();
     await option.click();
     await expect(this.speciesInput(), `Species input to have value ${speciesName}`).toHaveValue(speciesName);
@@ -37,13 +39,5 @@ export class AddSpeciesPage extends BasePage {
     await this.speciesInput().fill(searchTerm);
     await expect(this.searchResults().first(), 'Search results to be visible').toBeVisible();
     return (await this.searchResults().allTextContents()).map((species) => species.trim());
-  }
-
-  async selectSpeciesFromSuggestions(speciesName: string): Promise<void> {
-    await this.speciesInput().fill(speciesName.slice(0, 2));
-    const option = this.suggestionOption(speciesName);
-    await expect(option, 'Option to be visible').toBeVisible();
-    await option.click();
-    await expect(this.speciesInput(), `Species input to have value ${speciesName}`).toHaveValue(speciesName);
   }
 }

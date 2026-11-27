@@ -1,6 +1,6 @@
 import { type Locator } from '@playwright/test';
 import { vessels } from '../test-data/testData';
-import { BasePage } from './basePage';
+import { BasePage, escapeRegExp } from './basePage';
 
 /**
  * View account details and saved selections.
@@ -10,7 +10,7 @@ import { BasePage } from './basePage';
  * @since 2026-10-05
  */
 export class AccountPage extends BasePage {
-  public readonly pageHeading = (): Locator => this.page.getByTestId('app-heading-title');
+  public readonly pageHeading = (): Locator => this.page.getByRole('heading', { name: 'Your account', exact: true });
 
   public readonly personalDetailsHeading = (): Locator => this.page.getByRole('heading', { name: 'Personal details' });
 
@@ -19,7 +19,7 @@ export class AccountPage extends BasePage {
   public readonly vesselNameHeading = (vesselName: string): Locator =>
     this.page.getByRole('heading', {
       level: 3,
-      name: new RegExp(`^${vesselName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\(`)
+      name: new RegExp(`^${escapeRegExp(vesselName)}\\s*\\(`)
     });
 
   /** Summary list under a vessel heading; defaults to the configured test vessel. */
@@ -27,14 +27,7 @@ export class AccountPage extends BasePage {
     this.vesselNameHeading(vesselName).locator('xpath=following-sibling::dl[1]');
 
   public readonly summaryRow = (key: string, vesselName: string = vessels.testVessel): Locator =>
-    this.vesselSummary(vesselName)
-      .locator('.govuk-summary-list__row')
-      .filter({
-        has: this.page.locator('.govuk-summary-list__key', {
-          hasText: new RegExp(`^\\s*${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`)
-        })
-      })
-      .first();
+    this.summaryRowIn(this.vesselSummary(vesselName), new RegExp(`^\\s*${escapeRegExp(key)}\\s*$`)).first();
 
   public readonly summaryValue = (key: string, vesselName: string = vessels.testVessel): Locator =>
     this.summaryRow(key, vesselName).locator('.govuk-summary-list__value');

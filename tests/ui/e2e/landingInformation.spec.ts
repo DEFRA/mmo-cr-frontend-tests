@@ -41,8 +41,7 @@ test.describe('Landing Information', () => {
       });
 
       await test.step('I should continue to the review screen', async () => {
-        await checkAnswersPage.expectUrl(/\/check-answers$/);
-        await expect(checkAnswersPage.pageHeading(), 'Page heading to be visible').toBeVisible();
+        await checkAnswersPage.expectOnPage();
       });
 
       // UNVERIFIED (OQ-8): the live review still shows a "Species not landed" section with "Not landed: No"

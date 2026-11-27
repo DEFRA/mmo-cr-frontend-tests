@@ -30,12 +30,10 @@ export class FavouritesFlow {
     const { accountPage, addSpeciesPage } = this.pages;
 
     await accountPage.addSpeciesLink().click();
-    await expect(accountPage.page, 'Add species page is shown').toHaveURL(
-      /\/add-species\?return=\/account(&vesselId=[\w-]+)?$/
-    );
+    await addSpeciesPage.expectOnPage();
     await addSpeciesPage.searchAndSelectSpecies(speciesName);
     await addSpeciesPage.clickSaveAndContinue();
-    await accountPage.expectUrl(/\/account$/);
+    await accountPage.expectOnPage();
   }
 
   async ensureSpeciesAdded(speciesName: string): Promise<void> {
@@ -56,7 +54,7 @@ export class FavouritesFlow {
     await accountPage.removeSpeciesLink().click();
     await removeSpeciesPage.selectSpeciesToRemove(speciesName);
     await removeSpeciesPage.clickContinue();
-    await accountPage.expectUrl(/\/account$/);
+    await accountPage.expectOnPage();
     await expect(
       accountPage.speciesCaughtValue(),
       `Species caught no longer includes ${speciesName}`
@@ -68,7 +66,7 @@ export class FavouritesFlow {
 
     await accountPage.clickAddGear();
     await this.gearFlow.saveGearFromAddPage(gearName);
-    await accountPage.expectUrl(/\/account$/);
+    await accountPage.expectOnPage();
     await expect(accountPage.gearOnboardValue(), `Gear onboard includes ${gearName}`).toContainText(gearName);
   }
 
@@ -88,7 +86,7 @@ export class FavouritesFlow {
     await accountPage.clickRemoveGear();
     await removeGearPage.selectGearToRemove(gearName);
     await removeGearPage.clickContinue();
-    await accountPage.expectUrl(/\/account$/);
+    await accountPage.expectOnPage();
     await expect(accountPage.gearOnboardValue(), `Gear onboard no longer includes ${gearName}`).not.toContainText(
       gearName
     );
@@ -112,10 +110,10 @@ export class FavouritesFlow {
     const { accountPage, addPortPage } = this.pages;
 
     await accountPage.addPortLink().click();
-    await expect(accountPage.page, 'Add port page is shown').toHaveURL(/\/add-port/);
+    await expect(addPortPage.favouritesHeading(), 'Add port heading to be visible').toBeVisible();
     await addPortPage.searchAndSelectPort(portName);
     await addPortPage.clickSaveAndContinue();
-    await accountPage.expectUrl(/\/account$/);
+    await accountPage.expectOnPage();
     await expect(accountPage.portsUsedValue(), `Ports used includes ${portName}`).toContainText(portName);
   }
 
@@ -135,9 +133,9 @@ export class FavouritesFlow {
     if (!savedPorts.includes(portName)) return;
 
     await accountPage.removePortLink().click();
-    await expect(accountPage.page, 'Remove port page is shown').toHaveURL(/\/remove-port/);
+    await removePortPage.expectOnPage();
     await removePortPage.removePorts(portName);
-    await accountPage.expectUrl(/\/account$/);
+    await accountPage.expectOnPage();
     await expect(accountPage.portsUsedValue(), `Ports used no longer includes ${portName}`).not.toContainText(portName);
   }
 }

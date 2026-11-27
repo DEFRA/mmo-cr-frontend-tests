@@ -1,5 +1,7 @@
 import { errors, expect, type Locator, type Page } from '@playwright/test';
 
+export const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
  * Provide shared page-object functionality.
  * Includes common navigation, layout, date-input and port-selection helpers.
@@ -14,8 +16,13 @@ export abstract class BasePage {
     this.page = page;
   }
 
+  // Must be unique to the page so expectOnPage() proves which page is shown
+  public abstract readonly pageHeading: () => Locator;
+
   public readonly header = {
     govukHeader: (): Locator => this.page.locator('.govuk-header.app-header'),
+    homeLink: (): Locator => this.page.getByRole('link', { name: 'Home', exact: true }),
+    accountLink: (): Locator => this.page.getByRole('link', { name: 'Your account', exact: true }),
     serviceNavigation: (): Locator => this.page.getByRole('region', { name: 'Service information' }),
     // Shown on journey pages such as /select-vessel; not shown on /records or /check-answers (OQ-7)
     signOutButton: (): Locator =>
@@ -102,9 +109,22 @@ export abstract class BasePage {
     await this.common.saveAndContinueButton().click();
   }
 
+  protected summaryRowIn(scope: Locator, key: string | RegExp): Locator {
+    return scope
+      .locator('.govuk-summary-list__row')
+      .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: key }) });
+  }
+
+  protected summaryValueIn(scope: Locator, key: string | RegExp): Locator {
+    return this.summaryRowIn(scope, key).locator('.govuk-summary-list__value');
+  }
+
   async expectTitle(title: string) {
-    await this.page.waitForLoadState('domcontentloaded');
     await expect(this.page, `Page to have title ${title}`).toHaveTitle(title);
+  }
+
+  async expectOnPage() {
+    await expect(this.pageHeading(), `${this.constructor.name} heading to be visible`).toBeVisible();
   }
 
   async expectUrl(url: string | RegExp) {
