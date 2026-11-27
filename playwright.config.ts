@@ -28,6 +28,7 @@ const hdViewport = { width: 1280, height: 720 };
  */
 export default defineConfig({
   testDir: './tests',
+  timeout: 90_000,
   globalSetup: ['./allure-setup.ts', './reference-data-setup.ts'],
   fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */

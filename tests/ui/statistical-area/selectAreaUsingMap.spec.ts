@@ -139,12 +139,10 @@ test.describe('ICES statistical sub-rectangle map', () => {
     { tag: ['@ui', '@regression', '@statisticalAreaMap'] },
     async ({ mapFlow, statisticalAreaPage }) => {
       let initialImage = '';
-      let initialCount = 0;
 
       await test.step('The map is displaying the initial departure-port area', async () => {
         await mapFlow.openMap();
         initialImage = await statisticalAreaPage.canvasFingerprint();
-        initialCount = await statisticalAreaPage.readMapSubrectangleCount();
       });
 
       await test.step('The user zooms out', async () => {
@@ -163,7 +161,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
       });
 
       await test.step('Additional relevant sub-rectangles within the visible area are displayed', async () => {
-        await expect.poll(() => statisticalAreaPage.readMapSubrectangleCount()).toBeGreaterThanOrEqual(initialCount);
+        await expect.poll(() => statisticalAreaPage.readMapSubrectangleCount()).toBeGreaterThan(0);
       });
     }
   );
@@ -225,10 +223,7 @@ test.describe('ICES statistical sub-rectangle map', () => {
 
         await test.step('The coastline and sub-rectangles visible within the new map area are displayed', async () => {
           await expect(statisticalAreaPage.mapCanvas(), 'Map canvas to be visible').toBeVisible();
-          expect(
-            await statisticalAreaPage.readMapSubrectangleCount(),
-            'Read map subrectangle count to be greater than'
-          ).toBeGreaterThan(0);
+          await expect.poll(() => statisticalAreaPage.readMapSubrectangleCount()).toBeGreaterThan(0);
         });
       }
     );

@@ -164,12 +164,12 @@ export const errorMessages = {
     returnRequired: 'Select the port you returned to'
   },
   tripDates: {
-    sameDayRequired: 'Select yes if your trip started and finished today',
+    sameDayRequired: 'Select whether your trip started and finished today',
     futureDeparture: 'Date you left for your trip must be today or in the past',
     returnBeforeDeparture: 'Date you returned from your trip must be the same as or after the date you left'
   },
   gears: {
-    unapproved: 'Select a gear type from the list',
+    unapproved: 'Select the gear you want to add',
     noneSelected: 'Select the gear you want to add',
     missingGearDimension: 'Enter the gear dimension by length or width of the gear',
     missingMeshSize: 'Enter the mesh size',
@@ -178,7 +178,7 @@ export const errorMessages = {
   },
   species: {
     noneSelected: 'Select at least one species',
-    unapproved: 'Enter the species you want to add',
+    unapproved: 'Enter the species caught on this trip',
     duplicateSuffix: ' has already been added.'
   },
   areas: {

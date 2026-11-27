@@ -54,6 +54,7 @@ test.describe('Create Catch Record', () => {
         createdRecords,
         catchRecordFlow,
         checkAnswersPage,
+        confirmationPage,
         recordsPage,
         submittedRecordPage,
         navigationFlow
@@ -91,6 +92,7 @@ test.describe('Create Catch Record', () => {
 
         await test.step('I review and submit the record', async () => {
           await checkAnswersPage.clickAcceptAndSubmit();
+          await confirmationPage.expectOnPage();
         });
 
         await test.step(`The ${tripType} trip should be recorded successfully`, async () => {

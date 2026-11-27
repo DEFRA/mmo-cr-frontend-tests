@@ -47,13 +47,13 @@ export class SpeciesSelectionPage extends BasePage {
   public readonly speciesErrorMessage = (): Locator => this.page.locator('#speciesIds-error');
 
   public readonly weightAboveMinimumError = (speciesCode: string): Locator =>
-    this.page.locator('.govuk-error-message[id^="weightAboveMinimum-"]').filter({ hasText: `(${speciesCode})` });
+    this.speciesSection(speciesCode).locator('.govuk-error-message[id^="weightAboveMinimum-"]');
 
   public readonly weightBelowMinimumError = (speciesCode: string): Locator =>
-    this.page.locator('.govuk-error-message[id^="weightBelowMinimum-"]').filter({ hasText: `(${speciesCode})` });
+    this.speciesSection(speciesCode).locator('.govuk-error-message[id^="weightBelowMinimum-"]');
 
   public readonly weightDiscardedError = (speciesCode: string): Locator =>
-    this.page.locator('.govuk-error-message[id^="weightDiscarded-"]').filter({ hasText: `(${speciesCode})` });
+    this.speciesSection(speciesCode).locator('.govuk-error-message[id^="weightDiscarded-"]');
 
   public readonly addSpeciesLink = (): Locator => this.page.getByRole('link', { name: 'Add species' });
 
