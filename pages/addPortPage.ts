@@ -24,7 +24,7 @@ export class AddPortPage extends BasePage {
 
   public readonly portResultsList = (): Locator => this.page.locator('#port-results');
 
-  public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
+  public readonly errorSummary = (): Locator => this.common.errorSummary();
 
   public readonly portResultItem = (portName: string): Locator =>
     this.portResultsList().locator('li').filter({ hasText: portName });

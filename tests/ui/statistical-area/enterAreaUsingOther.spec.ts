@@ -8,8 +8,9 @@
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
 import { areas, checkAnswers, errorMessages, gears, ports } from '../../../test-data/testData';
+import { searchTermFor } from '../../../utils/search';
 
-const searchTerm: string = areas.validCode.slice(0, 2);
+const searchTerm: string = searchTermFor(areas.validCode);
 const additionalCharacters: string = areas.validCode.slice(2);
 const areaCodePattern: RegExp = /\d{2}[A-Z]\d{2}/;
 const coordinatesPattern: RegExp = /[-\u2212]?\d+\.\d+,\s*[-\u2212]?\d+\.\d+/;

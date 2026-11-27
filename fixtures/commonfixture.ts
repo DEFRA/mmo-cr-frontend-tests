@@ -110,7 +110,7 @@ export const test = base.extend<CommonFixtures>({
 
     // Each step runs even if an earlier one fails, so one broken clean-up does not leave the rest behind
     const cleanupSteps = [
-      () => catchRecordFlow.deleteCreatedDrafts(),
+      () => catchRecordFlow.deleteCreatedDrafts(createdRecords),
       () => catchRecordFlow.restoreFavourites(addedFavourites),
       () => catchRecordFlow.restoreAbsentFavourites(absentFavourites, removedFavourites)
     ];

@@ -1,7 +1,5 @@
 import { type Locator } from '@playwright/test';
-import { BasePage } from './basePage';
-
-const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+import { BasePage, escapeRegExp } from './basePage';
 
 /**
  * Review a catch record before submission.
@@ -18,10 +16,7 @@ export class CheckAnswersPage extends BasePage {
   public readonly amendmentHeading = (vesselName: string): Locator =>
     this.page.getByRole('heading', { level: 1, name: `Edit catch record for ${vesselName}` });
 
-  public readonly summaryRow = (key: string): Locator =>
-    this.page.locator('.govuk-summary-list__row').filter({
-      has: this.page.locator('.govuk-summary-list__key', { hasText: key })
-    });
+  public readonly summaryRow = (key: string): Locator => this.summaryRowIn(this.page.locator('main'), key);
 
   public readonly summaryValue = (key: string): Locator => this.summaryRow(key).locator('.govuk-summary-list__value');
 
@@ -38,10 +33,7 @@ export class CheckAnswersPage extends BasePage {
     this.page.getByRole('region', { name: gearName, exact: true });
 
   public readonly gearSummaryValue = (gearName: string, key: string): Locator =>
-    this.gearSection(gearName)
-      .locator('.govuk-summary-list__row')
-      .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: key }) })
-      .locator('.govuk-summary-list__value');
+    this.summaryValueIn(this.gearSection(gearName), key);
 
   // Species regions share the species name, so narrow them by the gear named in their weight change links
   public readonly speciesSection = (speciesName: string, gearName: string): Locator =>
@@ -52,21 +44,14 @@ export class CheckAnswersPage extends BasePage {
     });
 
   public readonly speciesSummaryValue = (speciesName: string, gearName: string, key: string): Locator =>
-    this.speciesSection(speciesName, gearName)
-      .locator('.govuk-summary-list__row')
-      .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: key }) })
-      .locator('.govuk-summary-list__value');
+    this.summaryValueIn(this.speciesSection(speciesName, gearName), key);
 
   public readonly notLandedSummary = (): Locator =>
     this.page.locator('.govuk-summary-list').filter({
       has: this.page.locator('.govuk-summary-list__key', { hasText: 'Catch kept onboard or in keep pots' })
     });
 
-  public readonly notLandedValue = (key: string): Locator =>
-    this.notLandedSummary()
-      .locator('.govuk-summary-list__row')
-      .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: key }) })
-      .locator('.govuk-summary-list__value');
+  public readonly notLandedValue = (key: string): Locator => this.summaryValueIn(this.notLandedSummary(), key);
 
   public readonly declarationWarning = (): Locator => this.page.locator('.govuk-warning-text');
 

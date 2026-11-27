@@ -102,9 +102,13 @@ export class MapFlow {
     return this.pointInRing(point, polygon.exterior) && !polygon.holes.some((hole) => this.pointInRing(point, hole));
   }
 
-  static isPartiallySeaBased(subrectangle: SubrectangleReference, land: LandFeature[]): boolean {
-    let hasLandSample = false;
-    let hasSeaSample = false;
+  private static classifySubrectangle(
+    subrectangle: SubrectangleReference,
+    land: LandFeature[],
+    stopWhen: (hasLand: boolean, hasSea: boolean) => boolean
+  ): { hasLand: boolean; hasSea: boolean } {
+    let hasLand = false;
+    let hasSea = false;
     const { minLongitude, maxLongitude, minLatitude, maxLatitude } = subrectangle.bounds;
 
     for (let longitudeStep = 1; longitudeStep < 12; longitudeStep++) {
@@ -116,33 +120,23 @@ export class MapFlow {
         if (!subrectangle.polygons.some((polygon) => this.pointInPolygon(point, polygon))) continue;
 
         if (land.some((feature) => feature.polygons.some((polygon) => this.pointInPolygon(point, polygon)))) {
-          hasLandSample = true;
+          hasLand = true;
         } else {
-          hasSeaSample = true;
+          hasSea = true;
         }
-        if (hasLandSample && hasSeaSample) return true;
+        if (stopWhen(hasLand, hasSea)) return { hasLand, hasSea };
       }
     }
-    return false;
+    return { hasLand, hasSea };
+  }
+
+  static isPartiallySeaBased(subrectangle: SubrectangleReference, land: LandFeature[]): boolean {
+    const { hasLand, hasSea } = this.classifySubrectangle(subrectangle, land, (hasLand, hasSea) => hasLand && hasSea);
+    return hasLand && hasSea;
   }
 
   static isWhollySeaBased(subrectangle: SubrectangleReference, land: LandFeature[]): boolean {
-    let hasSeaSample = false;
-    const { minLongitude, maxLongitude, minLatitude, maxLatitude } = subrectangle.bounds;
-
-    for (let longitudeStep = 1; longitudeStep < 12; longitudeStep++) {
-      for (let latitudeStep = 1; latitudeStep < 12; latitudeStep++) {
-        const point: Point = [
-          minLongitude + ((maxLongitude - minLongitude) * longitudeStep) / 12,
-          minLatitude + ((maxLatitude - minLatitude) * latitudeStep) / 12
-        ];
-        if (!subrectangle.polygons.some((polygon) => this.pointInPolygon(point, polygon))) continue;
-        if (land.some((feature) => feature.polygons.some((polygon) => this.pointInPolygon(point, polygon))))
-          return false;
-        hasSeaSample = true;
-      }
-    }
-
-    return hasSeaSample;
+    const { hasLand, hasSea } = this.classifySubrectangle(subrectangle, land, (hasLand) => hasLand);
+    return !hasLand && hasSea;
   }
 }

@@ -90,8 +90,14 @@ export class CatchRecordFlow {
     private readonly favouritesFlow: FavouritesFlow
   ) {}
 
+  private hasFavourites(favourites: Favourites): boolean {
+    return favourites.ports.length + favourites.gears.length + favourites.species.length > 0;
+  }
+
   // Returns only the favourites this call added so the shared account can be restored afterwards
   async ensureFavourites(favourites: Favourites): Promise<Favourites> {
+    if (!this.hasFavourites(favourites)) return noFavourites;
+
     const { accountPage } = this.pages;
 
     await this.navigationFlow.openAccount();
@@ -111,7 +117,7 @@ export class CatchRecordFlow {
   }
 
   async restoreFavourites(added: Favourites): Promise<void> {
-    if (added.ports.length + added.gears.length + added.species.length === 0) return;
+    if (!this.hasFavourites(added)) return;
 
     await this.navigationFlow.openAccount();
     for (const port of added.ports) await this.favouritesFlow.removePortFromAccount(port);
@@ -121,7 +127,7 @@ export class CatchRecordFlow {
 
   // Removes the given favourites if saved; returns only those it removed so they can be re-added afterwards
   async removeSavedFavourites(favourites: Favourites): Promise<Favourites> {
-    if (favourites.ports.length + favourites.gears.length + favourites.species.length === 0) return noFavourites;
+    if (!this.hasFavourites(favourites)) return noFavourites;
 
     const { accountPage } = this.pages;
     await this.navigationFlow.openAccount();
@@ -140,7 +146,7 @@ export class CatchRecordFlow {
   // Removes absent favourites the journey saved, then re-adds those that were saved before the test
   async restoreAbsentFavourites(absent: Favourites, removed: Favourites): Promise<void> {
     await this.restoreFavourites(absent);
-    if (removed.ports.length + removed.gears.length + removed.species.length > 0) {
+    if (this.hasFavourites(removed)) {
       await this.ensureFavourites(removed);
     }
   }
@@ -333,10 +339,12 @@ export class CatchRecordFlow {
 
   // Deletes drafts created by a test; submitted records and records already removed are left alone
   async deleteDraftsIfPresent(references: string[]): Promise<void> {
+    if (references.length === 0) return;
+
     const { recordsPage, draftRecordPage } = this.pages;
 
+    await this.navigationFlow.openRecords();
     for (const reference of references) {
-      await this.navigationFlow.openRecords();
       await expect(recordsPage.catchRecordsTable(), 'Catch records table to be visible').toBeVisible();
       if ((await recordsPage.recordRow(reference).count()) === 0) continue;
       if ((await recordsPage.recordStatus(reference).innerText()).trim() !== recordStatuses.draft) continue;
@@ -364,7 +372,8 @@ export class CatchRecordFlow {
     }
   }
 
-  async deleteCreatedDrafts(): Promise<void> {
-    await this.deleteDraftsIfPresent([...this.navigationFlow.createdRecordReferences]);
+  async deleteCreatedDrafts(extraReferences: string[] = []): Promise<void> {
+    const references = [...new Set([...this.navigationFlow.createdRecordReferences, ...extraReferences])];
+    await this.deleteDraftsIfPresent(references);
   }
 }

@@ -17,7 +17,7 @@ export class RemovePortPage extends BasePage {
 
   public readonly continueButton = (): Locator => this.page.getByRole('button', { name: 'Continue', exact: true });
 
-  public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
+  public readonly errorSummary = (): Locator => this.common.errorSummary();
 
   async removePorts(...portNames: string[]) {
     for (const portName of portNames) {

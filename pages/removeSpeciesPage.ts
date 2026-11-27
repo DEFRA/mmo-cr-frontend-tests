@@ -15,9 +15,9 @@ export class RemoveSpeciesPage extends BasePage {
 
   public readonly speciesCheckboxes = (): Locator => this.page.locator('.govuk-checkboxes__input');
 
-  public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
+  public readonly errorSummary = (): Locator => this.common.errorSummary();
 
-  public readonly errorMessage = (): Locator => this.page.locator('.govuk-error-message');
+  public readonly errorMessage = (): Locator => this.common.errorMessage();
 
   public readonly continueButton = (): Locator => this.common.saveAndContinueButton();
 

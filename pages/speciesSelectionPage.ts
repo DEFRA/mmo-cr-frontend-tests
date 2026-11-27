@@ -40,7 +40,7 @@ export class SpeciesSelectionPage extends BasePage {
   public readonly addWeightDiscardedLink = (speciesCode: string): Locator =>
     this.speciesSection(speciesCode).locator('[data-target^="weightDiscarded-"]');
 
-  public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
+  public readonly errorSummary = (): Locator => this.common.errorSummary();
 
   public readonly errorSummaryLinks = (): Locator => this.page.locator('.govuk-error-summary__list a');
 

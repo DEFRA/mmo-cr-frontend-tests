@@ -1,5 +1,7 @@
 import { errors, expect, type Locator, type Page } from '@playwright/test';
 
+export const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
  * Provide shared page-object functionality.
  * Includes common navigation, layout, date-input and port-selection helpers.
@@ -105,6 +107,16 @@ export abstract class BasePage {
 
   async clickSaveAndContinue() {
     await this.common.saveAndContinueButton().click();
+  }
+
+  protected summaryRowIn(scope: Locator, key: string | RegExp): Locator {
+    return scope
+      .locator('.govuk-summary-list__row')
+      .filter({ has: this.page.locator('.govuk-summary-list__key', { hasText: key }) });
+  }
+
+  protected summaryValueIn(scope: Locator, key: string | RegExp): Locator {
+    return this.summaryRowIn(scope, key).locator('.govuk-summary-list__value');
   }
 
   async expectTitle(title: string) {

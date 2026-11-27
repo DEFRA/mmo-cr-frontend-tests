@@ -24,7 +24,7 @@ export class SpeciesFlow {
     const { addSpeciesPage, speciesSelectionPage } = this.pages;
 
     const species = await this.findSpecies(searchTerm, matches);
-    await addSpeciesPage.selectSpeciesFromSuggestions(species);
+    await addSpeciesPage.searchAndSelectSpecies(species);
     await addSpeciesPage.clickSaveAndContinue();
     await speciesSelectionPage.expectOnPage();
     return species;

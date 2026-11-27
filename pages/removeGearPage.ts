@@ -27,8 +27,8 @@ export class RemoveGearPage extends BasePage {
 
   public readonly continueButton = (): Locator => this.page.getByRole('button', { name: 'Continue', exact: true });
 
-  public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
-  public readonly errorMessage = (): Locator => this.page.locator('.govuk-error-message');
+  public readonly errorSummary = (): Locator => this.common.errorSummary();
+  public readonly errorMessage = (): Locator => this.common.errorMessage();
 
   async selectGearToRemove(...gearNames: string[]) {
     for (const gearName of gearNames) {

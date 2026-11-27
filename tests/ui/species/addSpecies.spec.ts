@@ -9,6 +9,7 @@
 import { expect, test } from '../../../fixtures/commonfixture';
 import { type Favourites, noFavourites } from '../helpers/catchRecordFlow';
 import { catchSpecies, errorMessages, gears, ports } from '../../../test-data/testData';
+import { searchTermFor } from '../../../utils/search';
 
 // Departure and return ports the journey saves as favourites; removed after each test unless already saved
 const absentFavourites: Favourites = { ...noFavourites, ports: [ports.first, ports.third] };
@@ -64,7 +65,7 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The user can select a species from the available list', async () => {
-        await addSpeciesPage.selectSpeciesFromSuggestions(species);
+        await addSpeciesPage.searchAndSelectSpecies(species);
       });
 
       await test.step('The selected species is added to the catch record', async () => {
@@ -85,7 +86,7 @@ test.describe('Add species to a catch record', () => {
       await test.step('The user is on the Add Species page', async () => {
         await navigationFlow.openAddSpecies();
         species = await speciesFlow.findSpecies(catchSpecies.searchTerms.first);
-        searchTerm = species.slice(0, 2);
+        searchTerm = searchTermFor(species);
       });
 
       await test.step('The user enters at least two characters', async () => {
@@ -97,7 +98,7 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The user can select a species from the results list', async () => {
-        await addSpeciesPage.selectSpeciesFromSuggestions(species);
+        await addSpeciesPage.searchAndSelectSpecies(species);
         await addSpeciesPage.clickSaveAndContinue();
         await expect(speciesSelectionPage.speciesCheckbox(species), 'Species checkbox to be visible').toBeVisible();
       });
@@ -125,7 +126,7 @@ test.describe('Add species to a catch record', () => {
           catchSpecies.searchTerms.second,
           (species) => species !== firstSpecies
         );
-        await addSpeciesPage.selectSpeciesFromSuggestions(secondSpecies);
+        await addSpeciesPage.searchAndSelectSpecies(secondSpecies);
       });
 
       await test.step('The newly selected species is added to the existing species list', async () => {
@@ -260,13 +261,14 @@ test.describe('Add species to a catch record', () => {
       await test.step('The user is on the Add Species page', async () => {
         await navigationFlow.openAddSpecies();
         firstSpecies = await speciesFlow.findSpecies(catchSpecies.searchTerms.first);
-        firstSearchTerm = firstSpecies.slice(0, 2);
+        firstSearchTerm = searchTermFor(firstSpecies);
         secondSpecies = await speciesFlow.findSpecies(
           catchSpecies.searchTerms.second,
           (species) =>
-            species !== firstSpecies && species.slice(0, 2).toLocaleLowerCase() !== firstSearchTerm.toLocaleLowerCase()
+            species !== firstSpecies &&
+            searchTermFor(species).toLocaleLowerCase() !== firstSearchTerm.toLocaleLowerCase()
         );
-        secondSearchTerm = secondSpecies.slice(0, 2);
+        secondSearchTerm = searchTermFor(secondSpecies);
       });
 
       await test.step('The user enters a search term', async () => {
@@ -286,7 +288,7 @@ test.describe('Add species to a catch record', () => {
       });
 
       await test.step('The user selects a species matching the new search term', async () => {
-        await addSpeciesPage.selectSpeciesFromSuggestions(secondSpecies);
+        await addSpeciesPage.searchAndSelectSpecies(secondSpecies);
       });
 
       await test.step('The user selects Save and Continue', async () => {

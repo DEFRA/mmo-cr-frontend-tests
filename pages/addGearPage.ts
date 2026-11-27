@@ -1,5 +1,6 @@
 import { expect, type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
+import { searchTermFor } from '../utils/search';
 
 /**
  * Add gear from the catalogue.
@@ -33,9 +34,9 @@ export class AddGearPage extends BasePage {
       name: gearName ? `Enter the measurements for ${gearName}` : /Enter the measurements for/i
     });
 
-  public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
+  public readonly errorSummary = (): Locator => this.common.errorSummary();
 
-  public readonly errorMessage = (): Locator => this.page.locator('.govuk-error-message');
+  public readonly errorMessage = (): Locator => this.common.errorMessage();
 
   public readonly gearOption = (gearName: string): Locator =>
     this.page.getByRole('option', { name: gearName, exact: true });
@@ -52,7 +53,7 @@ export class AddGearPage extends BasePage {
   }
 
   async searchAndSelectGear(gearName: string): Promise<void> {
-    await this.searchGearOptions(gearName.slice(0, 2));
+    await this.searchGearOptions(searchTermFor(gearName));
     await this.gearOption(gearName).click();
     await expect(this.gearInput(), `Gear input to have value ${gearName}`).toHaveValue(gearName);
   }

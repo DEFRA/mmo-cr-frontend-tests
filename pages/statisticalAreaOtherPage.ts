@@ -1,5 +1,6 @@
 import { type Locator } from '@playwright/test';
 import { BasePage } from './basePage';
+import { searchTermFor } from '../utils/search';
 
 /**
  * Select or enter a statistical sub-area.
@@ -37,7 +38,7 @@ export class StatisticalAreaOtherPage extends BasePage {
       .filter({ has: this.page.getByText(areaName, { exact: true }) })
       .locator('.app-statistical-area-search__option-detail');
 
-  public readonly errorSummary = (): Locator => this.page.locator('.govuk-error-summary');
+  public readonly errorSummary = (): Locator => this.common.errorSummary();
 
   public readonly errorSummaryLinks = (): Locator => this.page.locator('.govuk-error-summary__list a');
 
@@ -50,7 +51,7 @@ export class StatisticalAreaOtherPage extends BasePage {
   async searchAndSelectAlternativeArea(areaName: string) {
     await this.selectAreaRadio('Other');
 
-    await this.alternativeAreaInput().fill(areaName.slice(0, 2));
+    await this.alternativeAreaInput().fill(searchTermFor(areaName));
 
     await this.alternativeAreaResultsList().waitFor({ state: 'visible' });
     const matchingArea = this.alternativeAreaResultItem(areaName);
