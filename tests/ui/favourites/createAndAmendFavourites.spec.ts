@@ -130,12 +130,15 @@ test.describe('Create and amend favourites', () => {
 
   // Page fixtures are per test, so clean-up runs after each test rather than in afterAll
   test.afterEach(async ({ navigationFlow, favouritesFlow, catchRecordFlow }) => {
-    await navigationFlow.openAccount();
-    await favouritesFlow.removeSpeciesFromAccount(catchSpecies.cod.name);
-    await favouritesFlow.removeGearFromAccount(gears.pots.name);
-    await favouritesFlow.removePortFromAccount(ports.first);
-    await favouritesFlow.removePortFromAccount(ports.second);
-    await catchRecordFlow.deleteCreatedDrafts();
+    try {
+      await catchRecordFlow.deleteCreatedDrafts();
+    } finally {
+      await navigationFlow.openAccount();
+      await favouritesFlow.removeSpeciesFromAccount(catchSpecies.cod.name);
+      await favouritesFlow.removeGearFromAccount(gears.pots.name);
+      await favouritesFlow.removePortFromAccount(ports.first);
+      await favouritesFlow.removePortFromAccount(ports.second);
+    }
   });
 
   test(

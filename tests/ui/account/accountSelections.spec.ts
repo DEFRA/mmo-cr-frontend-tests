@@ -18,24 +18,25 @@ test.describe('Account details and selections', () => {
     await favouritesFlow.removePortFromAccount(ports.first);
   };
 
-  test.beforeEach(async ({ navigationFlow, favouritesFlow, catchRecordFlow }) => {
+  test.beforeEach(async ({ navigationFlow, favouritesFlow }) => {
     test.slow();
     accountReadyForCleanup = false;
     await navigationFlow.signInAndOpenAccount({
       requiredCredentialsMessage: 'CATCH_RECORDING_EMAIL and CATCH_RECORDING_PASSWORD are required for account UI tests'
     });
     accountReadyForCleanup = true;
-    await catchRecordFlow.deleteAllDrafts();
-    await navigationFlow.openAccount();
     await removeAccountSelections(favouritesFlow);
   });
 
   test.afterEach(async ({ navigationFlow, favouritesFlow, catchRecordFlow }) => {
     if (!accountReadyForCleanup) return;
 
-    await navigationFlow.openAccount();
-    await removeAccountSelections(favouritesFlow);
-    await catchRecordFlow.deleteCreatedDrafts();
+    try {
+      await catchRecordFlow.deleteCreatedDrafts();
+    } finally {
+      await navigationFlow.openAccount();
+      await removeAccountSelections(favouritesFlow);
+    }
   });
 
   test(
