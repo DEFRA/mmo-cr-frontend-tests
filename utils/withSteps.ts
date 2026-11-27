@@ -11,8 +11,8 @@ const describeArg = (arg: unknown): string | undefined => {
 
 /**
  * Wraps a flow helper so every public method call appears as a named step in the Allure and HTML reports,
- * e.g. `FavouritesFlow.addPortToAccount(Plymouth)`. Only primitive and date arguments are logged, and
- * none for sign-in methods so credentials never reach the report.
+ * e.g. `FavouritesFlow.addPortToAccount(Plymouth)`. Only primitive and date arguments (plus primitive return
+ * values) are logged, and none for sign-in methods so credentials never reach the report.
  *
  * @author Randhir Patel
  * @since 2026-11-25
@@ -24,11 +24,17 @@ export const withSteps = <T extends object>(flow: T): T =>
       if (typeof value !== 'function' || typeof property !== 'string' || property === 'constructor') return value;
 
       return (...args: unknown[]) => {
-        const shown = sensitiveMethod.test(property)
-          ? []
-          : args.map(describeArg).filter((arg): arg is string => arg !== undefined);
+        const isSensitive = sensitiveMethod.test(property);
+        const shown = isSensitive ? [] : args.map(describeArg).filter((arg): arg is string => arg !== undefined);
         const title = `${target.constructor.name}.${property}(${shown.join(', ')})`;
-        return test.step(title, () => value.apply(target, args) as Promise<unknown>);
+        return test.step(title, async () => {
+          const result = await (value.apply(target, args) as Promise<unknown>);
+          const describedResult = isSensitive ? undefined : describeArg(result);
+          if (describedResult !== undefined) {
+            await test.step(`Result: ${describedResult}`, () => {});
+          }
+          return result;
+        });
       };
     }
   });

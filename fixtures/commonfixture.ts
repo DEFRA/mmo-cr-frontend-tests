@@ -1,4 +1,5 @@
 import { expect, type APIRequestContext, type Page, test as base } from '@playwright/test';
+import { allure } from 'allure-playwright';
 import { SigninPage } from '../pages/sign-in.page';
 import { HomePage } from '../pages/homePage';
 import { RecordsPage } from '../pages/recordsPage';
@@ -51,6 +52,8 @@ type CatchRecordSessionFixtures = {
   absentFavourites: Favourites;
   // Signs in and prepares favourites; afterwards deletes the test's drafts and restores the favourites it changed
   createdRecords: string[];
+  // Records environment/project parameters for Allure reports
+  allureContext: void;
 };
 
 type CommonFixtures = CatchRecordSessionFixtures & {
@@ -93,6 +96,57 @@ type CommonFixtures = CatchRecordSessionFixtures & {
 };
 
 export const test = base.extend<CommonFixtures>({
+  allureContext: [
+    async ({}, use, testInfo) => {
+      await allure.parameter('Environment', process.env.CATCH_RECORDING_ENV ?? 'test');
+      await allure.parameter('Project', testInfo.project.name);
+      await use();
+    },
+    { auto: true }
+  ],
+  page: async ({ page }, use, testInfo) => {
+    const consoleErrors: string[] = [];
+    const pageErrors: string[] = [];
+    const failedResponses: string[] = [];
+
+    page.on('console', (message) => {
+      if (message.type() === 'error') {
+        consoleErrors.push(message.text());
+      }
+    });
+    page.on('pageerror', (error) => {
+      pageErrors.push(error.stack ?? error.message);
+    });
+    page.on('response', (response) => {
+      if (response.status() >= 400) {
+        failedResponses.push(`${response.status()} ${response.request().method()} ${response.url()}`);
+      }
+    });
+
+    await use(page);
+
+    if (testInfo.status !== testInfo.expectedStatus) {
+      await allure.parameter('Failed URL', page.url());
+      if (consoleErrors.length > 0) {
+        await testInfo.attach('Console errors', {
+          body: consoleErrors.join('\n'),
+          contentType: 'text/plain'
+        });
+      }
+      if (pageErrors.length > 0) {
+        await testInfo.attach('Uncaught page errors', {
+          body: pageErrors.join('\n\n'),
+          contentType: 'text/plain'
+        });
+      }
+      if (failedResponses.length > 0) {
+        await testInfo.attach('HTTP error responses (4xx/5xx)', {
+          body: failedResponses.join('\n'),
+          contentType: 'text/plain'
+        });
+      }
+    }
+  },
   testFavourites: [noFavourites, { option: true }],
   absentFavourites: [noFavourites, { option: true }],
   createdRecords: async ({ navigationFlow, catchRecordFlow, testFavourites, absentFavourites }, use) => {
@@ -109,20 +163,22 @@ export const test = base.extend<CommonFixtures>({
     await use(createdRecords);
 
     // Each step runs even if an earlier one fails, so one broken clean-up does not leave the rest behind
-    const cleanupSteps = [
-      () => catchRecordFlow.deleteCreatedDrafts(createdRecords),
-      () => catchRecordFlow.restoreFavourites(addedFavourites),
-      () => catchRecordFlow.restoreAbsentFavourites(absentFavourites, removedFavourites)
-    ];
-    const failures: unknown[] = [];
-    for (const cleanupStep of cleanupSteps) {
-      try {
-        await cleanupStep();
-      } catch (error) {
-        failures.push(error);
+    await base.step('Teardown: Clean up created drafts and restore favourites', async () => {
+      const cleanupSteps = [
+        () => catchRecordFlow.deleteCreatedDrafts(createdRecords),
+        () => catchRecordFlow.restoreFavourites(addedFavourites),
+        () => catchRecordFlow.restoreAbsentFavourites(absentFavourites, removedFavourites)
+      ];
+      const failures: unknown[] = [];
+      for (const cleanupStep of cleanupSteps) {
+        try {
+          await cleanupStep();
+        } catch (error) {
+          failures.push(error);
+        }
       }
-    }
-    if (failures.length > 0) throw failures[0];
+      if (failures.length > 0) throw failures[0];
+    });
   },
   navigationFlow: async (
     {
