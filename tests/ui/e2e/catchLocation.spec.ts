@@ -50,7 +50,6 @@ test.describe('Catch Location', () => {
       });
 
       await test.step('The selected area should be recorded', async () => {
-        // "Check your details" is reached by answering the remaining questions
         await catchRecordFlow.completeSpeciesToReview([catchSpecies.cod]);
         await expect(
           checkAnswersPage.gearSummaryValue(gears.seineNets.name, checkAnswers.summaryKeys.statisticalSubArea),

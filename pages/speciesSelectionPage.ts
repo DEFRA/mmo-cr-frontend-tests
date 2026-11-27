@@ -67,13 +67,11 @@ export class SpeciesSelectionPage extends BasePage {
     await this.weightAboveMinimumInput(speciesCode).fill(aboveMin);
 
     if (belowMin !== undefined) {
-      // Reveal the input by clicking the toggle link
       await this.addWeightBelowMinimumLink(speciesCode).click();
       await this.weightBelowMinimumInput(speciesCode).fill(belowMin);
     }
 
     if (discarded !== undefined) {
-      // Reveal the input by clicking the toggle link
       await this.addWeightDiscardedLink(speciesCode).click();
       await this.weightDiscardedInput(speciesCode).fill(discarded);
     }

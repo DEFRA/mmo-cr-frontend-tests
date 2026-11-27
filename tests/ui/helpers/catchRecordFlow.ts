@@ -145,7 +145,6 @@ export class CatchRecordFlow {
     }
   }
 
-  // Creates the draft and returns its reference
   async startRecord(vesselName: string): Promise<string> {
     await this.navigationFlow.openNewRecord(vesselName);
     return this.readRecordReference();

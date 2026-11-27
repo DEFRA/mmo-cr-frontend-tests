@@ -52,7 +52,6 @@ test.describe('Trip Information', () => {
       });
 
       await test.step('Both ports should be saved against the trip', async () => {
-        // "Check your details" is reached by answering the remaining questions
         await catchRecordFlow.completeCatchToReview([
           { gear: gears.pots, areaCode: areas.validCode, species: [catchSpecies.cod] }
         ]);
